@@ -31,7 +31,7 @@ public class ShallowWater : MonoBehaviour
     [Range(0, 1.0f)]
     public float Damping = 0.99f;
     
-    [Range(0, 0.5f)]
+    [Range(0, 20f)]
     public float TravelSpeed = 0.45f;
 
     public RenderTexture DepthRenderTexture;
@@ -160,7 +160,7 @@ public class ShallowWater : MonoBehaviour
         }
     }
     
-    private void Update()
+    private void FixedUpdate()
     {
         Profiler.BeginSample("[ShallowWater]CPUUpdate");
         if (coreCameraTrans != null)
@@ -223,6 +223,7 @@ public class ShallowWater : MonoBehaviour
             cmdBuffer.BeginSample("[ShallowWater]UpdateHeight");
             cmdBuffer.SetComputeFloatParam(shallowWaterComputeShader, "Damping", Damping);
             cmdBuffer.SetComputeFloatParam(shallowWaterComputeShader, "TravelSpeed", TravelSpeed);
+            cmdBuffer.SetComputeFloatParam(shallowWaterComputeShader, "DeltaTime", Time.deltaTime);
             
             cmdBuffer.SetComputeVectorParam(shallowWaterComputeShader, "_ShallowWaterParams", new Vector4(transform.position.x, transform.position.z, curCamera.farClipPlane, 1.0f / orthographicSize));
             

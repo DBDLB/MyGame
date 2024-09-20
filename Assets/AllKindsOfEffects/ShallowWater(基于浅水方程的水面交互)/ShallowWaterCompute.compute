@@ -12,6 +12,7 @@ float4 _ShallowWaterParams;
 
 int _ShallowWaterSize;
 float TravelSpeed;
+float DeltaTime;
 float Damping;
 
 float GetPrevBufferValue(int indexX, int indexY, float current)
@@ -48,7 +49,7 @@ void CSMain (uint3 id : SV_DispatchThreadID)
                             GetPrevBufferValue(id.x - 1, id.y, prevHeight);
 
     float prevprevHeight = PrevPrevBuffer[index];
-    float newHeight = Damping * (prevHeight + (prevHeight - prevprevHeight)) + TravelSpeed * (nearHeightTotal - prevHeight * 4);
+    float newHeight = Damping * (prevHeight + (prevHeight - prevprevHeight)) + TravelSpeed * (nearHeightTotal - prevHeight * 4)* DeltaTime;
     CurrentBuffer[index] = max(-1, min(1, min(height, newHeight)));
 }
 

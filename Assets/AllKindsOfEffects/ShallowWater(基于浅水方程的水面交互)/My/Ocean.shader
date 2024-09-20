@@ -110,8 +110,7 @@ Shader "Scarecrow/Ocean"
             float4 _FoamNoiseSize;
             float _FoamDissolve;
             float _FoamIntensity;
-
-            uniform float4 _ShallowWaterParams;
+            
             CBUFFER_END
             // TEXTURE2D(_Normal);SAMPLER(sampler_Normal);
             // TEXTURE2D(_Displace);SAMPLER(sampler_Displace);
@@ -177,6 +176,16 @@ Shader "Scarecrow/Ocean"
 		    			lerp( dot( GradientNoiseDir( i + float2( 0.0, 1.0 ) ), f - float2( 0.0, 1.0 ) ),
 		    			dot( GradientNoiseDir( i + float2( 1.0, 1.0 ) ), f - float2( 1.0, 1.0 ) ), u.x ), u.y );
 		    }
+
+            // float3 ReconstructViewPos(float2 uv, float depth, float2 p11_22, float2 p13_31)
+            // {
+            //    // #if defined(_ORTHOGRAPHIC)
+            //    //     float3 viewPos = float3(((uv.xy * 2.0 - 1.0 - p13_31) * p11_22), depth);
+            //    // #else
+            //        float3 viewPos = float3(depth * ((uv.xy * 2.0 - 1.0 - p13_31) * p11_22), depth);
+            //    // #endif
+            //    return viewPos;
+            // }
             
             
             v2f vert(appdata v)
@@ -185,19 +194,52 @@ Shader "Scarecrow/Ocean"
                 o.uv = v.uv;
                 // float4 displcae = SAMPLE_TEXTURE2D_LOD(_Displace,sampler_LinearRepeat, float4(o.uv, 0, 0),0.1 * UNITY_SPECCUBE_LOD_STEPS);
                 // v.vertex += float4(displcae.xyz, 0);
-                // float z = mul(UNITY_MATRIX_MV, v.vertex).z;
-                // o.texPos.z = z;
                 o.pos = TransformObjectToHClip(v.vertex);
                 o.screenPosition = ComputeScreenPos(o.pos);
                 
                 o.worldPos = mul(unity_ObjectToWorld, v.vertex).xyz;
                 return o;
             }
-            
+
+            uniform StructuredBuffer<float> _ShallowWaterBuffer;
+            float4 _ShallowWaterParams;
+            int _ShallowWaterSize;
             half4 frag(v2f i): SV_Target
             {
-                // half3 normal =  TransformObjectToWorldNormal(SAMPLE_TEXTURE2D(_Normal,sampler_Normal, i.uv).rgb);
-                half3 normal =  half3(0,1,0);
+                //获取水波高度
+                float2 ShallowWaterUV = (i.worldPos.xz - _ShallowWaterParams.xy) * _ShallowWaterParams.w * float2(1, -1) + float2(0.5, 0.5);
+                ShallowWaterUV = saturate(ShallowWaterUV);
+                float inShowBound = ShallowWaterUV.x > 0 && ShallowWaterUV.y > 0 && ShallowWaterUV.x < 1 && ShallowWaterUV.y < 1;
+                float inArea = inShowBound ? 1 : 0;
+                int uvXInt = floor(ShallowWaterUV.x * _ShallowWaterSize);
+                int uvYInt = floor(ShallowWaterUV.y * _ShallowWaterSize);
+                int index = uvYInt * _ShallowWaterSize + uvXInt;
+                float heightValue = -_ShallowWaterBuffer[index] * inArea;
+                // heightValue = -heightValue;
+                //return heightValue;
+                //转法线
+                //float3 ShallowWaterNormal = float3(ddx(heightValue), 1, ddy(heightValue));
+
+                // 获取邻近点的水波高度，来手动计算高度差
+                int indexXPlus1 = uvYInt * _ShallowWaterSize + min(uvXInt + 1, _ShallowWaterSize - 1);
+                int indexXMinus1 = uvYInt * _ShallowWaterSize + max(uvXInt - 1, 0);
+                int indexYPlus1 = min(uvYInt + 1, _ShallowWaterSize - 1) * _ShallowWaterSize + uvXInt;
+                int indexYMinus1 = max(uvYInt - 1, 0) * _ShallowWaterSize + uvXInt;
+                
+                float heightRight = _ShallowWaterBuffer[indexXPlus1] * inArea;
+                float heightLeft = _ShallowWaterBuffer[indexXMinus1] * inArea;
+                float heightUp = _ShallowWaterBuffer[indexYPlus1] * inArea;
+                float heightDown = _ShallowWaterBuffer[indexYMinus1] * inArea;
+                
+                // 通过手动计算的邻近高度差分来得到法线
+                float3 ShallowWaterNormal;
+                ShallowWaterNormal.x = heightLeft - heightRight; // x方向的梯度
+                ShallowWaterNormal.z = heightDown - heightUp;    // z方向的梯度
+                ShallowWaterNormal.y = 1.0;  // y方向的权重，可以适当调节
+                ShallowWaterNormal = normalize(ShallowWaterNormal); // 归一化法线
+                
+                half3 normal =  ShallowWaterNormal;
+                //half3 normal = float3(0,1,0);
                 half bubbles = SAMPLE_TEXTURE2D(_Bubbles, sampler_Bubbles, i.uv).r;
 
                 Light light = GetMainLight();
@@ -205,13 +247,16 @@ Shader "Scarecrow/Ocean"
                 half3 viewDir = normalize(GetWorldSpaceViewDir(i.worldPos));
                 half3 reflectDir = reflect(viewDir, normal);               
                 // reflectDir *= sign(reflectDir.y);
-
+                
                 //获取深度
                 float2 screenPos = i.screenPosition.xy / i.screenPosition.w;
                 float depth = SAMPLE_TEXTURE2D_X(_CameraDepthTexture, sampler_CameraDepthTexture, screenPos).r;
                 float depthValue = LinearEyeDepth(depth, _ZBufferParams);
                 float waterDepth = i.screenPosition.w;
                 float depthDifference = min(1,exp(-(depthValue - waterDepth)/_DeepRange));
+                depthDifference = max(0,depthDifference - heightValue*0.5);
+
+
                 
                 //采样反射探头
                 half3 sky = SAMPLE_TEXTURECUBE_LOD(_SkyboxMap, sampler_SkyboxMap, -reflectDir,
@@ -246,12 +291,13 @@ Shader "Scarecrow/Ocean"
                 //WaterOpacity
                 float4 WaterOpacity = pow(1-fresnel,2.5);
 
-                //焦散部分
-                float3 caustics = saturate(Caustics(i.worldPos,depthDifference));
+                //焦散部分z
+                float3 caustics = saturate(Caustics(i.worldPos,saturate(depthDifference+_CausticsBlendDistance)));
                 
                 //海洋颜色
                 half4 baseMap = SAMPLE_TEXTURE2D(_CameraOpaqueTexture, sampler_CameraOpaqueTexture, screenPos);
-                half3 oceanDiffuse = oceanColor * light.color.rgb + (baseMap.rgb * depthDifference);
+                // half3 oceanDiffuse = oceanColor * light.color.rgb + (baseMap.rgb * depthDifference);
+                half3 oceanDiffuse = oceanColor * light.color.rgb;
                 half diffuseControl = saturate(dot(lightDir, normal));
                 oceanDiffuse *= diffuseControl < 0.7 ? 0.9 : 1;
                 half3 halfDir = normalize(lightDir + viewDir);
@@ -264,6 +310,7 @@ Shader "Scarecrow/Ocean"
                 diffuse = lerp(diffuse,_FoamColor,foam);
                 
                 half3 col = ambient + lerp(diffuse, sky, fresnel) + specular ;
+                col = lerp(col, baseMap.rgb , depthDifference);
                 
                 return half4(col, 1);
             }
