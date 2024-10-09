@@ -19,7 +19,7 @@ Material:
   m_CustomRenderQueue: -1
   stringTagMap: {}
   disabledShaderPasses: []
-  m_LockedProperties: _FoamNoiseSize
+  m_LockedProperties: 
   m_SavedProperties:
     serializedVersion: 3
     m_TexEnvs:
@@ -34,8 +34,8 @@ Material:
     m_Ints: []
     m_Floats:
     - _CausticsBlendDistance: 0.8
-    - _CausticsIntensity: 0.86
-    - _CausticsOffset: 0.8
+    - _CausticsIntensity: 1.5
+    - _CausticsOffset: 0.07
     - _CausticsSize: 0.25
     - _CausticsSpeed: 1
     - _DeepRange: 0.44
@@ -46,8 +46,8 @@ Material:
     - _FoamRange: 4.29
     - _FoamSpeed: 8.8
     - _FoamWidth: 1.38
-    - _FresnelScale: 0.056
-    - _Gloss: 17
+    - _FresnelScale: 0.6
+    - _Gloss: 185
     - _ShoreEdgeIntensity: 0.2
     - _ShoreEdgeWidth: 0.2
     - _ShoreRange: 1
@@ -55,7 +55,7 @@ Material:
     - _BubblesColor: {r: 0.8820755, g: 1, b: 0.98208696, a: 1}
     - _FoamColor: {r: 2, g: 2, b: 2, a: 1}
     - _FoamNoiseSize: {r: 120, g: 10, b: 0, a: 50}
-    - _OceanColorDeep: {r: 0, g: 0.6460881, b: 1, a: 1}
+    - _OceanColorDeep: {r: 0, g: 0.7767399, b: 0.8, a: 1}
     - _OceanColorShallow: {r: 0, g: 0.87560844, b: 1, a: 1}
     - _ShoreColor: {r: 0.8160377, g: 1, b: 0.9386793, a: 1}
     - _Specular: {r: 1, g: 1, b: 1, a: 1}

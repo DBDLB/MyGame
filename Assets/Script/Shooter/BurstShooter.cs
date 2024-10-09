@@ -9,18 +9,15 @@ public class BurstShooter : BulletShooter
 
     private bool isShooting = false;
 
-    void Update()
+
+
+    public override void Shoot()
     {
-        AimAtMouse();
+        //我们用协程来处理连发
         if (Input.GetMouseButton(0) && !isShooting)
         {
             StartCoroutine(ShootContinuously());
         }
-    }
-
-    public override void Shoot()
-    {
-        // 实现空，因为我们用协程来处理连发
     }
 
     private IEnumerator ShootContinuously()

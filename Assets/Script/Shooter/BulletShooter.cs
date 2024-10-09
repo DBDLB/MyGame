@@ -10,6 +10,12 @@ public abstract class BulletShooter : MonoBehaviour
 
     // 抽象方法，派生类必须实现该方法
     public abstract void Shoot();
+    
+    void Update()
+    {
+        AimAtMouse();
+        Shoot();
+    }
 
     // 这个方法创建并发射子弹，派生类可以选择调用它
     protected void FireBullet(Vector3 direction)

@@ -54,6 +54,7 @@ Shader "Scarecrow/Ocean"
         
         Pass
         {
+//            ZWrite Off
             HLSLPROGRAM
             #pragma target 3.0
             #pragma vertex vert
@@ -305,7 +306,7 @@ Shader "Scarecrow/Ocean"
                 
                 half3 diffuse = lerp(oceanDiffuse, bubblesDiffuse, bubbles);
                 
-                diffuse = lerp(diffuse ,float4(caustics*10,1) + diffuse ,WaterOpacity * depthDifference);
+                diffuse = lerp(diffuse ,float4(caustics*10,1) + diffuse ,depthDifference);
                 diffuse =lerp(diffuse,_ShoreColor,WaterShore)+ ShoreEdge;
                 diffuse = lerp(diffuse,_FoamColor,foam);
                 

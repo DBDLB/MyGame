@@ -1,0 +1,178 @@
+#pragma kernel CSMain
+struct BoidData{
+    float3 position;
+    float3 velocity;
+    float4 individualData;
+};
+
+struct BoidOutputData {
+    float3 position;
+    float3 velocity;
+    float3 param3;
+};
+
+static const float preyTable[] = {
+    0, 1, 0, 1
+};
+
+RWStructuredBuffer<BoidData> _Boids;
+RWStructuredBuffer<BoidOutputData> _Output;
+Texture2D<float4> _SDF;
+SamplerState sampler_SDF;
+float _TimeStep;
+float _MaxSpeed;
+
+float3 _SACWeight;
+float3 _SACRange;
+float _SDFWeight;
+float3 _BoxMin;
+float3 _BoxMax;
+
+
+void Avoidance(uint id){
+
+}
+
+float3 safeNormalize(float3 val){
+    if(length(val) == 0){
+        return val;
+    }
+    return normalize(val);
+}
+
+float3 ClampToMaxSpeed(float3 currentSpeed){
+    float speedMagnitude = length(currentSpeed);
+    if(speedMagnitude == 0){
+        return currentSpeed;
+    }
+    float3 speedNormalized = normalize(currentSpeed);
+    if(speedMagnitude > _MaxSpeed){
+        return speedNormalized * _MaxSpeed;
+    }
+    else{
+        return currentSpeed;
+    }
+}
+
+[numthreads(64,1,1)]
+void CSMain (uint3 id : SV_DispatchThreadID)
+{
+    BoidData data = _Boids[id.x];
+
+    //alignment
+    float3 nearbyBoidVelocity = 0.0f;
+    float alignmentCount = 0.0f;
+
+    //cohesion
+    float3 nearbyBoidPosition = 0.0f;
+    float cohesionCount = 0.0f;
+
+    //separation
+    float3 nearbyBoidRepulsion = 0.0f;
+    float separationCount = 0.0f;
+    
+    
+    for(uint i = 0; i < 1024; i++){
+        if(i != id.x){
+            BoidData queryBoid = _Boids[i];
+            float3 boidDistanceVector = data.position - queryBoid.position;
+            float distance = abs(length(boidDistanceVector));
+
+            if(distance > 0 && distance < _SACRange.x){
+                nearbyBoidRepulsion += boidDistanceVector * _SACRange.x / (distance * distance);
+                separationCount += 1.0f;
+            }
+            if(distance > 0 && distance < _SACRange.y){
+                nearbyBoidVelocity += queryBoid.velocity;
+                alignmentCount += 1.0f;
+            }
+            if(distance > 0 && distance < _SACRange.z){
+                nearbyBoidPosition += queryBoid.position;
+                cohesionCount += 1.0f;
+            }
+        }
+
+    }
+    
+    float3 uv = (data.position - _BoxMin) / (_BoxMax - _BoxMin);
+    uv.x = 1.0f - uv.x;
+    uv.z = 1.0f - uv.z;
+    float3 sdfSum = _SDF.SampleLevel(sampler_SDF, uv.xz, 0).xyz;
+    
+    sdfSum.z = 1.0f - sdfSum.z;
+    sdfSum.x = 1.0f - sdfSum.x;
+    sdfSum = sdfSum * 2.0f - 1.0f;
+    float sdfMagnitude = length(sdfSum);
+    
+    float3 direction = reflect(data.velocity, safeNormalize(sdfSum)) + sdfSum * 4;
+    sdfSum = safeNormalize(direction) * _MaxSpeed - data.velocity;
+    sdfSum = ClampToMaxSpeed(sdfSum) * sdfMagnitude;
+    
+    float3 horizonSum = data.velocity;
+    horizonSum.y = 0.0f;
+    horizonSum = safeNormalize(horizonSum) * _MaxSpeed - data.velocity;
+    horizonSum = ClampToMaxSpeed(horizonSum);
+    
+    float dft = _BoxMax.y - data.position.y;
+    float dfb = data.position.y - _BoxMin.y;
+    float dfl = data.position.x - _BoxMin.x;
+    float dfr = _BoxMax.x - data.position.x;
+    float dff = _BoxMax.z - data.position.z;
+    float dfbe = data.position.z - _BoxMin.z;
+    
+
+    float3 topPushoff = float3(-_MaxSpeed, -_MaxSpeed, -_MaxSpeed) * float3(exp(-dfr * 0.5f), exp(-dft * 0.5f), exp(-dff * 0.5f));
+    float3 bottomPushoff = float3(_MaxSpeed, _MaxSpeed, _MaxSpeed) * float3(exp(-dfl * 0.5f),exp(-dfb * 0.5f),exp(-dfbe * 0.5f));
+    float3 surfaceSum = topPushoff + bottomPushoff;
+    surfaceSum *= _MaxSpeed;
+    
+    float3 newAcclr = 0.0f;
+    float3 sepSum = 0, alignSum = 0, cohSum = 0;
+    
+    if(separationCount > 0.0f){
+        float3 steer = safeNormalize(nearbyBoidRepulsion) * _MaxSpeed - data.velocity;
+        sepSum = ClampToMaxSpeed(steer);
+    }
+    if(alignmentCount > 0.0f){
+        float3 sumVec = safeNormalize(nearbyBoidVelocity) * _MaxSpeed;
+        float3 steer = sumVec - data.velocity;
+        alignSum = ClampToMaxSpeed(steer);
+    }
+    if(cohesionCount > 0.0f){
+        float3 sumVec = nearbyBoidPosition / cohesionCount - data.position;
+        float3 steer = safeNormalize(sumVec) * _MaxSpeed - data.velocity;
+        cohSum = ClampToMaxSpeed(steer);
+    }
+
+    newAcclr = sepSum * _SACWeight.x + alignSum * _SACWeight.y + cohSum * _SACWeight.z + sdfSum * _SDFWeight + horizonSum * 16.0f + surfaceSum * 3.5f;
+    newAcclr = ClampToMaxSpeed(newAcclr);
+    
+    data.velocity += newAcclr * _TimeStep;
+    data.velocity = ClampToMaxSpeed(data.velocity);
+    data.position += data.velocity * _TimeStep;
+
+    if(data.position.x > _BoxMax.x){
+        data.position.x = _BoxMin.x;
+    }
+    if(data.position.x < _BoxMin.x){
+        data.position.x = _BoxMax.x;
+    }
+    if(data.position.y > _BoxMax.y){
+        data.position.y = _BoxMin.y;
+    }
+    if(data.position.y < _BoxMin.y){
+        data.position.y = _BoxMax.y;
+    }
+    if(data.position.z > _BoxMax.z){
+        data.position.z = _BoxMin.z;
+    }
+    if(data.position.z < _BoxMin.z){
+        data.position.z = _BoxMax.z;
+    }
+
+    _Boids[id.x] = data;
+    
+    _Output[id.x].position = data.position;
+    _Output[id.x].velocity = safeNormalize(data.velocity);
+    _Output[id.x].param3 = data.individualData.xyz;
+}

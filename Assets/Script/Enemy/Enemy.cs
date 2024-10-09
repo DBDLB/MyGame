@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 public abstract class Enemy : MonoBehaviour
@@ -7,6 +8,8 @@ public abstract class Enemy : MonoBehaviour
     public float attackPower = 10f;         // 敌人的攻击力
 
     protected Vector3 playerPosition;             // 玩家对象的变换
+    
+    public event Action OnDeath; 
 
     protected virtual void Start()
     {
@@ -32,6 +35,8 @@ public abstract class Enemy : MonoBehaviour
     // 敌人的死亡处理
     protected virtual void Die()
     {
+        // 调用死亡事件
+        OnDeath?.Invoke();
         // 处理死亡逻辑，比如播放动画、掉落物品等
         Destroy(gameObject);
     }

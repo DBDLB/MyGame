@@ -1,0 +1,19 @@
+{
+    "name": "Athena.FishFlock.Editor",
+    "rootNamespace": "",
+    "references": [
+        "GUID:e5864371bb73a1044a71d85ef1fafe43"
+    ],
+    "includePlatforms": [
+        "Editor",
+        "LinuxStandalone64"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
