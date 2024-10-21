@@ -1,7 +1,7 @@
 Shader "Unlit/My_Sand"
 {
     Properties{
-		_HighlightColor ("Highlight Color", color) = (1, 1, 1, 1)
+		[hdr]_HighlightColor ("Highlight Color", color) = (1, 1, 1, 1)
         _MainTex ("Texture", 2D) = "white" {}
         _Noise ("Noise", 2D) = "gray" {}
         _Normal ("Normal Map", 2D) = "bump" {}
@@ -85,8 +85,9 @@ Shader "Unlit/My_Sand"
             }
 
             inline half3 map_normal(float2 uv, half3 normal, half3 tangent, half3 bitangent){
-                half3 tangentSpaceNormal = UnpackNormal(SAMPLE_TEXTURE2D(_Normal,sampler_Normal, uv));
-                tangentSpaceNormal = lerp(half3(0, 0, 1.0), tangentSpaceNormal, _NormalIntensity);
+                half3 tangentSpaceNormal = UnpackNormalScale(SAMPLE_TEXTURE2D(_Normal,sampler_Normal, uv),_NormalIntensity);
+				tangentSpaceNormal.z=sqrt(1-saturate(dot(tangentSpaceNormal.xy,tangentSpaceNormal.xy)));
+                // tangentSpaceNormal = lerp(half3(0, 0, 1.0), tangentSpaceNormal, _NormalIntensity);
                 float3x3 tbn = float3x3(
                     tangent.x, bitangent.x, normal.x,
                     tangent.y, bitangent.y, normal.y,
@@ -242,6 +243,7 @@ Shader "Unlit/My_Sand"
 				half test = highlight;
             
 
+                // worldNormal = normal;
                 worldNormal = normal;
 
                 //return baseNormal * highlight;
@@ -394,5 +396,44 @@ Shader "Unlit/My_Sand"
 
 			ENDHLSL
 		}
+		
+		Pass
+        {
+            Name "DepthNormals"
+            Tags
+            {
+                "LightMode" = "DepthNormals"
+            }
+
+            // -------------------------------------
+            // Render State Commands
+            ZWrite On
+            Cull[_Cull]
+
+            HLSLPROGRAM
+            #pragma target 2.0
+
+            // -------------------------------------
+            // Shader Stages
+            #pragma vertex DepthNormalsVertex
+            #pragma fragment DepthNormalsFragment
+
+            // -------------------------------------
+            // Material Keywords
+            #pragma shader_feature_local _NORMALMAP
+            #pragma shader_feature_local _PARALLAXMAP
+            #pragma shader_feature_local _ _DETAIL_MULX2 _DETAIL_SCALED
+            #pragma shader_feature_local _ALPHATEST_ON
+            #pragma shader_feature_local_fragment _SMOOTHNESS_TEXTURE_ALBEDO_CHANNEL_A
+
+            // -------------------------------------
+            // Unity defined keywords
+            #pragma multi_compile_fragment _ LOD_FADE_CROSSFADE
+            
+            // -------------------------------------
+            // Includes
+            #include "Packages/com.unity.render-pipelines.universal/Shaders/LitDepthNormalsPass.hlsl"
+            ENDHLSL
+        }
 	} 
 }

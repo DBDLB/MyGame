@@ -1,57 +1,96 @@
-Shader "Unlit/test"
+Shader "Unlit/My_Glint_test"
 {
-    Properties
-    {
-        [Header(Unlit)][Space(10)]
-        [SinglelineTexture(_BaseColor)][MainTexture] _BaseMap("Albedo(rgba)", 2D) = "white" {}
-        [MainColor] _BaseColor("Color", Color) = (1.0, 1.0, 1.0, 1.0)
-        [Header(EdgeAlphaFalloff)][Space(10)]
-        [Toggle(USE_EDGE_ALPHA_FALLOFF)]_FallOffEnable("开启底部渐变", float) = 0
-        [ShowIf(_FallOffEnable)]_EdgeAlphaFadeDistance("Edge Alpha Fade Distance", Range(0,3)) = 0.5
-        _LightColorIntensity("光照颜色影响强度", Range(0.0, 1.0)) = 0
+    Properties{
+		_HighlightColor ("Highlight Color", color) = (1, 1, 1, 1)
+        _MainTex ("Texture", 2D) = "white" {}
+        _Noise ("Noise", 2D) = "gray" {}
+        _NormalIntensity ("Normal Intensity", Range(0, 1)) = 1.0
+        _Color ("Color", Color) = (0.5, 0.5, 0.5, 1.0)
+        _MetallicTex ("Metallic Texture", 2D) = "white" {} //default to white, so we can multiply thsi with the metallic value
+        [Gamma]_Metallic ("Metallic", Range(0, 1)) = 1.0
+        _SmoothnessTex ("Smoothness (Roughness) Texture", 2D) = "white" {} // same as above
+        _Smoothness ("Smoothness Multiplier)", Range(0, 1)) = 1.0
+        _BRDF_Lut("BRDF Lookup", 2D) = "white" {}
+        [Toggle]_RoughnessWorflow("Use Roughness Workflow", Float) = 0.0
+        [Toggle]_AlphaIsSmoothness("Alpha is Smoothness (Roughness)", Float) = 0.0
+		[Toggle(_ADD_LIGHTS)]_AddLights("AddLights", float)=1.0
+    	_Normal ("Normal Map", 2D) = "bump" {}
+		_NormalScale("NormalScale",Range(0,1))=1
+    	iResolution("Resolution", float) = 1.0
+	}
+	SubShader
+	{
+		Tags
+		{
+			"RenderPipeLine"="UniversalRenderPipeline"
+			"RenderType"="Opaque"
+		}
 
-        [Header(RenderingSettings)][Space(10)]
-        [RenderingMode] _Mode("混合模式", Int) = 0
-        [ShowIf(_ALPHATEST_ON)] _Cutoff("不透明蒙版剪辑值", Range(0.0, 1.0)) = 0.5
-        [Enum(UnityEngine.Rendering.CullMode)] _Cull("剔除模式", Int) = 2
-        
-        _Varnished("Varnished", Float) = 0.0
-        iResolution("Resolution", Vector) = (1,1,1,1)
+		HLSLINCLUDE
+		#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
+		#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
+		#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Shadows.hlsl"
+		#include "GraterNPBR.cginc"
 
-        [HideInInspector] _SrcBlend ("__src", Int) = 1.0
-        [HideInInspector] _DstBlend ("__dst", Int) = 0.0
-        [HideInInspector] _ZWrite ("__zw", Int) = 1.0
+		#pragma multi_compile _ _MAIN_LIGHT_SHADOWS
+		#pragma multi_compile _ _MAIN_LIGHT_SHADOWS_CASCADE
+		#pragma multi_compile _ _ADDITIONAL_LIGHT_SHADOWS
+		#pragma multi_compile _ _SHADOWS_SOFT
+		#pragma shader_feature _ADD_LIGHTS
 
+		CBUFFER_START(UnityPerMaterial)
+            float4 _MainTex_ST;
+            float4 _Noise_ST;
+            half _Smoothness;
+            half _Metallic;
+            half4 _Color;
+            half4 _HighlightColor;
+            half _NormalIntensity;
+            int _RoughnessWorflow;
+            int _AlphaIsSmoothness;
+			float iResolution;
+			float _NormalScale;
+		CBUFFER_END
 
+		TEXTURE2D(_MainTex);	SAMPLER(sampler_MainTex);
+		TEXTURE2D(_Normal);	SAMPLER(sampler_Normal);
+		TEXTURE2D(_Noise);	SAMPLER(sampler_Noise);
+		TEXTURE2D(_MetallicTex);	SAMPLER(sampler_MetallicTex);
+		TEXTURE2D(_SmoothnessTex);	SAMPLER(sampler_SmoothnessTex);
+		TEXTURE2D(_BRDF_Lut);	SAMPLER(sampler_BRDF_Lut);
 
+		struct a2v{
+			float4 positionOS: POSITION;
+			float2 uv: TEXCOORD0;
+			float3 normalOS: NORMAL;
+			float4 tangent:TANGENT;
+		};
 
+		struct v2f{
+			float4 positionCS: SV_POSITION;
+			float2 uv: TEXCOORD0;
+			float3 normalWS: TEXCOORD1;
+			float3 positionWS: TEXCOORD2;
+			float3 BtangentWS: TEXCOORD3;
+			float3 tangentWS: TEXCOORD4;
+			float4 positionOS: TEXCOORD5;
+		};
 
-        [Header(Fog)][Space(10)]
-        _FogToggle ("雾效强度", Range(0.0,1.0)) = 1.0
-
-        
-    }
-    
-    HLSLINCLUDE
-     #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
-     #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
-
-    // 定义常量
-            #define PG2020W 32u
-            #define PG2020H 18u
-            #define ALPHA_X 0.5
-            #define ALPHA_Y 0.5
-            #define MICROFACETRELATIVEAREA 1.
-            #define LOGMICROFACETDENSITY 5.
-            #define MAXANISOTROPY 8.
-            #define VARNISHED true
-            #define ALPHA_DIC 0.5
-            #define N 999999
-            #define NLEVELS 8
-            #define DISTRESOLUTION 32
-            #define PI 3.141592
-            #define IPI 0.318309
-            #define ISQRT2 0.707106
+			#define PG2020W 32u
+        	#define PG2020H 18u
+        	#define ALPHA_X 0.5
+        	#define ALPHA_Y 0.5
+        	#define MICROFACETRELATIVEAREA 1.
+        	#define LOGMICROFACETDENSITY 5.
+        	#define MAXANISOTROPY 8.
+        	#define VARNISHED true
+        	#define ALPHA_DIC 0.5
+        	#define N 999999
+        	#define NLEVELS 8
+        	#define DISTRESOLUTION 32
+        	#define PI 3.141592
+        	#define IPI 0.318309
+        	#define ISQRT2 0.707106
 
 
 
@@ -467,187 +506,149 @@ Shader "Unlit/test"
                 return (F * G * D_P) / (4.0 * wo.z);
             }
 
+		real4 CalculateLight(v2f i,Light light)
+		{
+                half3 normal = normalize(i.normalWS);
+                half3 tangent = normalize(i.tangentWS);
+                half3 bitangent = normalize(i.BtangentWS);
 
-          	float4 _BaseMap_ST;
-      	    half4 _BaseColor;
-      	    half _Cutoff;
-      	    float _EdgeAlphaFadeDistance;
-      	    half _LightColorIntensity;
-      	    half _FogToggle;
-            half _Varnished;
-            float4 iResolution;
-
-
-
-    ENDHLSL
-    
-    SubShader
-    {
-        Tags{"RenderType" = "Opaque" "RenderPipeline" = "UniversalPipeline" "IgnoreProjector" = "True"}
-        LOD 100
-
-        Pass
-        {
-            Name "ForwardLit"
-            Tags{"LightMode" = "UniversalForward"}
-            
-            Cull[_Cull]
-            Blend[_SrcBlend][_DstBlend]
-            ZWrite[_ZWrite]
-            
-            HLSLPROGRAM
-            #pragma prefer_hlslcc gles
-            #pragma exclude_renderers d3d11_9x
-            #pragma target 4.5
-            
-            #pragma vertex vert
-            #pragma fragment frag
-
-            #pragma shader_feature_local_fragment _ _ALPHATEST_ON
-            struct appdata
-            {
-                float4 positionOS : POSITION;
-                float2 texcoord : TEXCOORD0;
-                half4 tangentOS : TANGENT;
-            	half4 normalOS : NORMAL;
-            };
-
-            struct v2f
-            {
-                float2 uv : TEXCOORD0;
-                float4 positionCS  : SV_POSITION;
-                float3 positionWS : TEXCOORD1;
-                half4 tangentWS : TEXCOORD2;
-                half3 normalWS : TEXCOORD3;
-                float4 positionOS : TEXCOORD4;
-            };
-
-            TEXTURE2D(_BaseMap);  SAMPLER(sampler_BaseMap);
-            TEXTURE2D_X_FLOAT(_CameraDepthTexture);  SAMPLER(sampler_CameraDepthTexture);
-            TEXTURE2D(_heightMap);  SAMPLER(sampler_heightMap);
-
-
-            float SampleSceneDepth(float2 uv)
-            {
-                return SAMPLE_TEXTURE2D_X(_CameraDepthTexture, sampler_CameraDepthTexture, UnityStereoTransformScreenSpaceTex(uv)).r;
-            }
-            
-            float GetDepthFade(float3 positionWS, float Distance)
-            {
-                float4 ScreenPosition = ComputeScreenPos(TransformWorldToHClip(positionWS));
-                float depth = LinearEyeDepth(SampleSceneDepth(ScreenPosition.xy / ScreenPosition.w).r, _ZBufferParams);
-                return saturate((depth - ScreenPosition.w) / Distance);
-            }
-
-            void AthenaAlphaDiscard(real alpha, real cutoff, real offset = 0.0h)
-            {
-                #ifdef _ALPHATEST_ON
-                    clip(alpha - cutoff + offset);
-                #endif
-            }
-            
-            
-            v2f vert (appdata v)
-            {
-                v2f o;
-                VertexPositionInputs vertexInput = GetVertexPositionInputs(v.positionOS.xyz);
-                o.positionWS = vertexInput.positionWS;
-                o.positionCS = vertexInput.positionCS;
-                o.positionOS = v.positionOS;
-                o.tangentWS = float4(TransformObjectToWorldDir(v.tangentOS.xyz), v.tangentOS.w);
-                o.normalWS = TransformObjectToWorldNormal(v.normalOS.xyz);
-                o.uv = TRANSFORM_TEX(v.texcoord, _BaseMap);
-                return o;
-            }
-
-            float4 frag (v2f i) : SV_Target0
-            {
-                // Light intensity
-                float3 lightIntensity = (100000.0);
-
-                float2 fragCoord = i.uv * _BaseMap_ST.xy + _BaseMap_ST.zw;
-                float iTime = _Time.y;
-                // Texture position
-                float2 uv = fragCoord/iResolution.y * 400.;
-
-                // Vertex position
-                //float3 vertexPos = float3(fragCoord - iResolution.xy/2., 0.);
-                float3 vertexPos = i.positionOS;
-                // Light position (varies over time)
-                // float x_i = cos(iTime*0.6) * iResolution.x / 2.;
-                // float y_i = cos(iTime) * iResolution.y / 2.;
-                //float3 lightPos = float3(x_i, y_i, 100);
-                
-                Light light = GetMainLight(TransformWorldToShadowCoord(i.positionWS));
-                float3 lightPos = (light.direction);
-
-                
-                // Camera position
-                float3 cameraPos = SafeNormalize(_WorldSpaceCameraPos-i.positionWS);
-                
-                // Compute normal from PG2020 heightfield
-                // float diff = 10.;
-                // float hPG2020sm1t0 = pg2020TriangleFilter(float2((fragCoord.x - diff)/iResolution.x, (fragCoord.y)/iResolution.y));
-                // float hPG2020s1t0 = pg2020TriangleFilter(float2((fragCoord.x + diff)/iResolution.x, (fragCoord.y)/iResolution.y));
-                // float hPG2020s0tm1 = pg2020TriangleFilter(float2((fragCoord.x)/iResolution.x, (fragCoord.y - diff)/iResolution.y));
-                // float hPG2020s0t1 = pg2020TriangleFilter(float2((fragCoord.x)/iResolution.x, (fragCoord.y + diff)/iResolution.y));
-                // float2 slope = float2((hPG2020s1t0 - hPG2020sm1t0)/2.,
-                //                   (hPG2020s0t1 - hPG2020s0tm1)/2.);
-                // slope *= 4.;
-                //float3 vertexNormal = float3(-slope.x, -slope.y, 1.) / sqrt(slope.x*slope.x+slope.y*slope.y+1.);
-                float3 vertexNormal = i.normalWS;
-                
-                //float3 vertexTangent = float3(1., 0., 0.);
-                float3 vertexTangent = i.tangentWS;
+            	float3 vertexNormal = i.normalWS;
+            	float3 vertexTangent = i.tangentWS;
                 // Gram–Schmidt process
                 vertexTangent = vertexTangent - (dot(vertexNormal, vertexTangent) / dot(vertexNormal, vertexNormal)) * vertexNormal;
                 float3 vertexBinormal = cross(vertexNormal, vertexTangent);
-                // Matrix for transformation to tangent space
+
                 float3x3  toLocal = float3x3(
                     vertexTangent.x, vertexBinormal.x, vertexNormal.x,
                     vertexTangent.y, vertexBinormal.y, vertexNormal.y,
                     vertexTangent.z, vertexBinormal.z, vertexNormal.z ) ;
-                    
-                
-                // Incident direction
-                float3 wi = normalize(mul(toLocal, normalize(lightPos - vertexPos)));
+            	
+                float3x3 tbn = float3x3(
+                    tangent.x, bitangent.x, normal.x,
+                    tangent.y, bitangent.y, normal.y,
+                    tangent.z, bitangent.z, normal.z
+                );
+				float3 viewDirWS = SafeNormalize(_WorldSpaceCameraPos.xyz - i.positionWS);
+
+				// Incident direction
+                float3 wi = normalize(mul(toLocal, normalize(light.direction)));
                 // Observer direction
-                float3 wo = normalize(mul(toLocal, normalize(cameraPos - vertexPos)));
+                float3 wo = normalize(mul(toLocal, normalize(viewDirWS)));
 
-                float3 radiance_glint = (0.);
-                // float3 radiance_diffuse = (0.);
-                // float3 radiance = (0.);
-                //
-                // float distanceSquared = distance(vertexPos, lightPos);
-                // distanceSquared *= distanceSquared;
-                // float3 Li = lightIntensity / distanceSquared;
+				float2 fragCoord = i.uv * _MainTex_ST.xy + _MainTex_ST.zw;
+				float2 uv = fragCoord/iResolution * 400.0;
 
-//                 return float4(Li,1);
-                
-                // radiance_diffuse = f_diffuse(wo, wi) * Li;
-                // Call our physically based glinty BRDF
-                // radiance_glint = f_P(wo, wi, uv) * Li;
-                radiance_glint = f_P(wo, wi, uv);
+				float3 radiance_glint = f_P(wo, wi, uv);
+			return float4(radiance_glint,1.0f);
+		};
 
-                
-                // radiance = 0.33*radiance_diffuse + float3(0.13f,0.,0.);
-                //     
-                // radiance += 0.5*radiance_glint;
-                
-                                                //return float4(radiance_glint,1);
-                if(VARNISHED){
-                    // radiance += 0.17 * f_specular(wo, wi) * Li;
-                }
-                //return float4(radiance_diffuse,1);
-                // Gamma
-                // radiance = pow(radiance, (1.0 / 2.2));
-            
-                // Output to screen
-                float4 fragColor = float4(radiance_glint, 1.0);
+		ENDHLSL
 
-                return fragColor;
-                }
-                ENDHLSL
-        }
-    }
-}           
+		Pass
+		{
+			Tags{
+				"LightMode"="UniversalForward"
+			}
+
+			HLSLPROGRAM
+
+			#pragma vertex vert
+			#pragma fragment frag
+
+			v2f vert(a2v v)
+			{
+				v2f o;
+				o.positionCS = TransformObjectToHClip(v.positionOS);
+				o.uv = v.uv;
+				float3 worldNormal = TransformObjectToWorldNormal(v.normalOS);
+				o.normalWS = worldNormal;
+                float3 worldTangent = TransformObjectToWorldDir(v.tangent.xyz);
+                float3 worldBinormal = cross(worldNormal,worldTangent) * v.tangent.w;
+				o.tangentWS = worldTangent;
+				o.BtangentWS = worldBinormal;
+				o.positionWS = TransformObjectToWorld(v.positionOS);
+				o.positionOS = v.positionOS;
+				return o;
+			}
+
+			real4 frag(v2f i):SV_TARGET
+			{
+
+				//法线部分得到世界空间法线
+				float4 nortex=SAMPLE_TEXTURE2D(_Normal,sampler_Normal,i.uv.xy);
+    			float3 norTS=UnpackNormalScale(nortex,_NormalScale);
+    			norTS.z=sqrt(1-saturate(dot(norTS.xy,norTS.xy)));
+    //             float3x3 T2W={i.tangentWS.xyz,i.BtangentWS.xyz,i.normalWS.xyz};
+    //             T2W=transpose(T2W);
+    //             float3 N=NormalizeNormalPerPixel(mul(T2W,norTS));
+				//
+				// float3 normalWS = N;
+				// float3 viewDirWS = normalize(_WorldSpaceCameraPos.xyz - i.positionWS);
+    
+				#if defined(SHADOWS_SHADOWMASK) && defined(LIGHTMAP_ON)
+				    half4 shadowMask = inputData.shadowMask;
+				#elif !defined (LIGHTMAP_ON)
+				    half4 shadowMask = unity_ProbesOcclusion;
+				#else
+				    half4 shadowMask = half4(1, 1, 1, 1);
+				#endif
+    
+				real4 color = 0;
+
+				//Calculate Main Light
+				//Light light = GetMainLight(TransformWorldToShadowCoord(i.positionWS));
+
+				Light light = GetMainLight(TransformWorldToShadowCoord(i.positionWS));
+				color+= CalculateLight(i,light);
+				//float test = 0;
+
+				#if _ADD_LIGHTS
+				int addLightsCount = GetAdditionalLightsCount();
+				for(int t=0; t<addLightsCount;t++)
+				{
+					Light light0 = GetAdditionalLight(t, i.positionWS, shadowMask);
+					color+=CalculateLight(i,light0);
+				}
+				#endif
+
+				return color;
+			}
+			ENDHLSL
+		}
+		pass{
+
+			Tags{
+				"LightMode"="ShadowCaster"
+			}
+			HLSLPROGRAM
+			#pragma vertex vertShadow
+			#pragma fragment fragShadow
+
+			half3 _LightDirection;
+
+			v2f vertShadow(a2v v)
+			{
+				v2f o;
+				o.positionWS = TransformObjectToWorld(v.positionOS.xyz);
+				o.normalWS = TransformObjectToWorldNormal(v.normalOS.xyz);
+				o.uv = v.uv;
+
+				float3 positionWS = ApplyShadowBias(o.positionWS, o.normalWS, _LightDirection);
+				o.positionCS = TransformWorldToHClip(positionWS);
+
+				#if UNITY_REVERSED_Z
+				    o.positionCS.z = min(o.positionCS.z, UNITY_NEAR_CLIP_VALUE);
+				#else
+				    o.positionCS.z = max(o.positionCS.z, UNITY_NEAR_CLIP_VALUE);
+				#endif
+				return o;
+			}
+			half4 fragShadow(v2f i):SV_TARGET
+			{
+				return 0;
+			}
+
+			ENDHLSL
+		}
+	} 
+}

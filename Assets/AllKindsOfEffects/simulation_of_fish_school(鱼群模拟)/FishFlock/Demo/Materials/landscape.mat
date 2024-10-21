@@ -11,8 +11,7 @@ Material:
   m_Shader: {fileID: 4800000, guid: 4b9054bfc35e3ec44b43b1309411e43c, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
-  m_ValidKeywords:
-  - _ADD_LIGHTS
+  m_ValidKeywords: []
   m_InvalidKeywords: []
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
@@ -106,7 +105,7 @@ Material:
         m_Offset: {x: 0, y: 0}
     - _Noise:
         m_Texture: {fileID: 2800000, guid: d4573bd6f8f6510449bf6ac009ce5e92, type: 3}
-        m_Scale: {x: 25, y: 25}
+        m_Scale: {x: 10, y: 10}
         m_Offset: {x: 0, y: 0}
     - _Normal:
         m_Texture: {fileID: 0}
@@ -185,7 +184,7 @@ Material:
     - Enable_DistortDissolveTex: 0
     - Enable_DistortMainTex: 1
     - Enable_DistortMaskTex: 0
-    - _AddLights: 1
+    - _AddLights: 0
     - _AdditiveLight: 0
     - _AlphaClip: 0
     - _AlphaIsSmoothness: 0
@@ -297,7 +296,7 @@ Material:
     - _Mode: 2
     - _MultiTexLerp: 0
     - _MultiTexMode: 0
-    - _NormalIntensity: 0.063
+    - _NormalIntensity: 0.088
     - _NormalScale: 1
     - _OcclusionScale: 1
     - _OcclusionStrength: 1
@@ -359,7 +358,7 @@ Material:
     - _ShadingModel: 0
     - _SkinColorBoost: 1
     - _SkinFactor: 0
-    - _Smoothness: 0
+    - _Smoothness: 0.197
     - _SmoothnessScale: 0
     - _SmoothnessTextureChannel: 0
     - _SpecularHighlights: 1
@@ -441,7 +440,7 @@ Material:
     - _BP_MainColor: {r: 0.39215687, g: 0.39215687, b: 0.39215687, a: 1}
     - _BP_SpecularColor: {r: 0.39215687, g: 0.39215687, b: 0.39215687, a: 1}
     - _BaseColor: {r: 1, g: 1, b: 1, a: 1}
-    - _Color: {r: 1, g: 0.69781685, b: 0.3726415, a: 1}
+    - _Color: {r: 1, g: 0.6236166, b: 0, a: 1}
     - _DarkColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
     - _DissolveColor: {r: 1, g: 1, b: 1, a: 1}
     - _DissolveDirVec: {r: 0, g: 0, b: 0, a: 0}
@@ -457,7 +456,7 @@ Material:
     - _HeadAxisTRS_1: {r: 0, g: 0, b: 0, a: 0}
     - _HeadAxisTRS_2: {r: 0, g: 0, b: 0, a: 0}
     - _HeadAxisTRS_3: {r: 0, g: 0, b: 0, a: 0}
-    - _HighlightColor: {r: 1, g: 0.7372549, b: 0.4392157, a: 1}
+    - _HighlightColor: {r: 5.9921575, g: 4.4177475, b: 2.6318495, a: 1}
     - _MainColor1: {r: 1, g: 1, b: 1, a: 1}
     - _MatcapTint: {r: 1, g: 1, b: 1, a: 1}
     - _MultiTexColor: {r: 1, g: 0.38722068, b: 0.08699995, a: 1}
