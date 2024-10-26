@@ -58,6 +58,7 @@ Shader "LiquidBottle/Liquid"
                 ZFail Replace   // 通过比较条件, 但不通过深度测试时的操作
             }
             
+            
             Blend [_SrcBlend] [_DstBlend]
             ZWrite on
             HLSLPROGRAM

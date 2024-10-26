@@ -65,7 +65,7 @@ Material:
     - _BubbleInt: 3
     - _BubblePlxBias: 0.1
     - _CullMode: 0
-    - _DstBlend: 0
+    - _DstBlend: 10
     - _EdgeWidth: 0.05
     - _FresnelPow: 2
     - _HeightScale: 0
@@ -85,7 +85,7 @@ Material:
     - _PlxBias: 0.1
     - _PlxMaskInt: 10
     - _RimInt: 2
-    - _SrcBlend: 1
+    - _SrcBlend: 5
     - _WavesMult: 2.923531
     - _WavesScale: 1
     - _bFrontMode: 1

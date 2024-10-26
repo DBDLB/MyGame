@@ -20,7 +20,7 @@ Shader "URPNotes/MY_Liquid"{
         	_MeniscusCurve("弯月面弧度", Float) = 0.75
         	_FoamAmount("泡沫高度",  Range(0, 10)) = 1.0
         	_WavesScale("波浪大小", Float) = 1.0
-        	[HideInInspector]_Foam("Foam", Float) = 1.0
+        	_Foam("Foam", Float) = 1.0
         	_LiquidSpeed("液体速度(仅X,Y)", Vector) =(1,1,1,1)
         	_MainLightPower("受主光强度",Range(0, 1)) = 0.5
         	_Cutoff("Alpha Cutoff", Range(0, 1)) = 0.5
