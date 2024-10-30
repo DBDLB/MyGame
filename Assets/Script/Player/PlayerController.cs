@@ -71,11 +71,11 @@ public class PlayerController : MonoBehaviour
         // }
 
         // 获取输入
-        float horizontalInput = Input.GetAxis("Horizontal");
-        float verticalInput = Input.GetAxis("Vertical");
+        float horizontalInput = Input.GetAxisRaw("Horizontal");
+        float verticalInput = Input.GetAxisRaw("Vertical");
 
         // 计算移动方向
-        Vector3 move = new Vector3(horizontalInput, 0f, verticalInput);
+        Vector3 move = Vector3.Normalize( new Vector3(horizontalInput, 0f, verticalInput));
         
         if (move != Vector3.zero)
         {
