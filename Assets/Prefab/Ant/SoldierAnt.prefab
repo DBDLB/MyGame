@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 5371258756816254570}
   - component: {fileID: 1903189543208323197}
   m_Layer: 0
-  m_Name: WorkenAnt
+  m_Name: SoldierAnt
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -63,7 +63,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: e94b562b2e108664997896e4b1612aa4, type: 2}
+  - {fileID: 2100000, guid: f4607b77a3ecd334686aca5768876824, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0

@@ -21,9 +21,14 @@ public class ClickToShowUI : MonoBehaviour
 
             if (Physics.Raycast(ray, out hit))
             {
+                MeshCollider meshCollider = hit.collider as MeshCollider;
                 if (hit.transform == transform)
                 {
                     ShowUI(hit.transform.position);
+                }
+                else if (hit.transform.gameObject.layer != LayerMask.NameToLayer("UI"))
+                {
+                    uiPanel.SetActive(false);
                 }
             }
         }
@@ -31,12 +36,12 @@ public class ClickToShowUI : MonoBehaviour
 
     void ShowUI(Vector3 worldPosition)
     {
-        // 将世界坐标转换为屏幕坐标
-        Vector2 screenPosition = RectTransformUtility.WorldToScreenPoint(Camera.main, worldPosition);
+        // // 将世界坐标转换为屏幕坐标
+        // Vector2 screenPosition = RectTransformUtility.WorldToScreenPoint(Camera.main, worldPosition);
         
         // 设置UI面板的位置
         uiPanel.SetActive(true);
-        RectTransform uiRectTransform = uiPanel.GetComponent<RectTransform>();
-        uiRectTransform.position = screenPosition + new Vector2(0, -300); // 根据需要调整偏移
+        // RectTransform uiRectTransform = uiPanel.GetComponent<RectTransform>();
+        // uiRectTransform.position = screenPosition + new Vector2(0, -300); // 根据需要调整偏移
     }
 }

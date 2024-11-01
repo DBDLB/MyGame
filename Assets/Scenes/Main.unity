@@ -784,7 +784,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &337417797
 Transform:
   m_ObjectHideFlags: 0
@@ -3632,7 +3632,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 1649952579}
   m_Enabled: 0
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2256692038de1b846b225f3ac0c1ae9b, type: 3}
+  m_Script: {fileID: 11500000, guid: b609bb66c3638ab45a75c1a6105bc82c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   groundLayer:
@@ -3642,6 +3642,7 @@ MonoBehaviour:
   mousePositions: []
   smoothMousePositions: []
   minDistance: 1.5
+  AntPathList: []
   linePrefab: {fileID: 4711188274395750338, guid: 2c86b2ca005f2e0408b1de4dd5115929,
     type: 3}
   lineTexture: {fileID: 2800000, guid: e3034f72eb809f84c8c0e4396a2e1c25, type: 3}
@@ -3812,9 +3813,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 75cd38f9a45c1d147b9a2862c1281af8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  antPrefab: {fileID: 3736480129281915235, guid: f087b5444ece1254fbb948b98b16a2d4,
-    type: 3}
-  totalAnts: 5
+  prefabsAnt:
+  - antPrefab: {fileID: 3736480129281915235, guid: f087b5444ece1254fbb948b98b16a2d4,
+      type: 3}
+    AntNum: 3
+    AntTrack: {fileID: 1649952581}
   test: 0
 --- !u!1 &1691329022
 GameObject:

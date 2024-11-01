@@ -1,4 +1,4 @@
-Shader "Unlit/MA_Unlit"
+Shader "Unlit/Unlit"
 {
     Properties
     {
@@ -19,10 +19,6 @@ Shader "Unlit/MA_Unlit"
         [HideInInspector] _DstBlend ("__dst", Int) = 0.0
         [HideInInspector] _ZWrite ("__zw", Int) = 1.0
 
-
-
-
-
         [Header(Fog)][Space(10)]
         _FogToggle ("雾效强度", Range(0.0,1.0)) = 1.0
 
@@ -32,25 +28,27 @@ Shader "Unlit/MA_Unlit"
     HLSLINCLUDE
      #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
      #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
-      //CBUFFER_START (UnityPerMaterial)
-      	float4 _BaseMap_ST;
-      	half4 _BaseColor;
-      	half _Cutoff;
-      	float _EdgeAlphaFadeDistance;
-      	half _LightColorIntensity;
-      	half _FogToggle;
-     //CBUFFER_END
+
+      CBUFFER_START (UnityPerMaterial)
+      float4 _BaseMap_ST;
+      half4 _BaseColor;
+      half _Cutoff;
+      float _EdgeAlphaFadeDistance;
+      half _LightColorIntensity;
+      half _FogToggle;
+      CBUFFER_END
+
     ENDHLSL
     
     SubShader
     {
-        Tags{"RenderType" = "Opaque" "RenderPipeline" = "UniversalPipeline" "IgnoreProjector" = "True"}
-        LOD 100
+//        Tags{"RenderType" = "Opaque" "RenderPipeline" = "UniversalPipeline" "IgnoreProjector" = "True"}
+//        LOD 100
 
         Pass
         {
             Name "ForwardLit"
-            Tags{"LightMode" = "UniversalForward"}
+            Tags{"LightMode"="UniversalForward"}
             
             Cull[_Cull]
             Blend[_SrcBlend][_DstBlend]
@@ -81,6 +79,7 @@ Shader "Unlit/MA_Unlit"
                 half4 tangentWS : TEXCOORD2;
                 half3 normalWS : TEXCOORD3;
             };
+
 
             TEXTURE2D(_BaseMap);  SAMPLER(sampler_BaseMap);
             TEXTURE2D_X_FLOAT(_CameraDepthTexture);  SAMPLER(sampler_CameraDepthTexture);
@@ -141,6 +140,46 @@ Shader "Unlit/MA_Unlit"
                 
                 return float4(finalColor);
             }
+            ENDHLSL
+        }
+        
+        Pass
+        {
+            Name "DepthNormals"
+            Tags
+            {
+                "LightMode" = "DepthNormals"
+            }
+
+            // -------------------------------------
+            // Render State Commands
+            ZWrite On
+            Cull[_Cull]
+
+            HLSLPROGRAM
+            #pragma target 2.0
+
+            // -------------------------------------
+            // Shader Stages
+            #pragma vertex DepthNormalsVertex
+            #pragma fragment DepthNormalsFragment
+
+            // -------------------------------------
+            // Material Keywords
+            #pragma shader_feature_local _NORMALMAP
+            #pragma shader_feature_local _PARALLAXMAP
+            #pragma shader_feature_local _ _DETAIL_MULX2 _DETAIL_SCALED
+            #pragma shader_feature_local _ALPHATEST_ON
+            #pragma shader_feature_local_fragment _SMOOTHNESS_TEXTURE_ALBEDO_CHANNEL_A
+
+            // -------------------------------------
+            // Unity defined keywords
+            #pragma multi_compile_fragment _ LOD_FADE_CROSSFADE
+            
+            // Includes
+            // #include "Packages/com.unity.render-pipelines.universal/Shaders/LitInput.hlsl"
+            #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/SurfaceInput.hlsl"
+            #include "Packages/com.unity.render-pipelines.universal/Shaders/LitDepthNormalsPass.hlsl"
             ENDHLSL
         }
     }
