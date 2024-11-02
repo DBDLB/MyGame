@@ -3,16 +3,25 @@ using UnityEngine;
 public class ClickToShowUI : MonoBehaviour
 {
     public GameObject uiPanel; // 指向你的UI面板
-    private Canvas canvas; // 用于将世界坐标转换为屏幕坐标
+    
+    public float selectionThreshold = 0.1f; // 点击曲线的距离阈值
+    private Vector3 PreviousPoint;
+    private LineRenderer PreviousLineRenderer;
+    public GameObject DeleteButton;
 
     void Start()
     {
-        // 获取 Canvas 组件
-        canvas = uiPanel.GetComponentInParent<Canvas>();
         uiPanel.SetActive(false); // 初始化时隐藏UI面板
     }
 
     void Update()
+    {
+        ShowUI(); // 显示UI面板
+        
+        SelectionCurve(); // 选择曲线
+    }
+    
+    void ShowUI()
     {
         if (Input.GetMouseButtonDown(0))
         {
@@ -21,10 +30,9 @@ public class ClickToShowUI : MonoBehaviour
 
             if (Physics.Raycast(ray, out hit))
             {
-                MeshCollider meshCollider = hit.collider as MeshCollider;
                 if (hit.transform == transform)
                 {
-                    ShowUI(hit.transform.position);
+                    uiPanel.SetActive(true);
                 }
                 else if (hit.transform.gameObject.layer != LayerMask.NameToLayer("UI"))
                 {
@@ -34,14 +42,106 @@ public class ClickToShowUI : MonoBehaviour
         }
     }
 
-    void ShowUI(Vector3 worldPosition)
+    void SelectionCurve()
     {
-        // // 将世界坐标转换为屏幕坐标
-        // Vector2 screenPosition = RectTransformUtility.WorldToScreenPoint(Camera.main, worldPosition);
-        
-        // 设置UI面板的位置
-        uiPanel.SetActive(true);
-        // RectTransform uiRectTransform = uiPanel.GetComponent<RectTransform>();
-        // uiRectTransform.position = screenPosition + new Vector2(0, -300); // 根据需要调整偏移
+        if (Input.GetMouseButtonDown(0))
+        {
+            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+            RaycastHit hit;
+            Vector3 segmentStart = Vector3.zero;
+            Vector3 segmentEnd = Vector3.zero;
+
+            if (Physics.Raycast(ray, out hit, Mathf.Infinity))
+            {
+                float NearestDistance = float.MaxValue;
+                if (hit.transform.gameObject.layer == LayerMask.NameToLayer("Ground"))
+                {
+                    foreach (var variousAnt in AntColony.variousAnts)
+                    {
+                        foreach (var antPathList in variousAnt.antTrack.AntPathList)
+                        {
+                            // 遍历所有曲线进行选择
+                            Vector3 closestPoint = GetClosestPointOnLine(antPathList.lineRenderer, hit.point, out segmentStart, out segmentEnd);
+                            float distance = Vector3.Distance(hit.point, closestPoint);
+                            NearestDistance = Mathf.Min(NearestDistance, distance);
+                            if (distance < selectionThreshold)
+                            {
+                                if (PreviousLineRenderer != null && (PreviousLineRenderer != antPathList.lineRenderer))
+                                {
+                                    DeleteButton.SetActive(false);
+                                    HighlightLineRenderer(PreviousLineRenderer, 0.0f);
+                                    // PreviousLineRenderer = null;
+                                    // PreviousPoint = Vector3.zero;
+                                }
+                                PreviousPoint = hit.point;
+                                PreviousLineRenderer = antPathList.lineRenderer;
+
+                                Debug.Log("Selected Line: " + antPathList.lineRenderer.name);
+                                HighlightLineRenderer(antPathList.lineRenderer, 1.0f);
+                                DeleteButton.SetActive(true);
+                                //计算segmentStart和segmentEnd的垂直线
+                                Vector3 segmentDir = segmentEnd - segmentStart;
+                                Vector3 perpendicular = Vector3.Cross(segmentDir, Vector3.up);
+                                DeleteButton.transform.position = closestPoint + perpendicular.normalized * 1f;
+                                break; // 找到第一个目标后退出
+                            }
+                            else
+                            {
+                                HighlightLineRenderer(antPathList.lineRenderer, 0.0f);
+                            }
+                        }
+                    }
+
+                    if (NearestDistance< selectionThreshold)
+                    {
+                        DeleteButton.SetActive(false);
+                    }
+                }
+            }
+        }
+    }
+    
+    Vector3 GetClosestPointOnLine(LineRenderer lineRenderer, Vector3 point,out Vector3 OutSegmentStart, out Vector3 OutSegmentEnd)
+    {
+        Vector3 closestPoint = lineRenderer.GetPosition(0);
+        float closestDistance = float.MaxValue;
+
+        Vector3 finallySegmentStart = Vector3.zero;
+        Vector3 finallySegmentEnd = Vector3.zero;
+        for (int i = 0; i < lineRenderer.positionCount - 1; i++)
+        {
+            Vector3 segmentStart = lineRenderer.GetPosition(i);
+            Vector3 segmentEnd = lineRenderer.GetPosition(i + 1);
+            Vector3 segmentClosestPoint = GetClosestPointOnSegment(segmentStart, segmentEnd, point);
+            point.y = segmentClosestPoint.y; // 保持 y 坐标一致
+            float distance = Vector3.Distance(point, segmentClosestPoint);
+
+            if (distance < closestDistance)
+            {
+                closestDistance = distance;
+                closestPoint = segmentClosestPoint;
+                finallySegmentStart = segmentStart;
+                finallySegmentEnd = segmentEnd;
+            }
+        }
+        OutSegmentStart = finallySegmentStart;
+        OutSegmentEnd = finallySegmentEnd;
+        return closestPoint;
+    }
+
+    Vector3 GetClosestPointOnSegment(Vector3 start, Vector3 end, Vector3 point)
+    {
+        Vector3 lineDir = end - start;
+        float lengthSquared = lineDir.sqrMagnitude;
+        if (lengthSquared == 0) return start; // 线段的起点和终点重合
+
+        float t = Vector3.Dot(point - start, lineDir) / lengthSquared;
+        t = Mathf.Clamp01(t); // 限制 t 在 [0, 1] 之间
+        return start + t * lineDir;
+    }
+
+    void HighlightLineRenderer(LineRenderer lineRenderer, float mode)
+    {
+        lineRenderer.material.SetFloat("_SelectedMode", mode);
     }
 }

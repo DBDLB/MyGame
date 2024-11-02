@@ -50,7 +50,7 @@ public class Leg : MonoBehaviour
     {
         RaycastHit hit;
 
-        int layerMask = ~LayerMask.GetMask("Water");
+        int layerMask = ~LayerMask.GetMask("UI", "Water");
         // Calculate the tip target position
         if (Physics.Raycast(rayOrigin.position, bodyTransform.up.normalized * -1, out hit, maxRayDist,layerMask))
         {

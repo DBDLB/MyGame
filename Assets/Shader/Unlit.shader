@@ -4,7 +4,8 @@ Shader "Unlit/Unlit"
     {
         [Header(Unlit)][Space(10)]
         [SinglelineTexture(_BaseColor)][MainTexture] _BaseMap("Albedo(rgba)", 2D) = "white" {}
-        [MainColor] _BaseColor("Color", Color) = (1.0, 1.0, 1.0, 1.0)
+        [HDR][MainColor] _BaseColor("Color", Color) = (1.0, 1.0, 1.0, 1.0)
+        _SelectedMode("选择模式", float) = 0
         [Header(EdgeAlphaFalloff)][Space(10)]
         [Toggle(USE_EDGE_ALPHA_FALLOFF)]_FallOffEnable("开启底部渐变", float) = 0
         [ShowIf(_FallOffEnable)]_EdgeAlphaFadeDistance("Edge Alpha Fade Distance", Range(0,3)) = 0.5
@@ -36,6 +37,7 @@ Shader "Unlit/Unlit"
       float _EdgeAlphaFadeDistance;
       half _LightColorIntensity;
       half _FogToggle;
+      half _SelectedMode;
       CBUFFER_END
 
     ENDHLSL
@@ -123,7 +125,7 @@ Shader "Unlit/Unlit"
                 float2 heightUV  = i.uv;
                 half4 baseMap = SAMPLE_TEXTURE2D(_BaseMap, sampler_BaseMap, heightUV);
                 half4 finalColor;
-                finalColor.rgb = _BaseColor.rgb * baseMap.rgb;
+                finalColor.rgb = lerp(_BaseColor.rgb,float3(0,1,0)*10,_SelectedMode) * baseMap.rgb;
                 finalColor.a = _BaseColor.a * baseMap.a;
 
                 #ifndef _ALPHATEST_ON

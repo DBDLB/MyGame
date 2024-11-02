@@ -17,9 +17,11 @@ public class AntTrack : MonoBehaviour
     {
         public List<Vector3> pathList;
         public List<Ant> ants = new List<Ant>();
-        public AntPath(List<Vector3> path)
+        public LineRenderer lineRenderer;
+        public AntPath(List<Vector3> path, LineRenderer lineRenderer)
         {
-            pathList = path;
+            this.pathList = path;
+            this.lineRenderer = lineRenderer;
         }
     }
     
@@ -109,7 +111,7 @@ public class AntTrack : MonoBehaviour
             if (Input.GetMouseButtonUp(0))
             {
                 // isDrawLine = false;
-                AntPathList.Add(new AntPath(mousePositions));
+                AntPathList.Add(new AntPath(mousePositions, lineRenderer));
                 line = null;
                 mousePositions = new List<Vector3>();
                 this.enabled = false;

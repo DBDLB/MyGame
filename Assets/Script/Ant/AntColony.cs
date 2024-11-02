@@ -54,6 +54,7 @@ public class AntColony : MonoBehaviour
         public Queue<GameObject> antPool = new Queue<GameObject>(); // 对象池
         public AntTrack antTrack;
         public int totalAnts; // 总蚂蚁数量
+        public int PreviousFrameAntPathListCount = 0;
 
         public VariousAnt(int totalAnts, AntTrack antTrack, GameObject antPrefab)
         {
@@ -65,8 +66,7 @@ public class AntColony : MonoBehaviour
 
     public static List<VariousAnt> variousAnts = new List<VariousAnt>(); // 当前生成的蚂蚁列表
 
-
-    private int AntPathListCount = 0;
+    
     private int AntCount = 0;
     
 
@@ -179,7 +179,7 @@ public class AntColony : MonoBehaviour
                 }
             }
         }
-        AntPathListCount = variousAnt.antTrack.AntPathList.Count;
+        variousAnt.PreviousFrameAntPathListCount = variousAnt.antTrack.AntPathList.Count;
         AntCount = variousAnt.totalAnts;
     }
 
@@ -225,7 +225,7 @@ public class AntColony : MonoBehaviour
     {
         foreach (var variousAnt in variousAnts)
         {
-            if (AntCount != variousAnt.totalAnts || AntPathListCount != variousAnt.antTrack.AntPathList.Count)
+            if (AntCount != variousAnt.totalAnts || variousAnt.PreviousFrameAntPathListCount != variousAnt.antTrack.AntPathList.Count)
             {
                 needsReallocation = true;
                 return variousAnt;
