@@ -4,18 +4,21 @@ using System.Collections.Generic;
 
 public abstract class Ant : MonoBehaviour
 {
-    public AntTrack.AntPath waypoint; // 巡逻路径
+    public int price = 0; // 蚂蚁价格
+    [HideInInspector]public AntTrack.AntPath waypoint; // 巡逻路径
     public AntColony.VariousAnt variousAnt; // 蚂蚁种类
-    public int currentWaypointIndex = 1;
-    public AntColony colony; // 指向 AntColony 的引用
+    [HideInInspector]public int currentWaypointIndex = 1;
+    [HideInInspector]public AntColony colony; // 指向 AntColony 的引用
     public float patrolSpeed = 1.0f; // 巡逻速度
     public float minDistanceToPreviousAnt = 1.0f; // 与上一只蚂蚁的最小距离
     public float slowDownFactor = 0.5f; // 减慢速度的因子
+    public AntColony.AntType antType; // 蚂蚁种类
     
     //距离巢穴的距离过近时解除限制
-    public float minDistanceToColony = 2.0f;
+    [HideInInspector]public float minDistanceToColony = 2.0f;
     
-    public bool backToNest = false; // 是否返回巢穴
+    [HideInInspector]public bool backToNest = false; // 是否返回巢穴
+    protected Coroutine patrolCoroutine;
 
     protected virtual void OnEnable()
     {
@@ -27,19 +30,19 @@ public abstract class Ant : MonoBehaviour
             Quaternion targetRotation = Quaternion.LookRotation(direction);
             transform.rotation = targetRotation;
 
-            StartCoroutine(Patrol());
+            patrolCoroutine = StartCoroutine(Patrol());
         }
     }
 
     private IEnumerator Patrol()
     {
         // 循环巡逻
-        while (true)
+        while (waypoint!=null)
         {
             // 获取上一只蚂蚁
             Ant previousAnt = GetPreviousAnt();
             // 前往当前巡逻点
-            while (Vector3.Distance(transform.position, waypoint.pathList[currentWaypointIndex]) > 0.1f)
+            while (waypoint!=null&&Vector3.Distance(transform.position, waypoint.pathList[currentWaypointIndex]) > 0.1f)
             {
                 backToNest = false;
                 float speed = patrolSpeed;
@@ -68,7 +71,7 @@ public abstract class Ant : MonoBehaviour
             currentWaypointIndex++;
 
             // 如果到达终点，开始返回
-            if (currentWaypointIndex >= waypoint.pathList.Count)
+            if (waypoint!=null&&currentWaypointIndex >= waypoint.pathList.Count)
             {
                 // 计算前进方向并朝向该方向
                 // Vector3 directionBack = (waypoint.pathList[waypoint.pathList.Count - 2] - transform.position).normalized;
@@ -78,7 +81,7 @@ public abstract class Ant : MonoBehaviour
                 // 返回路径
                 for (int i = waypoint.pathList.Count - 1; i >= 0; i--)
                 {
-                    while (Vector3.Distance(transform.position, waypoint.pathList[i]) > 0.1f)
+                    while (waypoint!=null&&Vector3.Distance(transform.position, waypoint.pathList[i]) > 0.1f)
                     {
                         float speed = patrolSpeed;
 
@@ -102,11 +105,32 @@ public abstract class Ant : MonoBehaviour
                     }
                 }
 
-                // 回收蚂蚁
-                colony.RecycleAnt(gameObject);
-                yield break; // 结束协程
+                if (waypoint != null)
+                {
+                    // 回收蚂蚁
+                    colony.RecycleAnt(gameObject);
+                    yield break; // 结束协程
+                }
             }
         }
+
+        while (waypoint == null)
+        {
+            // 计算前进方向并朝向该方向
+            Vector3 direction = (colony.transform.position - transform.position).normalized;
+            Quaternion targetRotation = Quaternion.LookRotation(direction);
+            transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, Time.deltaTime * patrolSpeed*2);
+            transform.position = Vector3.MoveTowards(transform.position, colony.transform.position, Time.deltaTime * patrolSpeed);
+            // 检查是否到达巢穴位置
+            if (Vector3.Distance(transform.position, colony.transform.position) < 0.1f)
+            {
+                // 回收蚂蚁
+                colony.DeletePathRecycleAnt(gameObject);
+                yield break; // 结束协程
+            }
+            yield return null;
+        }
+        
     }
 
     // 获取上一只蚂蚁的方法

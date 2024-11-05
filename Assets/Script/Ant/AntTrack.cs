@@ -9,7 +9,6 @@ public class AntTrack : MonoBehaviour
     public int amountRadio = 20;
     public List<Vector3> mousePositions = new List<Vector3>(); // 记录鼠标位置的列表
     public List<Vector3> smoothMousePositions = new List<Vector3>(); // 平滑后的鼠标位置列表
-    
     public float minDistance = 0.5f; // 最小距离阈值
 
     [Serializable]
@@ -56,6 +55,7 @@ public class AntTrack : MonoBehaviour
                 {
                     if (linePrefab != null)
                     {
+                        smoothMousePositions.Clear();
                         lineMaterial = new Material(Shader.Find("Unlit/Unlit"));
                         line = Instantiate(linePrefab, this.transform);
                         lineRenderer = line.GetComponent<LineRenderer>();

@@ -125,7 +125,7 @@ Shader "Unlit/Unlit"
                 float2 heightUV  = i.uv;
                 half4 baseMap = SAMPLE_TEXTURE2D(_BaseMap, sampler_BaseMap, heightUV);
                 half4 finalColor;
-                finalColor.rgb = lerp(_BaseColor.rgb,float3(0,1,0)*10,_SelectedMode) * baseMap.rgb;
+                finalColor.rgb = lerp(_BaseColor.rgb,float3(0,1,0)*2,_SelectedMode) * baseMap.rgb;
                 finalColor.a = _BaseColor.a * baseMap.a;
 
                 #ifndef _ALPHATEST_ON

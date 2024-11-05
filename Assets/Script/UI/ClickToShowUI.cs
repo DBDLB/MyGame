@@ -1,17 +1,56 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 public class ClickToShowUI : MonoBehaviour
 {
-    public GameObject uiPanel; // 指向你的UI面板
     
+    public static ClickToShowUI instance;
+    public static ClickToShowUI Instance
+    {
+        get
+        {
+            if (instance == null)
+            {
+                instance = FindObjectOfType<ClickToShowUI>();
+                if (instance == null)
+                {
+                    GameObject singleton = new GameObject(typeof(ClickToShowUI).Name);
+                    instance = singleton.AddComponent<ClickToShowUI>();
+                }
+            }
+            return instance;
+        }
+    }
+
+    private void Awake()
+    {
+        if (instance == null)
+        {
+            instance = this;
+            DontDestroyOnLoad(gameObject);
+        }
+        else if (instance != this)
+        {
+            Destroy(gameObject);
+        }
+    }
+    
+    
+    public List<GameObject> uiPanels = new List<GameObject>();
+
     public float selectionThreshold = 0.1f; // 点击曲线的距离阈值
     private Vector3 PreviousPoint;
     private LineRenderer PreviousLineRenderer;
     public GameObject DeleteButton;
+    public AntTrack.AntPath antPath;
+    public int variousAntIndex;
 
     void Start()
     {
-        uiPanel.SetActive(false); // 初始化时隐藏UI面板
+        foreach (var uiPanel in uiPanels)
+        {
+            uiPanel.SetActive(false); // 初始化时隐藏UI面板
+        }
     }
 
     void Update()
@@ -32,11 +71,17 @@ public class ClickToShowUI : MonoBehaviour
             {
                 if (hit.transform == transform)
                 {
-                    uiPanel.SetActive(true);
+                    foreach (var uiPanel in uiPanels)
+                    {
+                        uiPanel.SetActive(true);
+                    }
                 }
                 else if (hit.transform.gameObject.layer != LayerMask.NameToLayer("UI"))
                 {
-                    uiPanel.SetActive(false);
+                    foreach (var uiPanel in uiPanels)
+                    {
+                        uiPanel.SetActive(false);
+                    }
                 }
             }
         }
@@ -56,9 +101,9 @@ public class ClickToShowUI : MonoBehaviour
                 float NearestDistance = float.MaxValue;
                 if (hit.transform.gameObject.layer == LayerMask.NameToLayer("Ground"))
                 {
-                    foreach (var variousAnt in AntColony.variousAnts)
+                    for (int i= 0; i < AntColony.variousAnts.Count;i++)
                     {
-                        foreach (var antPathList in variousAnt.antTrack.AntPathList)
+                        foreach (var antPathList in AntColony.variousAnts[i].antTrack.AntPathList)
                         {
                             // 遍历所有曲线进行选择
                             Vector3 closestPoint = GetClosestPointOnLine(antPathList.lineRenderer, hit.point, out segmentStart, out segmentEnd);
@@ -78,6 +123,8 @@ public class ClickToShowUI : MonoBehaviour
 
                                 Debug.Log("Selected Line: " + antPathList.lineRenderer.name);
                                 HighlightLineRenderer(antPathList.lineRenderer, 1.0f);
+                                antPath = antPathList;
+                                variousAntIndex = i;
                                 DeleteButton.SetActive(true);
                                 //计算segmentStart和segmentEnd的垂直线
                                 Vector3 segmentDir = segmentEnd - segmentStart;
@@ -92,13 +139,24 @@ public class ClickToShowUI : MonoBehaviour
                         }
                     }
 
-                    if (NearestDistance< selectionThreshold)
+                    if (NearestDistance > selectionThreshold)
                     {
                         DeleteButton.SetActive(false);
                     }
                 }
             }
         }
+    }
+    
+    public void DeletePath()
+    {
+        foreach (var ant in antPath.ants)
+        {
+            ant.waypoint = null;
+        }
+        AntColony.variousAnts[variousAntIndex].antTrack.AntPathList.Remove(antPath);
+        Destroy(antPath.lineRenderer.gameObject);
+        DeleteButton.SetActive(false);
     }
     
     Vector3 GetClosestPointOnLine(LineRenderer lineRenderer, Vector3 point,out Vector3 OutSegmentStart, out Vector3 OutSegmentEnd)
@@ -143,5 +201,14 @@ public class ClickToShowUI : MonoBehaviour
     void HighlightLineRenderer(LineRenderer lineRenderer, float mode)
     {
         lineRenderer.material.SetFloat("_SelectedMode", mode);
+    }
+    
+    // 隐藏所有面板
+    public void HideAllPanels()
+    {
+        foreach (GameObject panel in uiPanels)
+        {
+            panel.SetActive(false);
+        }
     }
 }

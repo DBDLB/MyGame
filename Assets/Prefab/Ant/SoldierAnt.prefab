@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 5661835378592937367}
   - component: {fileID: 8543058775941830806}
   - component: {fileID: 5371258756816254570}
-  - component: {fileID: 1903189543208323197}
+  - component: {fileID: -8575541639919999337}
   m_Layer: 0
   m_Name: SoldierAnt
   m_TagString: Untagged
@@ -106,7 +106,7 @@ SphereCollider:
   serializedVersion: 3
   m_Radius: 0.5
   m_Center: {x: 0, y: 0, z: 0}
---- !u!114 &1903189543208323197
+--- !u!114 &-8575541639919999337
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -115,16 +115,19 @@ MonoBehaviour:
   m_GameObject: {fileID: 3736480129281915235}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d82ddb16e95cdde4da162348dfd3a607, type: 3}
+  m_Script: {fileID: 11500000, guid: 04d22bbe9d0da0947b42b42295787844, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  price: 10
   waypoint:
     pathList: []
     ants: []
+    lineRenderer: {fileID: 0}
   currentWaypointIndex: 1
   colony: {fileID: 0}
   patrolSpeed: 10
   minDistanceToPreviousAnt: 2
   slowDownFactor: 0.5
+  antType: 1
   minDistanceToColony: 2
   backToNest: 0
