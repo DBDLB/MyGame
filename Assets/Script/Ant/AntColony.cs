@@ -56,14 +56,14 @@ public class AntColony : MonoBehaviour
 
     public class VariousAnt
     {
-        public GameObject antPrefab;
+        public antPrefabs antPrefab;
         public List<GameObject> ants = new List<GameObject>(); // 当前生成的蚂蚁列表
         public Queue<GameObject> antPool = new Queue<GameObject>(); // 对象池
         public AntTrack antTrack;
         public int totalAnts; // 总蚂蚁数量
         public int PreviousFrameAntPathListCount = 0;
 
-        public VariousAnt(int totalAnts, AntTrack antTrack, GameObject antPrefab)
+        public VariousAnt(int totalAnts, AntTrack antTrack, antPrefabs antPrefab)
         {
             this.totalAnts = totalAnts;
             this.antTrack = antTrack;
@@ -83,7 +83,7 @@ public class AntColony : MonoBehaviour
     {
         foreach (var antPrefab in prefabsAnts)
         {
-            variousAnts.Add(new VariousAnt(antPrefab.AntNum, antPrefab.AntTrack, antPrefab.antPrefab));
+            variousAnts.Add(new VariousAnt(antPrefab.AntNum, antPrefab.AntTrack, antPrefab));
             antPrefab.variousAnt = variousAnts[variousAnts.Count - 1];
         }
         ShowFoodCount();
@@ -133,6 +133,19 @@ public class AntColony : MonoBehaviour
 
     void ReallocateAnts(VariousAnt variousAnt)
     {
+        //清除variousAnts中antTrack中ants为null的蚂蚁
+        for (int i = 0; i < variousAnt.antTrack.AntPathList.Count; i++)
+        {
+            for (int j = 0; j < variousAnt.antTrack.AntPathList[i].ants.Count; j++)
+            {
+                if (variousAnt.antTrack.AntPathList[i].ants[j] == null)
+                {
+                    variousAnt.antTrack.AntPathList[i].ants.RemoveAt(j);
+                    variousAnt.antPrefab.AntNum--;
+                }
+            }
+        }
+
         if (variousAnt.ants.Count<variousAnt.totalAnts)
         {
             int count = variousAnt.totalAnts - variousAnt.ants.Count;
@@ -186,18 +199,27 @@ public class AntColony : MonoBehaviour
 
             
             int remainder = variousAnt.totalAnts - onTheRoad;
+            List<AntTrack.AntPath> allotAntPath = new List<AntTrack.AntPath>();
+            foreach (var antPath in variousAnt.antTrack.AntPathList)
+            {
+                if (antPath.ants.Count <= antsPerPath)
+                {
+                    allotAntPath.Add(antPath);
+                }
+
+            }
             // 分配余下的蚂蚁
             if (remainder > 0 && onTheRoad<variousAnt.totalAnts)
             {
                 System.Random random = new System.Random();
                 for (int i = 0; i < remainder; i++)
                 {
-                    int randomIndex = random.Next(totalPaths);
+                    int randomIndex = random.Next(allotAntPath.Count);
                     if (variousAnt.antPool.Count != 0)
                     {
                         GameObject ant = variousAnt.antPool.Dequeue();
-                        ant.GetComponent<Ant>().waypoint = variousAnt.antTrack.AntPathList[randomIndex];
-                        variousAnt.antTrack.AntPathList[randomIndex].ants.Add(ant.GetComponent<Ant>());
+                        ant.GetComponent<Ant>().waypoint = allotAntPath[randomIndex];
+                        allotAntPath[randomIndex].ants.Add(ant.GetComponent<Ant>());
                         ant.SetActive(true);
                     }
                 }
@@ -209,7 +231,7 @@ public class AntColony : MonoBehaviour
 
     void CreateAnt(VariousAnt variousAnt)
     {
-        GameObject ant = Instantiate(variousAnt.antPrefab, this.transform.position, Quaternion.identity);
+        GameObject ant = Instantiate(variousAnt.antPrefab.antPrefab, this.transform.position, Quaternion.identity);
         Ant antComponent = ant.GetComponent<Ant>();
         antComponent.colony = this; // 设置蚂蚁的引用
         ant.SetActive(false);

@@ -125,7 +125,7 @@ MonoBehaviour:
     lineRenderer: {fileID: 0}
   currentWaypointIndex: 1
   colony: {fileID: 0}
-  patrolSpeed: 10
+  patrolSpeed: 7
   minDistanceToPreviousAnt: 2
   slowDownFactor: 0.5
   antType: 1

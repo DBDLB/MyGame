@@ -18,12 +18,12 @@ public class Bullet : MonoBehaviour
             if (collision.gameObject.layer == LayerMask.NameToLayer("Enemy"))
             {
                 // 获取敌人对象
-                Enemy enemy = collision.gameObject.GetComponent<Enemy>();
-                if (enemy != null)
-                {
-                    // 让敌人接收伤害
-                    enemy.TakeDamage(damage);
-                }
+                // Enemy enemy = collision.gameObject.GetComponent<Enemy>();
+                // if (enemy != null)
+                // {
+                //     // 让敌人接收伤害
+                //     enemy.TakeDamage(damage);
+                // }
             }
             // 子弹碰撞到其他物体后销毁
             Destroy(gameObject);

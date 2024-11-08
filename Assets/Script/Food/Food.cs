@@ -8,7 +8,7 @@ public abstract class Food : MonoBehaviour
     public int foodValue = 1;
     
     // 抽象方法，供子类实现：处理蚂蚁拾取食物后的行为
-    public abstract void OnFoodPicked(Ant ant);
+    public abstract GameObject OnFoodPicked(Ant ant);
     
     protected virtual void OnEnable()
     {

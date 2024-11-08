@@ -2,6 +2,37 @@ using UnityEngine;
 
 public class CameraController : MonoBehaviour
 {
+    public static CameraController instance;
+    public static CameraController Instance
+    {
+        get
+        {
+            if (instance == null)
+            {
+                instance = FindObjectOfType<CameraController>();
+                if (instance == null)
+                {
+                    GameObject singleton = new GameObject(typeof(CameraController).Name);
+                    instance = singleton.AddComponent<CameraController>();
+                }
+            }
+            return instance;
+        }
+    }
+
+    private void Awake()
+    {
+        if (instance == null)
+        {
+            instance = this;
+            DontDestroyOnLoad(gameObject);
+        }
+        else if (instance != this)
+        {
+            Destroy(gameObject);
+        }
+    }
+    
     public float dragSpeedBase = 2.0f; // 基础拖动速度
     public float minSize = 5.0f; // 正交相机最小 size
     public float maxSize = 20.0f; // 正交相机最大 size
