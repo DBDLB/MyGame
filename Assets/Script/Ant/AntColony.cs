@@ -122,6 +122,7 @@ public class AntColony : MonoBehaviour
         ant.GetComponent<Ant>().waypoint.ants.Remove(ant.GetComponent<Ant>()); // 从路径上移除蚂蚁
         ant.GetComponent<Ant>().waypoint = null; // 清空蚂蚁的路径
         ReallocateAnts(ant.GetComponent<Ant>().variousAnt); // 回收后重新分配蚂蚁
+        // ant.GetComponent<Ant>().isPatrolPaused = false;
     }
     
     public void DeletePathRecycleAnt(GameObject ant)

@@ -15,7 +15,7 @@ public abstract class Ant : MonoBehaviour
     public AntColony.AntType antType; // 蚂蚁种类
     
     //距离巢穴的距离过近时解除限制
-    [HideInInspector]public float minDistanceToColony = 2.0f;
+    [HideInInspector]public float minDistanceToColony = 0.0f;
     
     [HideInInspector]public bool backToNest = false; // 是否返回巢穴
     protected Coroutine patrolCoroutine;
@@ -24,7 +24,8 @@ public abstract class Ant : MonoBehaviour
     {
         if (waypoint.pathList.Count > 0)
         {
-            currentWaypointIndex = 1;
+            currentWaypointIndex = 0;
+            backToNest = false;
             // 计算前进方向并朝向该方向
             Vector3 direction = (waypoint.pathList[currentWaypointIndex] - transform.position).normalized;
             Quaternion targetRotation = Quaternion.LookRotation(direction);
@@ -34,64 +35,134 @@ public abstract class Ant : MonoBehaviour
         }
     }
 
+    protected Ant previousAnt;
+    public bool isPatrolPaused = false;
     private IEnumerator Patrol()
     {
         // 循环巡逻
         while (waypoint!=null)
         {
-            // 获取上一只蚂蚁
-            Ant previousAnt = GetPreviousAnt();
+            int pathListCount = waypoint.pathList.Count;
+            transform.rotation = Quaternion.LookRotation((waypoint.pathList[1] - transform.position).normalized);
             // 前往当前巡逻点
-            while (waypoint!=null&&Vector3.Distance(transform.position, waypoint.pathList[currentWaypointIndex]) > 0.1f)
+            if (waypoint != null && !backToNest)
             {
-                backToNest = false;
-                float speed = patrolSpeed;
-
-                // 如果距离上一只蚂蚁太近，减慢速度
-                if (previousAnt != null && previousAnt.backToNest == backToNest)
+                for (int i = 1; i < pathListCount; i++)
                 {
-                    float distanceToPreviousAnt = Vector3.Distance(transform.position, previousAnt.transform.position);
-                    if (distanceToPreviousAnt < minDistanceToPreviousAnt)
+                    currentWaypointIndex++;
+                    while (waypoint != null && Vector3.Distance(transform.position, waypoint.pathList[i]) > 0.1f)
                     {
-                        speed *= Mathf.Clamp01(distanceToPreviousAnt / minDistanceToPreviousAnt);
+                        if (isPatrolPaused)
+                        {
+                            yield return null; // 暂时暂停，等待下一帧重新检查
+                            continue;
+                        }
+
+                        float speed = patrolSpeed;
+
+                        // 获取上一只蚂蚁
+                        previousAnt = GetPreviousAnt();
+                        // 如果距离上一只蚂蚁太近，减慢速度
+                        if (previousAnt != null && previousAnt.backToNest == backToNest)
+                        {
+                            float distanceToPreviousAnt =
+                                Vector3.Distance(transform.position, previousAnt.transform.position);
+                            if (distanceToPreviousAnt < minDistanceToPreviousAnt)
+                            {
+                                if (Vector3.Distance(transform.position, colony.transform.position)<minDistanceToColony)
+                                {
+                                    speed *= Mathf.Clamp01(distanceToPreviousAnt / minDistanceToPreviousAnt);
+                                }
+                                else
+                                {
+                                    speed *= Mathf.Max(Mathf.Clamp01(distanceToPreviousAnt / minDistanceToPreviousAnt), slowDownFactor);
+                                }
+                            }
+                        }
+
+                        // 计算前进方向并朝向该方向
+                        Vector3 direction = (waypoint.pathList[i] - transform.position).normalized;
+                        Quaternion targetRotation = Quaternion.LookRotation(direction);
+                        transform.rotation =
+                            Quaternion.Slerp(transform.rotation, targetRotation, Time.deltaTime * speed * 2);
+
+                        transform.position = Vector3.MoveTowards(transform.position, waypoint.pathList[i],
+                            Time.deltaTime * speed);
+                        yield return null; // 等待下一帧
                     }
                 }
-                
-                // 计算前进方向并朝向该方向
-                Vector3 direction = (waypoint.pathList[currentWaypointIndex] - transform.position).normalized;
-                Quaternion targetRotation = Quaternion.LookRotation(direction);
-                transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, Time.deltaTime * speed*2);
-
-                
-                transform.position = Vector3.MoveTowards(transform.position, waypoint.pathList[currentWaypointIndex], Time.deltaTime * speed);
-                yield return null; // 等待下一帧
+                backToNest = true;
             }
-
-            // 更新到下一个巡逻点
-            currentWaypointIndex++;
+            // while (!backToNest&&waypoint!=null&&Vector3.Distance(transform.position, waypoint.pathList[currentWaypointIndex]) > 0.1f)
+            // {
+            //
+            //     currentWaypointIndex++;
+            //     if (currentWaypointIndex >= waypoint.pathList.Count)
+            //     {
+            //         backToNest = true;
+            //         currentWaypointIndex--;
+            //     }
+            //     
+            //     if (isPatrolPaused)
+            //     {
+            //         yield return null; // 暂时暂停，等待下一帧重新检查
+            //         continue;
+            //     }
+            //     float speed = patrolSpeed;
+            //
+            //     // 如果距离上一只蚂蚁太近，减慢速度
+            //     if (previousAnt != null && previousAnt.backToNest == backToNest)
+            //     {
+            //         float distanceToPreviousAnt = Vector3.Distance(transform.position, previousAnt.transform.position);
+            //         if (distanceToPreviousAnt < minDistanceToPreviousAnt)
+            //         {
+            //             speed *= Mathf.Max(Mathf.Clamp01(distanceToPreviousAnt / minDistanceToPreviousAnt),0.5f);
+            //         }
+            //     }
+            //     
+            //     // 计算前进方向并朝向该方向
+            //     Vector3 direction = (waypoint.pathList[currentWaypointIndex] - transform.position).normalized;
+            //     Quaternion targetRotation = Quaternion.LookRotation(direction);
+            //     transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, Time.deltaTime * speed*2);
+            //
+            //     
+            //     transform.position = Vector3.MoveTowards(transform.position, waypoint.pathList[currentWaypointIndex], Time.deltaTime * speed);
+            //     yield return null; // 等待下一帧
+            // }
 
             // 如果到达终点，开始返回
-            if (waypoint!=null&&currentWaypointIndex >= waypoint.pathList.Count)
+            if (waypoint!=null&&backToNest)
             {
                 // 计算前进方向并朝向该方向
                 // Vector3 directionBack = (waypoint.pathList[waypoint.pathList.Count - 2] - transform.position).normalized;
                 Vector3 directionBack = (waypoint.pathList[^2] - transform.position).normalized;
                 transform.rotation = Quaternion.LookRotation(directionBack);
-                backToNest = true;
                 // 返回路径
-                for (int i = waypoint.pathList.Count - 1; i >= 0; i--)
+                for (int i = pathListCount - 1; i >= 0; i--)
                 {
+                    currentWaypointIndex--;
                     while (waypoint!=null&&Vector3.Distance(transform.position, waypoint.pathList[i]) > 0.1f)
                     {
+                        if (isPatrolPaused)
+                        {
+                            yield return null; // 暂时暂停，等待下一帧重新检查
+                            continue;
+                        }
+                        
                         float speed = patrolSpeed;
 
+                        // 获取上一只蚂蚁
+                        previousAnt = GetPreviousAnt();
                         // 如果距离上一只蚂蚁太近，减慢速度
                         if (previousAnt != null && previousAnt.backToNest == backToNest && Vector3.Distance(transform.position, colony.transform.position)>minDistanceToColony)
                         {
                             float distanceToPreviousAnt = Vector3.Distance(transform.position, previousAnt.transform.position);
                             if (distanceToPreviousAnt < minDistanceToPreviousAnt)
                             {
-                                speed *= Mathf.Clamp01(distanceToPreviousAnt / minDistanceToPreviousAnt);
+                                if (Vector3.Distance(transform.position, colony.transform.position)>minDistanceToColony)
+                                {
+                                    speed *= Mathf.Max(Mathf.Clamp01(distanceToPreviousAnt / minDistanceToPreviousAnt), slowDownFactor);
+                                }
                             }
                         }
                         
@@ -116,6 +187,11 @@ public abstract class Ant : MonoBehaviour
 
         while (waypoint == null)
         {
+            if (isPatrolPaused)
+            {
+                yield return null; // 暂时暂停，等待下一帧重新检查
+                continue;
+            }
             // 计算前进方向并朝向该方向
             Vector3 direction = (colony.transform.position - transform.position).normalized;
             Quaternion targetRotation = Quaternion.LookRotation(direction);

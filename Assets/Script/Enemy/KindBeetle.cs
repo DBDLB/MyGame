@@ -7,10 +7,18 @@ public class KindBeetle : Enemy
     private Vector3 currentTarget; // 当前移动目标点
     private bool isMoving = false; // 标记是否在移动
     private Quaternion targetRotation; // 目标旋转
+    public float moveSpeed = 2f; // 移动速度
+    public GameObject kindBeetleCarcass;
 
     private void Update()
     {
-        Move(currentTarget, 2f);
+        Move(currentTarget, moveSpeed);
+    }
+    
+    protected override void OnEnable()
+    {
+        base.OnEnable();
+        enemyType = EnemyType.KindBeetle;
     }
 
     public override void Move(Vector3 targetPosition, float speed)
@@ -56,15 +64,18 @@ public class KindBeetle : Enemy
         // 获取 BoxCollider 边界
         Bounds bounds = CameraController.Instance.groundCollider.bounds;
 
+        // 创建一个新的 Vector3 变量，只保留 x 和 z 轴的值，y 轴设为边界的中心 y 值
+        Vector3 targetXZ = new Vector3(targetPosition.x, bounds.center.y, targetPosition.z);
+
         // 检查目标点是否在边界内
-        return bounds.Contains(targetPosition);
+        return bounds.Contains(targetXZ);
     }
 
     // 重写受伤方法
-    public override void TakeDamage(int damage)
-    {
-        throw new System.NotImplementedException();
-    }
+    // public override void TakeDamage(int damage)
+    // {
+    //     throw new System.NotImplementedException();
+    // }
 
     // 重写攻击方法
     public override void Attack()
@@ -75,6 +86,9 @@ public class KindBeetle : Enemy
     // 重写死亡方法
     protected override void Die()
     {
-        throw new System.NotImplementedException();
+        GameObject Carcass = Instantiate(kindBeetleCarcass);
+        Carcass.transform.position = transform.position;
+        Carcass.transform.rotation = Quaternion.Euler(0, 0, 180);
+        base.Die();
     }
 }

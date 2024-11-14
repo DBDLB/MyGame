@@ -111,7 +111,14 @@ public class AntTrack : MonoBehaviour
             if (Input.GetMouseButtonUp(0))
             {
                 // isDrawLine = false;
-                AntPathList.Add(new AntPath(mousePositions, lineRenderer));
+                if (mousePositions != null && mousePositions.Count > 2)
+                {
+                    AntPathList.Add(new AntPath(mousePositions, lineRenderer));
+                }
+                else
+                {
+                    Destroy(line);
+                }
                 line = null;
                 mousePositions = new List<Vector3>();
                 this.enabled = false;

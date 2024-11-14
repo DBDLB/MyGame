@@ -129,6 +129,6 @@ MonoBehaviour:
   minDistanceToPreviousAnt: 2
   slowDownFactor: 0.5
   antType: 0
-  minDistanceToColony: 2
+  minDistanceToColony: 3
   backToNest: 0
   collectFoodRange: 5

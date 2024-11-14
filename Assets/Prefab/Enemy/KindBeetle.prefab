@@ -1,6 +1,6 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!1 &3736480129281915235
+--- !u!1 &8724396304468114954
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -8,48 +8,48 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 7137089021352191243}
-  - component: {fileID: 5661835378592937367}
-  - component: {fileID: 8543058775941830806}
-  - component: {fileID: 5371258756816254570}
-  - component: {fileID: -8575541639919999337}
+  - component: {fileID: 6775294349734174422}
+  - component: {fileID: 552940559580603219}
+  - component: {fileID: 588411735074628070}
+  - component: {fileID: 7387919196033790309}
+  - component: {fileID: 8626936522008203855}
   m_Layer: 0
-  m_Name: SoldierAnt
+  m_Name: KindBeetle
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &7137089021352191243
+--- !u!4 &6775294349734174422
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3736480129281915235}
+  m_GameObject: {fileID: 8724396304468114954}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 2.75, y: 0.22, z: 1.304}
-  m_LocalScale: {x: 0.5, y: 0.5, z: 1.5}
+  m_LocalPosition: {x: 6.0438104, y: 0.5, z: -6.4}
+  m_LocalScale: {x: 1, y: 1, z: 2}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!33 &5661835378592937367
+--- !u!33 &552940559580603219
 MeshFilter:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3736480129281915235}
-  m_Mesh: {fileID: 10207, guid: 0000000000000000e000000000000000, type: 0}
---- !u!23 &8543058775941830806
+  m_GameObject: {fileID: 8724396304468114954}
+  m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!23 &588411735074628070
 MeshRenderer:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3736480129281915235}
+  m_GameObject: {fileID: 8724396304468114954}
   m_Enabled: 1
   m_CastShadows: 1
   m_ReceiveShadows: 1
@@ -63,7 +63,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: f4607b77a3ecd334686aca5768876824, type: 2}
+  - {fileID: 2100000, guid: 6f0e85772003c824e86a8e272d41ee3a, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -85,13 +85,13 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!135 &5371258756816254570
-SphereCollider:
+--- !u!65 &7387919196033790309
+BoxCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3736480129281915235}
+  m_GameObject: {fileID: 8724396304468114954}
   m_Material: {fileID: 0}
   m_IncludeLayers:
     serializedVersion: 2
@@ -100,38 +100,25 @@ SphereCollider:
     serializedVersion: 2
     m_Bits: 0
   m_LayerOverridePriority: 0
-  m_IsTrigger: 0
+  m_IsTrigger: 1
   m_ProvidesContacts: 0
-  m_Enabled: 0
+  m_Enabled: 1
   serializedVersion: 3
-  m_Radius: 0.5
+  m_Size: {x: 1, y: 1, z: 1}
   m_Center: {x: 0, y: 0, z: 0}
---- !u!114 &-8575541639919999337
+--- !u!114 &8626936522008203855
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3736480129281915235}
+  m_GameObject: {fileID: 8724396304468114954}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 04d22bbe9d0da0947b42b42295787844, type: 3}
+  m_Script: {fileID: 11500000, guid: cbbf8688ba510624fac66a644cdad7cb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  price: 10
-  waypoint:
-    pathList: []
-    ants: []
-    lineRenderer: {fileID: 0}
-  currentWaypointIndex: 1
-  colony: {fileID: 0}
-  patrolSpeed: 7
-  minDistanceToPreviousAnt: 2
-  slowDownFactor: 0.5
-  antType: 1
-  minDistanceToColony: 3
-  backToNest: 0
-  collectEnemyRange: 5
-  minDistanceToOtherAnts: 3
-  damageInterval: 1
-  damageAmount: 5
+  health: 20
+  moveSpeed: 2
+  kindBeetleCarcass: {fileID: 1902355978741604373, guid: f306e87a03c1746438c4b28fe4e54d16,
+    type: 3}

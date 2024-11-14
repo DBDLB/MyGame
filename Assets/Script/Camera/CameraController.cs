@@ -32,7 +32,7 @@ public class CameraController : MonoBehaviour
             Destroy(gameObject);
         }
     }
-    
+
     public float dragSpeedBase = 2.0f; // 基础拖动速度
     public float minSize = 5.0f; // 正交相机最小 size
     public float maxSize = 20.0f; // 正交相机最大 size
@@ -59,7 +59,7 @@ public class CameraController : MonoBehaviour
             Vector3 delta = Input.mousePosition - lastMousePosition; // 计算鼠标移动量
 
             // 动态调整拖动速度
-            float dragSpeed = dragSpeedBase * (camera.orthographicSize / minSize);
+            float dragSpeed = dragSpeedBase * (camera.orthographicSize / minSize) * (Screen.dpi / 96.0f);
 
             Vector3 move = new Vector3(-delta.x, 0, -delta.y) * dragSpeed * Time.deltaTime; // 计算移动向量
             Vector3 newPosition = transform.position + move;
@@ -78,7 +78,7 @@ public class CameraController : MonoBehaviour
         {
             camera.orthographicSize -= scroll * 5; // 调整缩放速度，乘以一个因子
             camera.orthographicSize = Mathf.Clamp(camera.orthographicSize, minSize, maxSize); // 限制 size 在 minSize 和 maxSize 之间
-            
+
             // 调整相机位置以确保不超出边界
             RestrictCameraToBounds();
         }

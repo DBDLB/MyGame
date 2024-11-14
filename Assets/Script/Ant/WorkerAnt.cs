@@ -32,8 +32,13 @@ public class WorkerAnt : Ant
                 {
                     if (Vector3.Distance(transform.position, food.transform.position) < collectFoodRange)
                     {
+                        if (food.gameObject.GetComponent<Cake>() == null)
+                        {
+                            FoodManager.Instance.foodList.Remove(food);
+                        }
+
                         isMovingToFood = true;
-                        StopCoroutine(patrolCoroutine);
+                        isPatrolPaused = true;
                         moveToFoodCoroutine = StartCoroutine(MoveToFood(food));
                         break;
                     }
@@ -44,7 +49,7 @@ public class WorkerAnt : Ant
     
     private IEnumerator MoveToFood(Food food)
     {
-        backCurrentWaypointIndex = Mathf.Min(waypoint.pathList.Count - 1, currentWaypointIndex-1);
+        backCurrentWaypointIndex =currentWaypointIndex;
         // float distance = Vector3.Distance(food.transform.position, transform.position);
         Vector3 direction = (food.transform.position - transform.position).normalized;
         while (food != null&&Vector3.Distance(transform.position, food.transform.position) > 0.1f)
@@ -59,7 +64,16 @@ public class WorkerAnt : Ant
         {
             pickedFood = food.OnFoodPicked(this);
         }
-        StartCoroutine(HasFoodBackAntColony(food.foodValue));
+
+        if (pickedFood != null)
+        {
+            StartCoroutine(HasFoodBackAntColony(food.foodValue));
+        }
+        else
+        {
+            isPatrolPaused = false;
+            isMovingToFood = false;
+        }
     }
     
     
@@ -79,7 +93,7 @@ public class WorkerAnt : Ant
                 transform.rotation = Quaternion.LookRotation(directionBack);
                 backToNest = true;
                 // 返回路径
-                for (int i = backCurrentWaypointIndex; i >= 0; i--)
+                for (int i = backCurrentWaypointIndex; i > 0; i--)
                 {
                     while (waypoint != null && Vector3.Distance(transform.position, waypoint.pathList[i]) > 0.1f)
                     {
@@ -102,9 +116,10 @@ public class WorkerAnt : Ant
                     // 回收蚂蚁
                     colony.foodCount += foodValue;
                     AntColony.instance.ShowFoodCount();
-                    colony.RecycleAnt(gameObject);
                     //删除pickedFood
                     Destroy(pickedFood);
+                    colony.RecycleAnt(gameObject);
+                    isPatrolPaused = false;
                     isMovingToFood = false; // 到达食物位置后重置标志
                     yield break; // 结束协程
                 }
@@ -125,6 +140,7 @@ public class WorkerAnt : Ant
                 colony.foodCount += foodValue;
                 AntColony.instance.ShowFoodCount();
                 colony.DeletePathRecycleAnt(gameObject);
+                isPatrolPaused = false;
                 //删除pickedFood
                 Destroy(pickedFood);
                 isMovingToFood = false; // 到达食物位置后重置标志

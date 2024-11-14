@@ -15,4 +15,10 @@ public abstract class Food : MonoBehaviour
         // 将食物添加到 FoodManager 的食物列表中
         FoodManager.Instance.foodList.Add(this);
     }
+    
+    protected virtual void OnDisable()
+    {
+        // 将食物从 FoodManager 的食物列表中移除
+        FoodManager.Instance.foodList.Remove(this);
+    }
 }
