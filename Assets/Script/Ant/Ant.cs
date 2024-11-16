@@ -2,7 +2,7 @@ using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 
-public abstract class Ant : MonoBehaviour
+public abstract class Ant : MonoBehaviour, IDamageable
 {
     public int price = 0; // 蚂蚁价格
     [HideInInspector]public AntTrack.AntPath waypoint; // 巡逻路径
@@ -13,7 +13,7 @@ public abstract class Ant : MonoBehaviour
     public float minDistanceToPreviousAnt = 1.0f; // 与上一只蚂蚁的最小距离
     public float slowDownFactor = 0.5f; // 减慢速度的因子
     public AntColony.AntType antType; // 蚂蚁种类
-    
+    public int health;
     //距离巢穴的距离过近时解除限制
     [HideInInspector]public float minDistanceToColony = 0.0f;
     
@@ -223,4 +223,22 @@ public abstract class Ant : MonoBehaviour
     
     // 抽象方法，供子类实现
     protected abstract void PerformAction();
+    public virtual void TakeDamage(int damage)
+    {
+        health -= damage;
+        if (health <= 0)
+        {
+            Die();
+        }
+    }
+
+    public virtual void Die()
+    {
+        // 默认的死亡行为，可以在子类中重写
+        variousAnt.ants.Remove(this.gameObject);
+        waypoint.ants.Remove(this); // 从路径上移除蚂蚁
+        waypoint = null; // 清空蚂蚁的路径
+        AntColony.instance.DeleteAnt(antType);
+        Destroy(gameObject);
+    }
 }

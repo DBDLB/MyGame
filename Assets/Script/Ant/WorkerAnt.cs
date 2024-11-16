@@ -67,7 +67,7 @@ public class WorkerAnt : Ant
 
         if (pickedFood != null)
         {
-            StartCoroutine(HasFoodBackAntColony(food.foodValue));
+            StartCoroutine(HasFoodBackAntColony(pickedFood.GetComponent<Food>().foodValue));
         }
         else
         {

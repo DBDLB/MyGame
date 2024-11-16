@@ -313,6 +313,17 @@ public class AntColony : MonoBehaviour
             ShowFoodCount();
         }
     }
+    
+    public void DeleteAnt(AntType antType)
+    {
+        foreach (var prefabsAnt in prefabsAnts)
+        {
+            if (prefabsAnt.antPrefab.GetComponent<Ant>().antType == (AntType)antType)
+            {
+                prefabsAnt.AntNum--;
+            }
+        }
+    }
     #endregion
     
 

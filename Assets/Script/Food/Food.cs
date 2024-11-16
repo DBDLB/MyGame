@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public abstract class Food : MonoBehaviour
+public abstract class Food : MonoBehaviour,IDamageable
 {
     // 食物的价值
     public int foodValue = 1;
@@ -20,5 +20,21 @@ public abstract class Food : MonoBehaviour
     {
         // 将食物从 FoodManager 的食物列表中移除
         FoodManager.Instance.foodList.Remove(this);
+    }
+
+    public virtual void TakeDamage(int damage)
+    {
+        foodValue -= damage;
+        if (foodValue <= 0)
+        {
+            Die();
+        }
+    }
+
+    public virtual void Die()
+    {
+        // 默认的死亡行为，可以在子类中重写
+        FoodManager.Instance.foodList.Remove(this);
+        Destroy(gameObject);
     }
 }

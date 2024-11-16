@@ -5,7 +5,6 @@ using UnityEngine;
 public class Cake : Food
 {
     //蛋糕总量
-    public int foodAllValue = 30; 
     public GameObject littleCake;
     public override GameObject OnFoodPicked(Ant ant)
     {
@@ -18,13 +17,17 @@ public class Cake : Food
         // cake.transform.position = antTransform.position;
         cake.transform.SetParent(antTransform,true);
         cake.transform.localPosition = new Vector3(0, 1, 0);
-        cake.GetComponent<LittleCake>().foodValue = foodValue;
-        foodAllValue -= foodValue;
-        if (foodAllValue <= 0)
+        foodValue -= cake.GetComponent<LittleCake>().foodValue;
+        if (foodValue <= 0)
         {
             Destroy(gameObject);
         }
         
         return cake;
+    }
+    
+    public override void TakeDamage(int damage)
+    {
+        base.TakeDamage(damage);
     }
 }

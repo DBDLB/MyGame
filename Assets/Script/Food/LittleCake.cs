@@ -2,7 +2,14 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class LittleCake : MonoBehaviour
+public class LittleCake : Food
 {
-    public int foodValue = 1;
+    public override GameObject OnFoodPicked(Ant ant)
+    {
+        return null;
+    }
+    protected virtual void OnEnable()
+    {
+        FoodManager.Instance.foodList.Remove(this);
+    }
 }

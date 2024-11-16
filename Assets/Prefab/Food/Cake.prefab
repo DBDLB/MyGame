@@ -118,6 +118,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c023bbc67eecb5c409d8bae3b27e3168, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  foodValue: 1
+  foodValue: 100
+  foodAllValue: 100
   littleCake: {fileID: 6087900499704287441, guid: 9fe650cd0eca0564b856a67b7ce139b6,
     type: 3}

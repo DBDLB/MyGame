@@ -39,7 +39,7 @@ public class SoldierAnt : Ant
     private IEnumerator MoveToEnemy(Enemy enemy)
     {
         backCurrentWaypointIndex = Mathf.Min(waypoint.pathList.Count - 1, currentWaypointIndex - 1);
-        float damageTimer = 0.0f;
+        float damageTimer = damageInterval;
         
         while (enemy != null)
         {
