@@ -96,7 +96,8 @@ public class ClickToShowUI : MonoBehaviour
             Vector3 segmentStart = Vector3.zero;
             Vector3 segmentEnd = Vector3.zero;
 
-            if (Physics.Raycast(ray, out hit, Mathf.Infinity))
+            LayerMask groundLayer = LayerMask.GetMask("Ground","UI");
+            if (Physics.Raycast(ray, out hit, Mathf.Infinity, groundLayer))
             {
                 float NearestDistance = float.MaxValue;
                 if (hit.transform.gameObject.layer == LayerMask.NameToLayer("Ground"))
