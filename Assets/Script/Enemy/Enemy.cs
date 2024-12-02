@@ -84,7 +84,7 @@ public abstract class Enemy : MonoBehaviour, IDamageable
     {
         float damageTimer = damageInterval;
         float toTargetMoveSpeed = moveSpeed + 1;
-        while (enemy != null)
+        while (enemy != null && enemy.activeSelf)
         {
             Vector3 enemyTransformPosition = enemy.transform.position;
             enemyTransformPosition.y = transform.position.y; // 忽略 y 轴
@@ -101,7 +101,7 @@ public abstract class Enemy : MonoBehaviour, IDamageable
             // 检查是否达到目标点
             // if (Vector3.Distance(transform.position, adjustedTarget) < 0.1f)
             {
-                while (enemy != null&&Vector3.Distance(transform.position, new Vector3(enemy.transform.position.x,transform.position.y,enemy.transform.position.z)- direction * enemyRadius) < 1f)
+                while (enemy != null&& enemy.activeSelf&&Vector3.Distance(transform.position, new Vector3(enemy.transform.position.x,transform.position.y,enemy.transform.position.z)- direction * enemyRadius) < 1f)
                 {
                     damageTimer += Time.deltaTime;
                     if (damageTimer >= damageInterval)
@@ -116,7 +116,7 @@ public abstract class Enemy : MonoBehaviour, IDamageable
             // StartCoroutine(HasEnemyBackAntColony());
             yield return null; // 等待下一帧
         }
-        if(enemy == null)
+        if(enemy == null||!enemy.activeSelf)
         {
             isMovePaused = false;
             isMovingToEnemy = false;

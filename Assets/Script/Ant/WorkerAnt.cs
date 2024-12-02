@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections;
+using System.Linq;
 
 public class WorkerAnt : Ant
 {
@@ -8,8 +9,8 @@ public class WorkerAnt : Ant
     
     private int backCurrentWaypointIndex = 1;
     private bool isMovingToFood = false;
-    private GameObject pickedFood;
-    
+    public GameObject pickedFood;
+
     // protected override void Start()
     // {
     //     base.Start(); // 调用基类的 Start 方法
@@ -26,37 +27,69 @@ public class WorkerAnt : Ant
     {
         if (!isMovingToFood)
         {
-            foreach (var food in FoodManager.Instance.foodList)
+            Food food = GetNearestFood();
+            if (food != null)
             {
-                if (food != null)
+                if (Vector3.Distance(transform.position, food.transform.position) < collectFoodRange)
                 {
-                    if (Vector3.Distance(transform.position, food.transform.position) < collectFoodRange)
+                    //检查food.hasAnt是否有自己有的话就不添加
+                    foreach (var ant in food.hasAnt)
                     {
-                        if (food.gameObject.GetComponent<Cake>() == null)
+                        if (ant == this)
                         {
-                            FoodManager.Instance.foodList.Remove(food);
+                            return;
                         }
-
-                        isMovingToFood = true;
-                        isPatrolPaused = true;
-                        moveToFoodCoroutine = StartCoroutine(MoveToFood(food));
-                        break;
+                    }
+                    bool moveTo = false;
+                    //检查food.hasAnt是否已满
+                    foreach (var ant in food.hasAnt)
+                    {
+                        if (ant == null)
+                        {
+                            food.AddAnt(this);
+                            isMovingToFood = true;
+                            isPatrolPaused = true;
+                            moveToFoodCoroutine = StartCoroutine(MoveToFood(food));
+                            break;
+                        }
                     }
                 }
             }
         }
     }
     
+    //获取离得最近的食物
+    private Food GetNearestFood()
+    {
+        Food nearestFood = null;
+        float minDistance = float.MaxValue;
+        foreach (var food in FoodManager.Instance.foodList)
+        {
+            if (food != null)
+            {
+                float distance = Vector3.Distance(transform.position, food.transform.position);
+                if (distance < minDistance)
+                {
+                    minDistance = distance;
+                    nearestFood = food;
+                }
+            }
+        }
+
+        return nearestFood;
+    }
+    
     private IEnumerator MoveToFood(Food food)
     {
         backCurrentWaypointIndex =currentWaypointIndex;
         // float distance = Vector3.Distance(food.transform.position, transform.position);
-        Vector3 direction = (food.transform.position - transform.position).normalized;
-        while (food != null&&Vector3.Distance(transform.position, food.transform.position) > 0.1f)
+        // Vector3 direction = (food.transform.position - transform.position).normalized;
+        float foodRadius = food.GetComponent<Collider>().bounds.extents.magnitude; // 获取敌人的半径
+        while (food != null&&Vector3.Distance(transform.position, food.transform.position) > foodRadius)
         {
-            transform.rotation = Quaternion.LookRotation(direction);
+            transform.rotation = Quaternion.LookRotation((food.transform.position - transform.position).normalized);
             transform.position = Vector3.MoveTowards(transform.position, food.transform.position,
-                Time.deltaTime * patrolSpeed);
+                Time.deltaTime * patrolSpeed*1.1f);
             yield return null; // 等待下一帧
         }
 
@@ -67,6 +100,8 @@ public class WorkerAnt : Ant
 
         if (pickedFood != null)
         {
+            // waypoint.ants.Remove(this);
+            backToNest = true;
             StartCoroutine(HasFoodBackAntColony(pickedFood.GetComponent<Food>().foodValue));
         }
         else
@@ -75,8 +110,7 @@ public class WorkerAnt : Ant
             isMovingToFood = false;
         }
     }
-    
-    
+
     //按照路径返回巢穴
     private IEnumerator HasFoodBackAntColony(int foodValue)
     {
@@ -95,7 +129,7 @@ public class WorkerAnt : Ant
                 // 返回路径
                 for (int i = backCurrentWaypointIndex; i > 0; i--)
                 {
-                    while (waypoint != null && Vector3.Distance(transform.position, waypoint.pathList[i]) > 0.1f)
+                    while (waypoint != null&& i < waypoint.pathList.Count && Vector3.Distance(transform.position, waypoint.pathList[i]) > 0.1f)
                     {
                         float speed = patrolSpeed;
 
@@ -115,9 +149,12 @@ public class WorkerAnt : Ant
                 {
                     // 回收蚂蚁
                     colony.foodCount += foodValue;
-                    AntColony.instance.ShowFoodCount();
+                    UIManager.Instance.ShowFoodCount();
                     //删除pickedFood
-                    Destroy(pickedFood);
+                    if (pickedFood!=null)
+                    {
+                        pickedFood.GetComponent<Food>().Die();
+                    }
                     colony.RecycleAnt(gameObject);
                     isPatrolPaused = false;
                     isMovingToFood = false; // 到达食物位置后重置标志
@@ -138,15 +175,53 @@ public class WorkerAnt : Ant
             {
                 // 回收蚂蚁
                 colony.foodCount += foodValue;
-                AntColony.instance.ShowFoodCount();
-                colony.DeletePathRecycleAnt(gameObject);
-                isPatrolPaused = false;
+                UIManager.Instance.ShowFoodCount();
                 //删除pickedFood
-                Destroy(pickedFood);
+                if (pickedFood!=null)
+                {
+                    pickedFood.GetComponent<Food>().Die();
+                }
+                colony.RecycleAnt(gameObject);
+                isPatrolPaused = false;
                 isMovingToFood = false; // 到达食物位置后重置标志
                 yield break; // 结束协程
             }
             yield return null;
+        }
+    }
+//重写Die方法
+    public override void Die()
+    {
+        // this.StopAllCoroutines();
+        if (pickedFood != null)
+        {
+            InsectCarcass insectCarcass = pickedFood.GetComponent<InsectCarcass>();
+            if(insectCarcass != null)
+            {
+                pickedFood.transform.localRotation = Quaternion.Euler(0, 0,  0);
+                pickedFood.transform.SetParent(null, true);
+                insectCarcass.ReleaseAnt();
+            }
+        }
+
+        ReleaseAnt();
+        base.Die();
+    }
+    
+    //释放子蚂蚁
+    public void ReleaseAnt()
+    {
+        WorkerAnt[] children = GetComponentsInChildren<WorkerAnt>();
+        if (children.Length > 1)
+        {
+            for (int i = 1; i < children.Length; i++)
+            {
+                children[i].transform.localRotation = Quaternion.Euler(0, 0, 0);
+                children[i].transform.SetParent(null, true);
+                children[i].transform.position = colony.transform.position;
+                children[i].enabled = true;
+                AntColony.Instance.RecycleAnt(children[i].gameObject);
+            }
         }
     }
 }

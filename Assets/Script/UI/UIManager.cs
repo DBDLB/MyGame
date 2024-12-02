@@ -1,8 +1,39 @@
+using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 
 public class UIManager : MonoBehaviour
 {
+    
+    public static UIManager instance;
+    public static UIManager Instance
+    {
+        get
+        {
+            if (instance == null)
+            {
+                instance = FindObjectOfType<UIManager>();
+                if (instance == null)
+                {
+                    GameObject singleton = new GameObject(typeof(UIManager).Name);
+                    instance = singleton.AddComponent<UIManager>();
+                }
+            }
+            return instance;
+        }
+    }
+    
     public GameObject[] panels; // 存储所有面板的数组
+    public TextMeshProUGUI FoodShowText; // 显示食物数量的文本
+    public ShowAntNumText[] showAntNumTexts; // 显示蚂蚁数量的文本
+    
+    [System.Serializable]
+    public class ShowAntNumText
+    {
+        public AntColony.AntType antType;
+        public TextMeshProUGUI antNumText;
+    }
+
 
     private void Start()
     {
@@ -43,6 +74,32 @@ public class UIManager : MonoBehaviour
             {
                 panel.SetActive(!panel.activeSelf);
                 break;
+            }
+        }
+    }
+    
+    // 显示食物数量
+    public void ShowFoodCount()
+    {
+        FoodShowText.text = "食物数量：" + AntColony.instance.foodCount;
+    }
+    
+    // 显示蚂蚁数量
+    public void ShowAntCount(AntColony.VariousAnt variousAnt,AntColony.AntType antType)
+    {
+        foreach (ShowAntNumText showAntNumText in showAntNumTexts)
+        {
+            if (showAntNumText.antType == antType)
+            {
+                switch (antType)
+                {
+                    case AntColony.AntType.WorkerAnt:
+                        showAntNumText.antNumText.text = "工蚁：" + variousAnt.ants.Count;
+                        break;
+                    case AntColony.AntType.SoldierAnt:
+                        showAntNumText.antNumText.text = "兵蚁：" + variousAnt.ants.Count;
+                        break;
+                }
             }
         }
     }

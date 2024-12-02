@@ -119,4 +119,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   foodValue: 15
+  accommodateAntCount: 2
+  hasAnt:
+  - {fileID: 0}
+  - {fileID: 0}
   isPicked: 0

@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class LittleCake : Food
 {
-    public override GameObject OnFoodPicked(Ant ant)
+    public override GameObject OnFoodPicked(WorkerAnt ant)
     {
         return null;
     }

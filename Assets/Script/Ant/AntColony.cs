@@ -47,7 +47,7 @@ public class AntColony : MonoBehaviour
     public class antPrefabs
     {
         public GameObject antPrefab;
-        public int AntNum;
+        public int AntStartNum;
         public AntTrack AntTrack;
         public VariousAnt variousAnt;
     }
@@ -64,7 +64,7 @@ public class AntColony : MonoBehaviour
         // public int totalAnts; // 总蚂蚁数量
         public int PreviousFrameAntPathListCount = 0;
 
-        public VariousAnt(int totalAnts, AntTrack antTrack, antPrefabs antPrefab)
+        public VariousAnt( AntTrack antTrack, antPrefabs antPrefab)
         {
             // this.totalAnts = totalAnts;
             this.antTrack = antTrack;
@@ -74,7 +74,6 @@ public class AntColony : MonoBehaviour
 
     public static List<VariousAnt> variousAnts = new List<VariousAnt>(); // 当前生成的蚂蚁列表
     
-    public TextMeshProUGUI textMeshPro;
     public int foodCount = 20;
     
     private int AntCount = 0;
@@ -84,13 +83,19 @@ public class AntColony : MonoBehaviour
     {
         foreach (var antPrefab in prefabsAnts)
         {
-            variousAnts.Add(new VariousAnt(antPrefab.AntNum, antPrefab.AntTrack, antPrefab));
+            variousAnts.Add(new VariousAnt(antPrefab.AntTrack, antPrefab));
             antPrefab.variousAnt = variousAnts[variousAnts.Count - 1];
+            //根据antPrefab.AntNum生成蚂蚁
+            for (int i = 0; i < antPrefab.AntStartNum; i++)
+            {
+                CreateAnt(antPrefab.variousAnt);
+            }
         }
-        ShowFoodCount();
+        UIManager.Instance.ShowFoodCount();
         foreach (var variousAnt in variousAnts)
         {
             StartCoroutine(ReallocateAntsCoroutine(variousAnt));
+            UIManager.Instance.ShowAntCount(variousAnt, variousAnt.antPrefab.antPrefab.GetComponent<Ant>().antType);
         }
     }
 
@@ -123,18 +128,20 @@ public class AntColony : MonoBehaviour
     public void RecycleAnt(GameObject ant)
     {
         ant.SetActive(false); // 隐藏蚂蚁
-        ant.GetComponent<Ant>().variousAnt.antPool.Enqueue(ant); // 回收蚂蚁
-        ant.GetComponent<Ant>().waypoint.ants.Remove(ant.GetComponent<Ant>()); // 从路径上移除蚂蚁
-        ant.GetComponent<Ant>().waypoint = null; // 清空蚂蚁的路径
+        Ant antComponent = ant.GetComponent<Ant>();
+        antComponent.variousAnt.antPool.Enqueue(ant); // 回收蚂蚁
+        if (antComponent.waypoint != null)
+        {
+            antComponent.waypoint.ants.Remove(antComponent); // 从路径上移除蚂蚁
+            antComponent.waypoint = null; // 清空蚂蚁的路径
+        }
+
+        if (ant.GetComponent<WorkerAnt>() != null)
+        {
+            ant.GetComponent<WorkerAnt>().ReleaseAnt();
+        }
         // StartCoroutine(ReallocateAntsCoroutine(ant.GetComponent<Ant>().variousAnt));// 回收后重新分配蚂蚁
         // ant.GetComponent<Ant>().isPatrolPaused = false;
-    }
-    
-    public void DeletePathRecycleAnt(GameObject ant)
-    {
-        ant.SetActive(false); // 隐藏蚂蚁
-        ant.GetComponent<Ant>().variousAnt.antPool.Enqueue(ant); // 回收蚂蚁
-        // StartCoroutine(ReallocateAntsCoroutine(ant.GetComponent<Ant>().variousAnt));// 回收后重新分配蚂蚁
     }
 
     private IEnumerator ReallocateAntsCoroutine(VariousAnt variousAnt)
@@ -150,19 +157,18 @@ public class AntColony : MonoBehaviour
                     if (variousAnt.antTrack.AntPathList[i].ants[j] == null)
                     {
                         variousAnt.antTrack.AntPathList[i].ants.RemoveAt(j);
-                        variousAnt.antPrefab.AntNum--;
                     }
                 }
             }
 
-            if (variousAnt.ants.Count < variousAnt.antPrefab.AntNum)
-            {
-                int count = variousAnt.antPrefab.AntNum - variousAnt.ants.Count;
-                for (int i = 0; i < count; i++)
-                {
-                    CreateAnt(variousAnt);
-                }
-            }
+            // if (variousAnt.ants.Count < variousAnt.antPrefab.AntNum)
+            // {
+            //     int count = variousAnt.antPrefab.AntNum - variousAnt.ants.Count;
+            //     for (int i = 0; i < count; i++)
+            //     {
+            //         CreateAnt(variousAnt);
+            //     }
+            // }
 
             while (variousAnt.antPool.Count != 0)
             {
@@ -341,11 +347,6 @@ public class AntColony : MonoBehaviour
     #endregion
     
     #region 食物的添加与减少
-    public void ShowFoodCount()
-    {
-        textMeshPro.text = "食物数量：" + foodCount;
-    }
-    
     //消耗食物生成蚂蚁
     public void ConsumeFoodAndCreateAnt(int antType)
     {
@@ -362,25 +363,27 @@ public class AntColony : MonoBehaviour
                 {
                     if (foodCount >= prefabsAnt.antPrefab.GetComponent<Ant>().price)
                     {
-                        prefabsAnt.AntNum++;
+                        // prefabsAnt.AntNum++;
+                        CreateAnt(prefabsAnt.variousAnt);
                         foodCount -= prefabsAnt.antPrefab.GetComponent<Ant>().price;
+                        UIManager.Instance.ShowAntCount(prefabsAnt.variousAnt, (AntType)antType);
                     }
                 }
             }
-            ShowFoodCount();
+            UIManager.Instance.ShowFoodCount();
         }
     }
     
-    public void DeleteAnt(AntType antType)
-    {
-        foreach (var prefabsAnt in prefabsAnts)
-        {
-            if (prefabsAnt.antPrefab.GetComponent<Ant>().antType == (AntType)antType)
-            {
-                prefabsAnt.AntNum--;
-            }
-        }
-    }
+    // public void DeleteAnt(AntType antType)
+    // {
+    //     foreach (var prefabsAnt in prefabsAnts)
+    //     {
+    //         if (prefabsAnt.antPrefab.GetComponent<Ant>().antType == (AntType)antType)
+    //         {
+    //             prefabsAnt.AntNum--;
+    //         }
+    //     }
+    // }
     #endregion
     
 

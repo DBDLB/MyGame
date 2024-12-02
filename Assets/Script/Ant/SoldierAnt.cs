@@ -151,8 +151,8 @@ public class SoldierAnt : Ant
             {
                 // 回收蚂蚁
                 // colony.foodCount += foodValue;
-                AntColony.instance.ShowFoodCount();
-                colony.DeletePathRecycleAnt(gameObject);
+                // AntColony.instance.ShowFoodCount();
+                colony.RecycleAnt(gameObject);
                 //删除pickedFood
                 // Destroy(pickedEnemy);
                 isMovingToEnemy = false; // 到达食物位置后重置标志

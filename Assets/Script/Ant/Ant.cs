@@ -22,7 +22,7 @@ public abstract class Ant : MonoBehaviour, IDamageable
 
     protected virtual void OnEnable()
     {
-        if (waypoint.pathList.Count > 0)
+        if (waypoint!=null&&waypoint.pathList.Count > 0)
         {
             currentWaypointIndex = 0;
             backToNest = false;
@@ -43,14 +43,17 @@ public abstract class Ant : MonoBehaviour, IDamageable
         while (waypoint!=null)
         {
             int pathListCount = waypoint.pathList.Count;
-            transform.rotation = Quaternion.LookRotation((waypoint.pathList[1] - transform.position).normalized);
+            if (pathListCount > 1)
+            {
+                transform.rotation = Quaternion.LookRotation((waypoint.pathList[1] - transform.position).normalized);
+            }
             // 前往当前巡逻点
             if (waypoint != null && !backToNest)
             {
                 for (int i = 1; i < pathListCount; i++)
                 {
                     currentWaypointIndex++;
-                    while (waypoint != null && Vector3.Distance(transform.position, waypoint.pathList[i]) > 0.1f)
+                    while (waypoint != null && i < waypoint.pathList.Count && Vector3.Distance(transform.position, waypoint.pathList[i]) > 0.1f)
                     {
                         if (isPatrolPaused)
                         {
@@ -141,7 +144,7 @@ public abstract class Ant : MonoBehaviour, IDamageable
                 for (int i = pathListCount - 1; i >= 0; i--)
                 {
                     currentWaypointIndex--;
-                    while (waypoint!=null&&Vector3.Distance(transform.position, waypoint.pathList[i]) > 0.1f)
+                    while (waypoint!=null&& i < waypoint.pathList.Count&&Vector3.Distance(transform.position, waypoint.pathList[i]) > 0.1f)
                     {
                         if (isPatrolPaused)
                         {
@@ -201,7 +204,7 @@ public abstract class Ant : MonoBehaviour, IDamageable
             if (Vector3.Distance(transform.position, colony.transform.position) < 0.1f)
             {
                 // 回收蚂蚁
-                colony.DeletePathRecycleAnt(gameObject);
+                colony.RecycleAnt(gameObject);
                 yield break; // 结束协程
             }
             yield return null;
@@ -223,6 +226,7 @@ public abstract class Ant : MonoBehaviour, IDamageable
     
     // 抽象方法，供子类实现
     protected abstract void PerformAction();
+
     public virtual void TakeDamage(int damage)
     {
         health -= damage;
@@ -232,13 +236,19 @@ public abstract class Ant : MonoBehaviour, IDamageable
         }
     }
 
+    private bool isDead = false;
     public virtual void Die()
     {
+        if (!isDead)
+        {
+            isDead = true;
         // 默认的死亡行为，可以在子类中重写
         variousAnt.ants.Remove(this.gameObject);
         waypoint.ants.Remove(this); // 从路径上移除蚂蚁
         waypoint = null; // 清空蚂蚁的路径
-        AntColony.instance.DeleteAnt(antType);
-        Destroy(gameObject);
+        UIManager.Instance.ShowAntCount(variousAnt, variousAnt.antPrefab.antPrefab.GetComponent<Ant>().antType);
+        // AntColony.instance.DeleteAnt(antType);
+        Destroy(gameObject);            
+        }
     }
 }

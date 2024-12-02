@@ -119,6 +119,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   foodValue: 100
-  foodAllValue: 100
+  accommodateAntCount: 1
+  hasAnt:
+  - {fileID: 0}
   littleCake: {fileID: 6087900499704287441, guid: 9fe650cd0eca0564b856a67b7ce139b6,
     type: 3}
