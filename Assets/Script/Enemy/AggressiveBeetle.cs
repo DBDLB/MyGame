@@ -1,13 +1,11 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
 public class AggressiveBeetle : Enemy
 {
-    public GameObject aggressiveBeetle;
-    
-    
     protected override void OnEnable()
     {
         base.OnEnable();
@@ -30,14 +28,5 @@ public class AggressiveBeetle : Enemy
     private void Update()
     {
         Attack();
-    }
-
-    // 重写死亡方法
-    public override void Die()
-    {
-        GameObject Carcass = Instantiate(aggressiveBeetle);
-        Carcass.transform.position = transform.position;
-        Carcass.transform.rotation = Quaternion.Euler(0, 0, 180);
-        base.Die();
     }
 }

@@ -12,12 +12,12 @@ public class CreateBezierCurve : MonoBehaviour
     /// <param name="start">曲线的起始位置</param>
     /// <param name="center">决定曲线形状的控制点</param>
     /// <param name="end">曲线的终点</param>
-    public Vector3 GetBezierPoint(float t, Vector3 start, Vector3 center, Vector3 end)
+    private static Vector3 GetBezierPoint(float t, Vector3 start, Vector3 center, Vector3 end)
     {
         return (1 - t) * (1 - t) * start + 2 * t * (1 - t) * center + t * t * end;
     }
     
-    private Vector3 InitControlPos(Vector3 startPos, Vector3 targetPos, float startAngle)
+    private static Vector3 InitControlPos(Vector3 startPos, Vector3 targetPos, float startAngle)
     {
         // 计算起始点和结束点之间的中点
         Vector3 midPoint = (startPos + targetPos) / 2f;
@@ -45,7 +45,7 @@ public class CreateBezierCurve : MonoBehaviour
         return (startPos + localRotationPos);
     }
 
-    public Vector3[] GetBezierPath(Vector3 startPoint, Vector3 endPoint,float startAngle, int resolution = 10)
+    public static Vector3[] GetBezierPath(Vector3 startPoint, Vector3 endPoint,float startAngle, int resolution = 10)
     {
         Vector3 bezierControlPoint = InitControlPos(startPoint, endPoint, startAngle);
         Vector3[] _path = new Vector3[resolution]; //resolution为int类型，表示要取得路径点数量，值越大，取得的路径点越多，曲线最后越平滑
@@ -58,22 +58,22 @@ public class CreateBezierCurve : MonoBehaviour
     }
     
     
-    //用Gizmos绘制贝塞尔曲线
-    public Vector3 startPoint = new Vector3(0, 0, 0);
-    public Vector3 endPoint = new Vector3(0, 0, 10);
-    public float startAngle = 60;
-    private void OnDrawGizmos()
-    {
-        Vector3 bezierControlPoint = InitControlPos(transform.position, endPoint, startAngle);
-        Vector3[] path = GetBezierPath(transform.position, endPoint, startAngle);
-        Gizmos.color = Color.red;
-        Gizmos.DrawLine(transform.position, bezierControlPoint);
-        Gizmos.DrawLine(endPoint, bezierControlPoint);
-        Gizmos.DrawLine(transform.position, path[0]);
-        for (int i = 0; i < path.Length - 1; i++)
-        {
-            Gizmos.DrawLine(path[i], path[i + 1]);
-        }
-    }
+    // //用Gizmos绘制贝塞尔曲线
+    // public Vector3 startPoint = new Vector3(0, 0, 0);
+    // public Vector3 endPoint = new Vector3(0, 0, 10);
+    // public float startAngle = 60;
+    // private  void OnDrawGizmos()
+    // {
+    //     Vector3 bezierControlPoint = InitControlPos(transform.position, endPoint, startAngle);
+    //     Vector3[] path = GetBezierPath(transform.position, endPoint, startAngle);
+    //     Gizmos.color = Color.red;
+    //     Gizmos.DrawLine(transform.position, bezierControlPoint);
+    //     Gizmos.DrawLine(endPoint, bezierControlPoint);
+    //     Gizmos.DrawLine(transform.position, path[0]);
+    //     for (int i = 0; i < path.Length - 1; i++)
+    //     {
+    //         Gizmos.DrawLine(path[i], path[i + 1]);
+    //     }
+    // }
 
 }

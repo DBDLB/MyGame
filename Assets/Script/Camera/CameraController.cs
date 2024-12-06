@@ -51,15 +51,18 @@ public class CameraController : MonoBehaviour
         if (Input.GetMouseButtonDown(1)) // 右键
         {
             lastMousePosition = Input.mousePosition; // 记录鼠标当前位置
+            return;
         }
 
         // 检测鼠标右键是否保持按下状态
         if (Input.GetMouseButton(1)) // 右键
         {
+            // Vector3 currentMousePosition = Input.mousePosition;
+            // Vector3 delta = lastMousePosition - currentMousePosition;
             Vector3 delta = Input.mousePosition - lastMousePosition; // 计算鼠标移动量
 
             // 动态调整拖动速度
-            float dragSpeed = dragSpeedBase * (camera.orthographicSize / minSize) * (Screen.dpi / 96.0f);
+            float dragSpeed = dragSpeedBase * (camera.orthographicSize / maxSize) * (Screen.dpi / 96.0f);
 
             Vector3 move = new Vector3(-delta.x, 0, -delta.y) * dragSpeed * Time.deltaTime; // 计算移动向量
             Vector3 newPosition = transform.position + move;

@@ -244,8 +244,11 @@ public abstract class Ant : MonoBehaviour, IDamageable
             isDead = true;
         // 默认的死亡行为，可以在子类中重写
         variousAnt.ants.Remove(this.gameObject);
-        waypoint.ants.Remove(this); // 从路径上移除蚂蚁
-        waypoint = null; // 清空蚂蚁的路径
+        if (waypoint != null)
+        {
+            waypoint.ants.Remove(this); // 从路径上移除蚂蚁
+            waypoint = null; // 清空蚂蚁的路径
+        }
         UIManager.Instance.ShowAntCount(variousAnt, variousAnt.antPrefab.antPrefab.GetComponent<Ant>().antType);
         // AntColony.instance.DeleteAnt(antType);
         Destroy(gameObject);            

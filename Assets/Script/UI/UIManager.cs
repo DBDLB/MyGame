@@ -99,6 +99,9 @@ public class UIManager : MonoBehaviour
                     case AntColony.AntType.SoldierAnt:
                         showAntNumText.antNumText.text = "兵蚁：" + variousAnt.ants.Count;
                         break;
+                    case AntColony.AntType.ShooterAnt:
+                        showAntNumText.antNumText.text = "射手蚁：" + variousAnt.ants.Count;
+                        break;
                 }
             }
         }

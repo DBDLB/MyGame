@@ -10,7 +10,8 @@ public class AntColony : MonoBehaviour
     public enum AntType
     {
         WorkerAnt,
-        SoldierAnt
+        SoldierAnt,
+        ShooterAnt,
     }
     public static AntColony instance;
     public static AntColony Instance

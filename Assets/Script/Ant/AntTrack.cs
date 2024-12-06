@@ -111,25 +111,38 @@ public class AntTrack : MonoBehaviour
             if (Input.GetMouseButtonUp(0))
             {
                 // isDrawLine = false;
+
                 if (mousePositions != null && mousePositions.Count > 2)
                 {
-                    AntPathList.Add(new AntPath(mousePositions, lineRenderer));
+                    ClickToShowUI.CreatingPath = this;
+                    ClickToShowUI.Instance.CreateButton.SetActive(true);
+                    ClickToShowUI.Instance.CancelCreateButton.SetActive(true);
+                    Vector3 segmentDir = smoothMousePositions[smoothMousePositions.Count - 1] - smoothMousePositions[smoothMousePositions.Count - 2];
+                    Vector3 perpendicular = Vector3.Cross(segmentDir, Vector3.up);
+                    ClickToShowUI.Instance.CreateButton.transform.position = smoothMousePositions[smoothMousePositions.Count - 2] + perpendicular.normalized * 1f;
+                    ClickToShowUI.Instance.CancelCreateButton.transform.position = smoothMousePositions[smoothMousePositions.Count - 2] - perpendicular.normalized * 1f;
                 }
                 else
                 {
                     Destroy(line);
                 }
-                line = null;
-                mousePositions = new List<Vector3>();
-                this.enabled = false;
-                AntColony.instance.GetComponent<ClickToShowUI>().enabled = true;
             }
         }
     }
-
-    // 获取记录的鼠标位置列表
-    public List<Vector3> GetMousePositions()
+    public void CreatePath()
     {
-        return mousePositions;
+        AntPathList.Add(new AntPath(mousePositions, lineRenderer));
+        line = null;
+        mousePositions = new List<Vector3>();
+        this.enabled = false;
+        AntColony.instance.GetComponent<ClickToShowUI>().enabled = true;
+    }
+    public void CancelCreatePath()
+    {
+        Destroy(line);
+        line = null;
+        mousePositions = new List<Vector3>();
+        this.enabled = false;
+        AntColony.instance.GetComponent<ClickToShowUI>().enabled = true;
     }
 }

@@ -118,7 +118,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cbbf8688ba510624fac66a644cdad7cb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  health: 20
+  aggressiveBeetles:
+  - {fileID: 1902355978741604373, guid: f306e87a03c1746438c4b28fe4e54d16, type: 3}
+  enemyType: 0
   moveSpeed: 2
-  kindBeetleCarcass: {fileID: 1902355978741604373, guid: f306e87a03c1746438c4b28fe4e54d16,
-    type: 3}
+  health: 20
+  attackPower: 0
+  isMovePaused: 0
+  isMovingToEnemy: 0
+  damageInterval: 1
+  collectEnemyRange: 1

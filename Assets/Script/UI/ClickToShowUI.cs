@@ -42,6 +42,8 @@ public class ClickToShowUI : MonoBehaviour
     private Vector3 PreviousPoint;
     private LineRenderer PreviousLineRenderer;
     public GameObject DeleteButton;
+    public GameObject CreateButton;
+    public GameObject CancelCreateButton;
     public AntTrack.AntPath antPath;
     public int variousAntIndex;
 
@@ -158,6 +160,23 @@ public class ClickToShowUI : MonoBehaviour
         AntColony.variousAnts[variousAntIndex].antTrack.AntPathList.Remove(antPath);
         Destroy(antPath.lineRenderer.gameObject);
         DeleteButton.SetActive(false);
+    }
+
+    public static AntTrack CreatingPath;
+    
+    public void CreatePath()
+    {
+        CreatingPath.CreatePath();
+        CreateButton.SetActive(false);
+        CancelCreateButton.SetActive(false);
+        CreatingPath = null;
+    }
+    public void CancelCreatePath()
+    {
+        CreatingPath.CancelCreatePath();
+        CreateButton.SetActive(false);
+        CancelCreateButton.SetActive(false);
+        CreatingPath = null;
     }
     
     Vector3 GetClosestPointOnLine(LineRenderer lineRenderer, Vector3 point,out Vector3 OutSegmentStart, out Vector3 OutSegmentEnd)

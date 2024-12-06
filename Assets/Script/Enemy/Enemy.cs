@@ -6,12 +6,13 @@ using Random = UnityEngine.Random;
 
 public abstract class Enemy : MonoBehaviour, IDamageable
 {
+    public List<GameObject> aggressiveBeetles;
     public enum EnemyType
     {
         KindBeetle,
         // 添加其他敌人类型
         AggressiveBeetle,
-        FlyingBeetle,
+        ShooterEnemy,
         // 其他类型
     }
     protected virtual void OnEnable()
@@ -43,11 +44,23 @@ public abstract class Enemy : MonoBehaviour, IDamageable
         }
     }
 
+    private bool isDead = false;
+    // 重写死亡方法
     public virtual void Die()
     {
-        // 默认的死亡行为，可以在子类中重写
-        EnemyManager.Instance.enemyList.Remove(this);
-        Destroy(gameObject);
+        if (!isDead)
+        {
+            isDead = true;
+            foreach (var aggressiveBeetle in aggressiveBeetles)
+            {
+                GameObject Carcass = Instantiate(aggressiveBeetle);
+                Carcass.transform.position = transform.position+new Vector3(Random.Range(-0.5f, 0.5f), 0, Random.Range(-0.5f, 0.5f));
+                Carcass.transform.rotation = Quaternion.Euler(0, 0, 180);
+            }
+            // 默认的死亡行为，可以在子类中重写
+            EnemyManager.Instance.enemyList.Remove(this);
+            Destroy(gameObject);
+        }
     }
 
     // 抽象方法：处理敌人攻击的行为
@@ -73,12 +86,17 @@ public abstract class Enemy : MonoBehaviour, IDamageable
                     {
                         isMovingToEnemy = true;
                         isMovePaused = true;
-                        StartCoroutine(MoveToTarget(target));
+                        AttackMode(target);
                         break;
                     }
                 }
             }
         }
+    }
+
+    public virtual void AttackMode(GameObject target)
+    {
+        StartCoroutine(MoveToTarget(target));
     }
     private IEnumerator MoveToTarget(GameObject enemy)
     {
