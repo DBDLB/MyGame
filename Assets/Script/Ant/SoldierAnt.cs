@@ -8,7 +8,7 @@ public class SoldierAnt : Ant
     public float collectEnemyRange = 1f;
     public float minDistanceToOtherAnts = 0.5f; // 蚂蚁之间的最小距离
     public float damageInterval = 1.0f; // 每秒造成一次伤害
-    public int damageAmount = 5; // 每次造成的伤害量
+    public int attackPower = 5; // 每次造成的伤害量
     
     private int backCurrentWaypointIndex = 1;
     private bool isMovingToEnemy = false;
@@ -63,7 +63,7 @@ public class SoldierAnt : Ant
                     damageTimer += Time.deltaTime;
                     if (damageTimer >= damageInterval&&enemy.health>0)
                     {
-                        enemy.TakeDamage(damageAmount); // 对敌人造成伤害
+                        enemy.TakeDamage(attackPower); // 对敌人造成伤害
                         damageTimer = 0.0f; // 重置计时器
                     }
                     yield return null; // 等待下一帧

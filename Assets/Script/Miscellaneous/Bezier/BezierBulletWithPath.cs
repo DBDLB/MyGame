@@ -5,7 +5,7 @@ public class BezierBulletWithPath : MonoBehaviour
 {
     public Vector3[] path;            // 预计算的贝塞尔曲线路径
     public float speed = 5.0f;        // 子弹移动速度
-    public int damageAmount = 5; // 每次造成的伤害量
+    public int attackPower = 5; // 每次造成的伤害量
 
     private int currentIndex = 0;     // 当前路径点索引
     private float distanceCovered = 0.0f; // 累计移动距离
@@ -65,7 +65,7 @@ public class BezierBulletWithPath : MonoBehaviour
     {
         if (targetEnemy != null && Vector3.Distance(transform.position, targetEnemy.transform.position) < 2)
         {
-            targetEnemy.GetComponent<IDamageable>().TakeDamage(damageAmount);
+            targetEnemy.GetComponent<IDamageable>().TakeDamage(attackPower);
         }
         Destroy(gameObject); // 删除子弹
     }

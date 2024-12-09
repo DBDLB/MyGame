@@ -1,6 +1,6 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!1 &3758301310566690003
+--- !u!1 &7565249704628674005
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -8,48 +8,48 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 6486727554358343893}
-  - component: {fileID: 4990055317104263248}
-  - component: {fileID: 2889807871385272308}
-  - component: {fileID: 4574081219052624614}
-  - component: {fileID: 9181021658983041843}
+  - component: {fileID: 7922346896867041566}
+  - component: {fileID: 4469001740404235399}
+  - component: {fileID: 6256400657396551125}
+  - component: {fileID: 1341173335882791291}
+  - component: {fileID: 4900622800247502280}
   m_Layer: 0
-  m_Name: ShooterAnt
+  m_Name: ShooterEnemy
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &6486727554358343893
+--- !u!4 &7922346896867041566
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3758301310566690003}
+  m_GameObject: {fileID: 7565249704628674005}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -7.02, y: 0.22, z: 0.71}
-  m_LocalScale: {x: 0.5, y: 0.5, z: 1.5}
+  m_LocalPosition: {x: 6.36, y: 0.5, z: 0}
+  m_LocalScale: {x: 0.5, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!33 &4990055317104263248
+--- !u!33 &4469001740404235399
 MeshFilter:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3758301310566690003}
-  m_Mesh: {fileID: 10207, guid: 0000000000000000e000000000000000, type: 0}
---- !u!23 &2889807871385272308
+  m_GameObject: {fileID: 7565249704628674005}
+  m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!23 &6256400657396551125
 MeshRenderer:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3758301310566690003}
+  m_GameObject: {fileID: 7565249704628674005}
   m_Enabled: 1
   m_CastShadows: 1
   m_ReceiveShadows: 1
@@ -63,7 +63,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 765e47c37cf1c734392f9281f30acd0a, type: 2}
+  - {fileID: 2100000, guid: 5159c629427c6764c9cbb81e7fa2e294, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -85,46 +85,39 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!114 &4574081219052624614
+--- !u!114 &1341173335882791291
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3758301310566690003}
+  m_GameObject: {fileID: 7565249704628674005}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 60bf26521c8ca4d43b57b78e751193f4, type: 3}
+  m_Script: {fileID: 11500000, guid: 02fb3260df0b0444abd21916e7c970dc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  price: 20
-  waypoint:
-    pathList: []
-    ants: []
-    lineRenderer: {fileID: 0}
-  currentWaypointIndex: 1
-  colony: {fileID: 0}
-  patrolSpeed: 4
-  minDistanceToPreviousAnt: 2
-  slowDownFactor: 0.5
-  antType: 2
-  health: 15
-  minDistanceToColony: 0
-  backToNest: 0
-  isPatrolPaused: 0
-  shooterAntBullet: {fileID: 6562113559196050659, guid: be320cc456ddec14282d0681ba2431dc,
+  aggressiveBeetles:
+  - {fileID: 4259068132884459434, guid: 60f586c587d4ed8408bea88010f2769a, type: 3}
+  enemyType: 2
+  moveSpeed: 3.5
+  health: 20
+  attackPower: 2
+  isMovePaused: 0
+  isMovingToEnemy: 0
+  damageInterval: 1
+  collectEnemyRange: 10
+  shooterEnemyBullet: {fileID: 7698037031812944771, guid: 7689e0dafe3a83542ab8f6aae5bbd0f6,
     type: 3}
-  shootRange: 10
-  attackPower: 5
-  shootInterval: 2
   bulletMoveSpeed: 40
---- !u!65 &9181021658983041843
+  shootInterval: 1
+--- !u!65 &4900622800247502280
 BoxCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3758301310566690003}
+  m_GameObject: {fileID: 7565249704628674005}
   m_Material: {fileID: 0}
   m_IncludeLayers:
     serializedVersion: 2

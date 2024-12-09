@@ -9,7 +9,7 @@ public class ShooterAnt : Ant
     public GameObject shooterAntBullet;
     //攻击范围
     public float shootRange = 10f;
-    public int damageAmount = 5; // 每次造成的伤害量
+    public int attackPower = 5; // 每次造成的伤害量
     public float shootInterval = 1.0f;
     public float bulletMoveSpeed = 2.0f; // 子弹移动时间
 
@@ -92,7 +92,7 @@ public class ShooterAnt : Ant
             bulletWithPath.targetEnemy = enemy.gameObject;
             bulletWithPath.endPoint = enemy.transform.position;
             bulletWithPath.speed = bulletMoveSpeed;
-            bulletWithPath.damageAmount = damageAmount;
+            bulletWithPath.attackPower = attackPower;
             bulletWithPath.ShootBullet();
         }
     }
