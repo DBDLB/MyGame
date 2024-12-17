@@ -69,7 +69,7 @@ Material:
     - _EdgeWidth: 0.05
     - _FresnelPow: 2
     - _HeightScale: 0
-    - _HeightWarpInt: 0.05
+    - _HeightWarpInt: 0
     - _LayerNum: 3
     - _LayerWarpInt: 1
     - _LerpWarpInt: 1

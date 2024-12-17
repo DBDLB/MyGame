@@ -18,6 +18,7 @@ static const float preyTable[] = {
 RWStructuredBuffer<BoidData> _Boids;
 RWStructuredBuffer<BoidOutputData> _Output;
 Texture2D<float4> _SDF;
+float _NoiseScale;
 SamplerState sampler_SDF;
 float _TimeStep;
 float _MaxSpeed;
@@ -97,7 +98,9 @@ void CSMain (uint3 id : SV_DispatchThreadID)
     float3 uv = (data.position - _BoxMin) / (_BoxMax - _BoxMin);
     uv.x = 1.0f - uv.x;
     uv.z = 1.0f - uv.z;
-    float3 sdfSum = _SDF.SampleLevel(sampler_SDF, uv.xz, 0).xyz;
+    float4 sdfSumAndNoise = _SDF.SampleLevel(sampler_SDF, uv.xz, 0);
+    float3 sdfSum = sdfSumAndNoise.xyz;
+    float sdfNoise = sdfSumAndNoise.w;
     
     sdfSum.z = 1.0f - sdfSum.z;
     sdfSum.x = 1.0f - sdfSum.x;
@@ -109,7 +112,7 @@ void CSMain (uint3 id : SV_DispatchThreadID)
     sdfSum = ClampToMaxSpeed(sdfSum) * sdfMagnitude;
     
     float3 horizonSum = data.velocity;
-    horizonSum.y = 0.0f;
+    horizonSum.y = (sdfNoise * 2.0f - 1.0f)*_NoiseScale;
     horizonSum = safeNormalize(horizonSum) * _MaxSpeed - data.velocity;
     horizonSum = ClampToMaxSpeed(horizonSum);
     

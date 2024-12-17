@@ -7,10 +7,10 @@ Shader "MY_PBR_MultiLight_Glint"
     	[NoScaleOffset]_MaskMap("MaskMap(Metallic,AO,Smoothness)",2D)="white"{}
     	_Metallic("Metallic",Range(0,1)) = 1
         _Smoothness("Smoothness",Range(0,1)) = 1
-		_SpecularRange("SpecularRange", Range(0,100)) = 50
+//		_SpecularRange("SpecularRange", Range(0,100)) = 50
     	[NoScaleOffset][Normal]_NormalMap("NormalMap",2D)="Bump"{}
     	_NormalScale("NormalScale",Range(0,1))=1
-		_TestValue("Test",Range(1,20))=5.0
+		_TestValue("Test",Range(0,1))=1
 		[Toggle(_ADD_LIGHTS)]_AddLights("AddLights", float)=1.0
     	iResolution("Resolution", float) = 1.0
     }
@@ -38,7 +38,7 @@ Shader "MY_PBR_MultiLight_Glint"
 			float4 _MainTex_ST;
 			float4 _BaseColor;
 			float4 _SpecularColor;
-			float _SpecularRange;
+			// float _SpecularRange;
 			float _TestValue;
 		    float _Smoothness;
 			float _Metallic;
@@ -515,7 +515,7 @@ Shader "MY_PBR_MultiLight_Glint"
             float3 wo = normalize(mul(pbr.toLocal, normalize(pbr.viewDirWS)));
             float2 fragCoord = pbr.uv * _MainTex_ST.xy + _MainTex_ST.zw;
             float2 uv = fragCoord/iResolution * 400.0;
-            float3 radiance_glint = f_P(wo, wi, uv);
+            float3 radiance_glint = f_P(wo, wi, uv) * _TestValue;
             //Glint
 
 
@@ -604,7 +604,7 @@ Shader "MY_PBR_MultiLight_Glint"
 			{
 				v2f o;
 				o.positionCS = TransformObjectToHClip(v.positionOS);
-				o.uv = v.uv;
+				o.uv = TRANSFORM_TEX(v.uv, _MainTex);
 				float3 worldNormal = TransformObjectToWorldNormal(v.normalOS);
 				o.normalWS = worldNormal;
                 float3 worldTangent = TransformObjectToWorldDir(v.tangent.xyz);

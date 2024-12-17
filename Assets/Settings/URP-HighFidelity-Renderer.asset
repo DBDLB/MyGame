@@ -70,7 +70,8 @@ MonoBehaviour:
   m_RendererFeatures:
   - {fileID: -1878332245247344467}
   - {fileID: -256166545750507819}
-  m_RendererFeatureMap: adc0de57c6d2eee5d5be3345e2e971fc
+  - {fileID: 8910312799906172386}
+  m_RendererFeatureMap: adc0de57c6d2eee5d5be3345e2e971fce20d065c48caa77b
   m_UseNativeRenderPass: 0
   postProcessData: {fileID: 11400000, guid: 41439944d30ece34e96484bdb6645b55, type: 2}
   xrSystemData: {fileID: 11400000, guid: 60e1133243b97e347b653163a8c01b64, type: 2}
@@ -113,3 +114,101 @@ MonoBehaviour:
   m_CopyDepthMode: 0
   m_AccurateGbufferNormals: 0
   m_IntermediateTextureMode: 1
+--- !u!114 &8910312799906172386
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c10d4b074aa20a341a18bff0b2d88b61, type: 3}
+  m_Name: VolumetricLightFeature
+  m_EditorClassIdentifier: 
+  m_Active: 1
+  _Setting:
+    enable: 1
+    _Scale: 0.6
+    _StepCount: 12
+    enableDepthTex: 1
+    enableShadow: 1
+    enableNoise: 1
+    enableBlur: 1
+    blueNoise64:
+    - {fileID: 2800000, guid: 995c83255a9708b49822560d2a5cdc5b, type: 3}
+    - {fileID: 2800000, guid: 752be454cf904de40b14a655c9113470, type: 3}
+    - {fileID: 2800000, guid: f6b08bbb2e8df664f84adf973c55964e, type: 3}
+    - {fileID: 2800000, guid: 1a21f40c133d6b849a01e01c37294110, type: 3}
+    - {fileID: 2800000, guid: 8e65f9af2bc1edc46b9c5fc81894b800, type: 3}
+    - {fileID: 2800000, guid: 0907f21797a7c4448b5abb4d80e7148d, type: 3}
+    - {fileID: 2800000, guid: f93ab62b658db004d8225989ed51e003, type: 3}
+    - {fileID: 2800000, guid: cf3546bd954fde64cbb1413b3461ba46, type: 3}
+    - {fileID: 2800000, guid: b15452e3fd0e2cf47ab8b2eab903182e, type: 3}
+    - {fileID: 2800000, guid: f1bc86ca9a098c14abfec118c835795a, type: 3}
+    - {fileID: 2800000, guid: c1a36ece911df3e4b9af4f5f2d5e31f8, type: 3}
+    - {fileID: 2800000, guid: e268dcb1accc9524fb0f096100f17d6e, type: 3}
+    - {fileID: 2800000, guid: 85c451d2ed32b454497c67e748260ecb, type: 3}
+    - {fileID: 2800000, guid: c4218a6253e92834a86f7ef6d977e94b, type: 3}
+    - {fileID: 2800000, guid: b6d33b619ab61004685982fadbd0ab2a, type: 3}
+    - {fileID: 2800000, guid: 581feec3c86ffa04b824c44d084f8a79, type: 3}
+    - {fileID: 2800000, guid: 81be7c19a6d2d6e4498b2dfc64e5aaac, type: 3}
+    - {fileID: 2800000, guid: 0ab17d5c0d0984b4e806e0318ffce9b9, type: 3}
+    - {fileID: 2800000, guid: 4dfbbc50b28f609488a161591e5c89b5, type: 3}
+    - {fileID: 2800000, guid: 6b477a1f8ab057549bca373956853029, type: 3}
+    - {fileID: 2800000, guid: e3e7b04ff7e74474cace6671b5116efb, type: 3}
+    - {fileID: 2800000, guid: 08ca0933feab6804eadbd276c934f6da, type: 3}
+    - {fileID: 2800000, guid: 47e9efca9fda9ac428eb81d5e2ba3f7d, type: 3}
+    - {fileID: 2800000, guid: 5f3f6d78613fa0a498740dc641da8886, type: 3}
+    - {fileID: 2800000, guid: 25d9683fdcf59b643afa3af31ce82e21, type: 3}
+    - {fileID: 2800000, guid: 29ae02370ebe314439d2d4deeca73b1c, type: 3}
+    - {fileID: 2800000, guid: 21af232de55122f4db4e0ebba70c740d, type: 3}
+    - {fileID: 2800000, guid: d52531a3c28a96c439653efc63c14f5a, type: 3}
+    - {fileID: 2800000, guid: 74630c0c9f74c1d499cadbf63987f57c, type: 3}
+    - {fileID: 2800000, guid: f4b546c52518b2e4495c693953da6bf3, type: 3}
+    - {fileID: 2800000, guid: cf9e1d790fe9fca44a6f74043064aa55, type: 3}
+    - {fileID: 2800000, guid: 0a26374d58a4bb742979554854217f1d, type: 3}
+    - {fileID: 2800000, guid: 2a0b5cd119620ab4baddf1c5f0bd0e88, type: 3}
+    - {fileID: 2800000, guid: 20e9839a93d54694389b83188f0dd86a, type: 3}
+    - {fileID: 2800000, guid: 239d995b1bc4d554094946349ab76755, type: 3}
+    - {fileID: 2800000, guid: a144f2f60a5e24642a67755923fd3b1c, type: 3}
+    - {fileID: 2800000, guid: b2ba293851975974b8e95d7baf011756, type: 3}
+    - {fileID: 2800000, guid: d0a17706a12affc4ca0b8ec65387edf3, type: 3}
+    - {fileID: 2800000, guid: a1c94a00086ac6c4683b5241db1d97af, type: 3}
+    - {fileID: 2800000, guid: ae7507896459eea43b632647d6a55778, type: 3}
+    - {fileID: 2800000, guid: 3820414c7a7cd6f459105d197d69b6f7, type: 3}
+    - {fileID: 2800000, guid: 02544bbee1fc0e64fb0e7e445060ef08, type: 3}
+    - {fileID: 2800000, guid: 9a3364f78b307ef428764d2da6644b88, type: 3}
+    - {fileID: 2800000, guid: f4e0e43df8a0dc14b92c0a38c65d8938, type: 3}
+    - {fileID: 2800000, guid: 3db0cc4a30bab5742b798f7a754fbdfa, type: 3}
+    - {fileID: 2800000, guid: de6b68cd675cd554a9896faa76955c1b, type: 3}
+    - {fileID: 2800000, guid: 1ee357d2201ca024684dde89e0e53a74, type: 3}
+    - {fileID: 2800000, guid: 6d8ce04b227a18d489ca2563af6d0964, type: 3}
+    - {fileID: 2800000, guid: 58eed64606be34b479c0ee4f2ed3bd6d, type: 3}
+    - {fileID: 2800000, guid: 4e9a1e84601da394aa3dccb4b3895b39, type: 3}
+    - {fileID: 2800000, guid: dcaa3b2921bba5e4aba9313d79310508, type: 3}
+    - {fileID: 2800000, guid: 2fbf483984cac164e847a8617136eb10, type: 3}
+    - {fileID: 2800000, guid: 70ad0786bfaf128409181c1a65039ce5, type: 3}
+    - {fileID: 2800000, guid: 3af1611df9dc4e84dbf7f4cd46a0043e, type: 3}
+    - {fileID: 2800000, guid: 9d465b46b25d7194d97e21f18fd11072, type: 3}
+    - {fileID: 2800000, guid: 96f659de33557a742a3d1a152555c3f3, type: 3}
+    - {fileID: 2800000, guid: 6c2074a280f02c742a9d22d74f5dfb4f, type: 3}
+    - {fileID: 2800000, guid: 6e41ff1078a718343b24362e2ab0ade5, type: 3}
+    - {fileID: 2800000, guid: cce24425925460145bfa61b1b058e47e, type: 3}
+    - {fileID: 2800000, guid: 8e25955a0c1ef5046ac8b637164744c4, type: 3}
+    - {fileID: 2800000, guid: 64777020a2fa2af418079b45e6cecdb2, type: 3}
+    - {fileID: 2800000, guid: e28696ff403ed964c943d5f206274ea1, type: 3}
+    - {fileID: 2800000, guid: 8f5ba6b104ee3584894007d5021fcf11, type: 3}
+    - {fileID: 2800000, guid: ef3a95f100460724795f12b78efa07ed, type: 3}
+    blueNoiseRGBA64: {fileID: 2800000, guid: 87f209cb9f9bc3644a6cbaefa2ae3080, type: 3}
+    enableTime: 1
+    feedbackMin: 0.88
+    feedbackMax: 0.97
+    useYCOCG: 1
+    useClamp: 1
+    useClipping: 1
+    useOptimizations: 1
+    useVarianceClip: 1
+    varianceCoe: 1
+    lightShader: {fileID: 4800000, guid: 8287531384175f74a8ab1a2c4d8d343a, type: 3}
+    _event: 500

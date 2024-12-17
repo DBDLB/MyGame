@@ -148,8 +148,8 @@ Material:
     - _ZWrite: 1
     m_Colors:
     - _BaseColor: {r: 1, g: 1, b: 1, a: 1}
-    - _BoxMax: {r: 189.3, g: 34, b: 100, a: 0}
-    - _BoxMin: {r: -10.699997, g: 2, b: -100, a: 0}
+    - _BoxMax: {r: 316, g: 50, b: 200, a: 0}
+    - _BoxMin: {r: -84, g: 0, b: -200, a: 0}
     - _Color: {r: 1, g: 1, b: 1, a: 1}
     - _EmissionColor: {r: 1, g: 1, b: 1, a: 1}
     - _SpecColor: {r: 0.19999996, g: 0.19999996, b: 0.19999996, a: 1}

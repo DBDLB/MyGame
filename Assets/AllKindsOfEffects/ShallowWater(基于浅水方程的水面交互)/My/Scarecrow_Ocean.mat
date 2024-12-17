@@ -28,7 +28,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _SkyboxMap:
-        m_Texture: {fileID: 8900000, guid: 33af4705fe497e845a7d23bea427483a, type: 3}
+        m_Texture: {fileID: 8900000, guid: fb6cf5daf5795b94dab458bb9e180e65, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     m_Ints: []

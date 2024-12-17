@@ -1718,6 +1718,9 @@ MonoBehaviour:
   material: {fileID: 2100000, guid: 33e7aa34df93d4c47a34c614563b39c4, type: 2}
   maxSpeed: 8
   sdfWeight: 8
+  fishRandomScale: {x: 0.1, y: 1.5}
+  offsetFishStart: {x: 50, y: 16, z: 50}
+  fishNoiseY: 0
   fishTailAmplitude: 0.3
   fishTailFrequency: 1
   fishTailSpeed: 5
@@ -1758,6 +1761,9 @@ MonoBehaviour:
   material: {fileID: 2100000, guid: 1335b3d26927235499f0f876d45c2a6b, type: 2}
   maxSpeed: 40
   sdfWeight: 5
+  fishRandomScale: {x: 0.5, y: 1.5}
+  offsetFishStart: {x: 0, y: 0, z: 0}
+  fishNoiseY: 0.5
   fishTailAmplitude: 5
   fishTailFrequency: 0.1
   fishTailSpeed: 40

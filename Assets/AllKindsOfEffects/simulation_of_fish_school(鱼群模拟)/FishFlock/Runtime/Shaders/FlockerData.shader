@@ -69,7 +69,8 @@ Shader "FlockerData"
         float4 _BoxMax;
         float _MaxSpeed;
         float _SDFWeight;
-        
+        float4 _IndividualData;
+        float _NoiseScale;
      CBUFFER_END
     float _TimeStep;
     #define UNITY_SPECCUBE_LOD_STEPS 6
@@ -233,9 +234,9 @@ Shader "FlockerData"
                 float2 uv = i.uv;
                 int id = Uv2Id(uv, 512);
                 
-                float individualData =RandomRange(0.2f, 1.0f,id);
+                float fishRandomScale =RandomRange(_IndividualData.x, _IndividualData.y,id);
                 float3 randomPosition = normalize(RandomOnUnitSphere(RandomFloat3(uv)));
-                float4 position = float4(float3(randomPosition.x,randomPosition.y*(_BoxMax.y - _BoxMin.y)*0.4,randomPosition.z)+ _Center,individualData);
+                float4 position = float4(float3(randomPosition.x,randomPosition.y*(_BoxMax.y - _BoxMin.y)*0.4,randomPosition.z)+ _Center,fishRandomScale);
                 position.xyz = Remap(position.xyz, _BoxMin, _BoxMax, 0, 1);
                 float4 velocity = float4(normalize(RandomOnUnitSphere(RandomFloat3(uv)) * _MaxSpeed),0);
                 velocity = velocity*0.5+0.5;
@@ -376,11 +377,13 @@ Shader "FlockerData"
                 float3 uv = (bd.position - _BoxMin) / (_BoxMax - _BoxMin);
                     uv.x = 1.0f - uv.x;
                     uv.z = 1.0f - uv.z;
-                    float3 sdfSum = SAMPLE_TEXTURE2D_LOD(_SDF, sampler_PointRepeat, uv.xz,0).xyz;
+                    float4 sdfSumAndNoise = SAMPLE_TEXTURE2D_LOD(_SDF, sampler_PointRepeat, uv.xz,0);
+                    float3 sdfSum = sdfSumAndNoise.xyz;
+                    float sdfNoise = sdfSumAndNoise.w;
                     sdfSum.z = 1.0f - sdfSum.z;
                     sdfSum.x = 1.0f - sdfSum.x;
                     sdfSum = sdfSum * 2.0f - 1.0f;
-                    sdfSum.y = 0;
+                    sdfSum.y = 0.0f;
                     float sdfMagnitude = length(sdfSum);
                     float3 direction = reflect(bd.velocity, safeNormalize(sdfSum)) + sdfSum * 4;
                     sdfSum = safeNormalize(direction) * _MaxSpeed - bd.velocity;

@@ -1,0 +1,60 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!21 &2100000
+Material:
+  serializedVersion: 8
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: VolumetricLight_mat
+  m_Shader: {fileID: 4800000, guid: 8287531384175f74a8ab1a2c4d8d343a, type: 3}
+  m_Parent: {fileID: 0}
+  m_ModifiedSerializedProperties: 0
+  m_ValidKeywords: []
+  m_InvalidKeywords: []
+  m_LightmapFlags: 4
+  m_EnableInstancingVariants: 0
+  m_DoubleSidedGI: 0
+  m_CustomRenderQueue: -1
+  stringTagMap: {}
+  disabledShaderPasses: []
+  m_LockedProperties: 
+  m_SavedProperties:
+    serializedVersion: 3
+    m_TexEnvs:
+    - _MainTex:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _VolumetricLightDepth:
+        m_Texture: {fileID: 2800000, guid: a6f134e4fd00f324eb3579c37e2c7769, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    m_Ints: []
+    m_Floats:
+    - _AbsorptionRatio: 0.01
+    - _Corner: 0.4
+    - _DistanceFalloffCoe: 0.769
+    - _HGFactor: 0.45
+    - _IncomingLoss: 1
+    - _LightIntensity: 175.3
+    - _OutScatteringLoss: 0
+    - _Outset: 0.8
+    - _Smooth: 0.7
+    - _Steps: 4
+    - _TransmittanceExtinction: 0.25
+    m_Colors:
+    - _BoundaryPlanes_0: {r: 0, g: 1, b: 0, a: -0}
+    - _BoundaryPlanes_1: {r: 0.82477146, g: 0.5654661, b: -0, a: -0.62682647}
+    - _BoundaryPlanes_2: {r: 0, g: 0.5, b: 0.86602545, a: -0.55425614}
+    - _BoundaryPlanes_3: {r: -0.82477146, g: 0.5654661, b: 0, a: -0.62682647}
+    - _BoundaryPlanes_4: {r: 0, g: 0.5, b: -0.86602545, a: -0.55425614}
+    - _BoundaryPlanes_5: {r: 0, g: -1, b: 0, a: -10}
+    - _LightColor: {r: 1, g: 1, b: 1, a: 1}
+    - _LightPosition: {r: 1.52, g: 1.28, b: 10, a: 0.57735026}
+    - _ShadowVMatrix_0: {r: 0.7292846, g: -0.50000006, b: 0.00000002980233, a: 5.5542493}
+    - _ShadowVMatrix_1: {r: 0, g: -0.5, b: 0.8660256, a: -214.41624}
+    - _ShadowVMatrix_2: {r: 0, g: 0.11085123, b: -0.000000006607248, a: 0.0000019073486}
+    - _ShadowVMatrix_3: {r: 0, g: -1.0000001, b: 0.00000005960466, a: 11.108499}
+  m_BuildTextureStacks: []

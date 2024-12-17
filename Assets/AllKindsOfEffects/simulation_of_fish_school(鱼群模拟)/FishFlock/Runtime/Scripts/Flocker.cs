@@ -14,7 +14,6 @@ public class Flocker : MonoBehaviour
         public Vector4 individualData;
     };
     
-    // public static bool isComputeShader = true;
     public bool isComputeShader = true;
     public static bool enable = true;
     public static float fishNumControl = 1;
@@ -28,6 +27,9 @@ public class Flocker : MonoBehaviour
     [Header("鱼群设置")]
     [SerializeField] float maxSpeed = 8f;
     [SerializeField] float sdfWeight = 8f;
+    [SerializeField] Vector2 fishRandomScale = new Vector2(0.5f, 1.5f);
+    [SerializeField] Vector3 offsetFishStart = new Vector3(0f, 0f,0f);
+    [SerializeField] float fishNoiseY = 0.5f;
     [Header("摆尾幅度")]
     [Range(0f, 10f)]
     [SerializeField] float fishTailAmplitude = 0.3f;
@@ -88,7 +90,7 @@ public class Flocker : MonoBehaviour
                 isInitialized = false;
                 material.EnableKeyword("INSTNCED_INDIRECT");
                 material.DisableKeyword("COMPUTE_SHADER_ON");
-                Vector3 center = transform.position;
+                Vector3 center = transform.position + offsetFishStart;
                 boxMin = transform.position - transform.localScale / 2;
                 boxMax = transform.position + transform.localScale / 2;
                 Datamaterial.SetVector("_BoxMin", boxMin);
@@ -97,6 +99,7 @@ public class Flocker : MonoBehaviour
                 Datamaterial.SetFloat("_SDFWeight", sdfWeight - 2);
                 Datamaterial.SetFloat("_TimeStep", Time.deltaTime);
                 Datamaterial.SetVector("_Center", center);
+                Datamaterial.SetVector("_IndividualData", new Vector4(fishRandomScale.x, fishRandomScale.y, 0, 0));
                 if (testTextureD)
                 {
                     testTextureA = testTextureD;
@@ -120,6 +123,7 @@ public class Flocker : MonoBehaviour
         Datamaterial.SetTexture("_SDF", fishSDF);
         int index = Time.frameCount % 2;
         Datamaterial.SetFloat("_TimeStep", Time.deltaTime);
+        Datamaterial.SetFloat("_NoiseScale", fishNoiseY);
         
         Datamaterial.SetTexture("_TestMap",testTextureA);
         testTextureA = index == 0 ? testTextureC : testTextureB;
@@ -144,6 +148,7 @@ public class Flocker : MonoBehaviour
         computeShader.SetVector("_SACWeight", new Vector4(separationWeight, alignmentWeight, cohesionWeight));
         computeShader.SetVector("_SACRange", new Vector4(separationRange, alignmentRange, cohesionRange));
         computeShader.SetTexture(0, "_SDF", fishSDF);
+        computeShader.SetFloat("_NoiseScale", fishNoiseY);
         computeShader.SetFloat("_SDFWeight", sdfWeight);
         
         Vector3 boxMin = transform.position - transform.localScale / 2;
@@ -200,7 +205,7 @@ public class Flocker : MonoBehaviour
 
                 if (!isInitialized)
                 {
-                    Vector3 center = transform.position;
+                    Vector3 center = transform.position + offsetFishStart;
                     boxMin = transform.position - transform.localScale / 2;
                     boxMax = transform.position + transform.localScale / 2;
                     Datamaterial.SetVector("_BoxMin", boxMin);
@@ -209,6 +214,7 @@ public class Flocker : MonoBehaviour
                     Datamaterial.SetFloat("_SDFWeight", sdfWeight - 2);
                     Datamaterial.SetFloat("_TimeStep", Time.deltaTime);
                     Datamaterial.SetVector("_Center", center);
+                    Datamaterial.SetVector("_IndividualData", new Vector4(fishRandomScale.x, fishRandomScale.y, 0, 0));
                     if (testTextureA != null)
                     {
                         Graphics.Blit(null, testTextureA, Datamaterial, 0);
@@ -230,9 +236,9 @@ public class Flocker : MonoBehaviour
 
     void InitializeBoids(){
         BoidData[] initValue = new BoidData[numFish];
-        Vector3 center = transform.position;
+        Vector3 center = transform.position + offsetFishStart;
         for(int i = 0; i < numFish; i++){
-            initValue[i].individualData = new Vector3(Random.Range(1, 5), Random.Range(0.2f, 1f), Random.Range(0.0f, 1.0f));
+            initValue[i].individualData = new Vector3(Random.Range(1, 5), Random.Range(fishRandomScale.x,fishRandomScale.y), Random.Range(0.0f, 1.0f));
             initValue[i].position = center + Random.insideUnitSphere * 3f;
             initValue[i].velocity = Random.onUnitSphere * maxSpeed;
         }

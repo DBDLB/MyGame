@@ -23,7 +23,8 @@ public class FishFlockSettler : EditorWindow
     public Vector3 mousePos;
     
     private List<GameObject> allFishFlocks = new List<GameObject>();
-    public Vector3 fishFlocksPosition = new Vector3(0, 0, 0);
+    public Vector3 fishFlocksPosition = new Vector3(0, 50, 0);
+    public Vector3 fishFlocksScale = new Vector3(100, 100, 100);
 
     string FishFlockPath = "Assets/AllKindsOfEffects/simulation_of_fish_school(鱼群模拟)/FishFlock/Runtime/Prefab/FishFlock.prefab";
     string DrawPlanePath = "Assets/AllKindsOfEffects/simulation_of_fish_school(鱼群模拟)/FishFlock/Editor/Prefab/DrawPlane.prefab";
@@ -63,10 +64,14 @@ public class FishFlockSettler : EditorWindow
     string SDFPath = "Assets/AllKindsOfEffects/simulation_of_fish_school(鱼群模拟)/FishFlock/Demo/Textures/FishSDF.png";
 
     private TextureImporter textureImporter;
-    
+    ShowGizmos showGizmosObject = null;
     
     private void OnEnable()
     {
+        //在场景中创建一个空物体
+        showGizmosObject = new GameObject("ShowGizmos").AddComponent<ShowGizmos>().GetComponent<ShowGizmos>();
+        showGizmosObject.transform.position = new Vector3(0, 0, 0);
+
         renderTexture = new RenderTexture(512, 512, 24);
         DrawPlane = AssetDatabase.LoadAssetAtPath<GameObject>(DrawPlanePath);
         rt = AssetDatabase.LoadAssetAtPath<RenderTexture>(RtPath);
@@ -88,11 +93,63 @@ public class FishFlockSettler : EditorWindow
         
         instantiated = new List<GameObject>();
         activeTex = SaveRT();
-        labelRect = new Rect(0, 130, renderTexture.width, renderTexture.height);
+        labelRect = new Rect(0, 150, renderTexture.width, renderTexture.height);
     }
     
+    //关闭窗口时
+    private void OnDestroy()
+    {
+        //删除showGizmosObject.gameObject
+        if (showGizmosObject != null)
+        {
+            DestroyImmediate(showGizmosObject.gameObject);
+        }
+        
+        //删除DrawPlane
+        GetFishFlock();
+        if (allFishFlocks.Count > 0)
+        {
+            foreach (GameObject selectedObject in allFishFlocks)
+            {
+                Flocker flocker = selectedObject.GetComponent<Flocker>();
+                if (flocker)
+                {
+                    Transform drawPlane = selectedObject.transform.Find(DrawPlane.name);
+                    if (drawPlane != null)
+                    {
+                        DestroyImmediate(drawPlane.gameObject);
+                        Debug.Log("鱼群路径删除成功");
+                    }
+                }
+            }
+        }
+
+        if (renderCamera != null)
+        {
+            DestroyImmediate(renderCamera.gameObject);
+        }
+
+        if (renderTexture != null)
+        {
+            DestroyImmediate(renderTexture);
+        }
+
+        if (RenderTextureMaker != null)
+        {
+            DestroyImmediate(RenderTextureMaker);
+        }
+        
+        
+        foreach(GameObject go in instantiated){
+            DestroyImmediate(go);
+        }
+
+    }
     private void OnGUI()
     {
+        showGizmosObject.fishFlocksPosition = fishFlocksPosition;
+        showGizmosObject.fishFlocksScale = fishFlocksScale;
+        
         if (DrawPlane == null)
         {
             DrawPlane = AssetDatabase.LoadAssetAtPath<GameObject>(DrawPlanePath);
@@ -117,6 +174,7 @@ public class FishFlockSettler : EditorWindow
                     Debug.Log("鱼群创建成功");
                     PrefabUtility.UnpackPrefabInstance(instance, PrefabUnpackMode.Completely, InteractionMode.AutomatedAction);
                     instance.transform.position = fishFlocksPosition;
+                    instance.transform.localScale = fishFlocksScale;
                     Flocker flocker = instance.GetComponent<Flocker>();
                     flocker.enabled = true;
                     flocker.fishSDF = newfishSDF;
@@ -135,7 +193,11 @@ public class FishFlockSettler : EditorWindow
         // 开始滚动视图
         scrollPosition = EditorGUILayout.BeginScrollView(scrollPosition);
         
+        EditorGUILayout.BeginHorizontal();
         fishFlocksPosition = EditorGUILayout.Vector3Field("创建鱼群位置", fishFlocksPosition, GUILayout.Width(300));
+        GUILayout.Space(10);
+        fishFlocksScale = EditorGUILayout.Vector3Field("创建鱼群大小", fishFlocksScale, GUILayout.Width(300));
+        EditorGUILayout.EndHorizontal();
         GUILayout.Space(10);
         
         showFishPath = EditorGUILayout.ToggleLeft("显示鱼群路径", showFishPath);
@@ -343,7 +405,13 @@ public class FishFlockSettler : EditorWindow
             ClearRT(rt);
             activeTex = SaveRT();
         }
-        
+
+        // if (GUILayout.Button("保存笔画",GUILayout.Width(100)))
+        // {
+        //     paintBrushHead.SetActive(false);
+        //     CollapsePainting();
+        // }
+
         EditorGUILayout.EndHorizontal();
         
         if (renderTexture != null && startDrawing)
@@ -399,7 +467,7 @@ public class FishFlockSettler : EditorWindow
         {
             bool isMouseDown = (e.button == 0);
             PaintAtPosition(isMouseDown, nowDrawPlane.transform);
-            Debug.Log(e.button);
+            // Debug.Log(e.button);
             if((!isSave&&isMouseDown == false&& e.button == 1) || instantiatedCount >= 1000){
                 // Invoke("CollapsePainting", 0.1f);
                 timer += Time.deltaTime;
@@ -424,51 +492,6 @@ public class FishFlockSettler : EditorWindow
         }
     }
 
-
-    //关闭窗口时
-    private void OnDestroy()
-    {
-        //删除DrawPlane
-        GetFishFlock();
-        if (allFishFlocks.Count > 0)
-        {
-            foreach (GameObject selectedObject in allFishFlocks)
-            {
-                Flocker flocker = selectedObject.GetComponent<Flocker>();
-                if (flocker)
-                {
-                    Transform drawPlane = selectedObject.transform.Find(DrawPlane.name);
-                    if (drawPlane != null)
-                    {
-                        DestroyImmediate(drawPlane.gameObject);
-                        Debug.Log("鱼群路径删除成功");
-                    }
-                }
-            }
-        }
-
-        if (renderCamera != null)
-        {
-            DestroyImmediate(renderCamera.gameObject);
-        }
-
-        if (renderTexture != null)
-        {
-            DestroyImmediate(renderTexture);
-        }
-
-        if (RenderTextureMaker != null)
-        {
-            DestroyImmediate(RenderTextureMaker);
-        }
-        
-        
-        foreach(GameObject go in instantiated){
-            DestroyImmediate(go);
-        }
-
-    }
-    
     //创建一个文件夹选择框
     public static string FolderField(string label, string path)
     {
@@ -531,7 +554,7 @@ public class FishFlockSettler : EditorWindow
     void PaintAtPosition(bool isMouseDown,Transform drawPlane)
     {
         Vector3 mousePos = Event.current.mousePosition;
-        mousePos = new Vector3(mousePos.x,mousePos.y-130,0);
+        mousePos = new Vector3(mousePos.x,mousePos.y-150,0);
         Ray targetRay = renderCamera.ScreenPointToRay(mousePos);
         RaycastHit hitResult;
         if(Physics.Raycast(targetRay, out hitResult, 9999.0f))
