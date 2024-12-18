@@ -18,7 +18,7 @@ Shader "MY_PBR_MultiLight_Glint"
 	{
 		Tags
 		{
-			"RenderPipeLine"="UniversalRenderPipeline"
+			"RenderPipeLine"="UniversalPipeline"
 			"RenderType"="Opaque"
 		}
 
@@ -583,7 +583,7 @@ Shader "MY_PBR_MultiLight_Glint"
                 float3 IndirColor=IndirSpeColor+IndirDiffColor;
                 //return float4(IndirColor,1);
                 //间接光部分计算完成
-                float4 color=float4((IndirColor+DirectColor+radiance_glint),1)*pbr.light.shadowAttenuation*pbr.light.distanceAttenuation;
+                float4 color=float4((IndirColor+(DirectColor+radiance_glint)*pbr.light.shadowAttenuation*pbr.light.distanceAttenuation),1);
 			return color;
 		};
 

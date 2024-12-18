@@ -11,12 +11,14 @@ Shader "MY_test/Cloud"{
     SubShader{
         Tags{
             "RenderType"="Transparent"
-            "RenderPipeline"="UniversalRenderPipeline"
+            "RenderPipeline"="UniversalPipeline"
             "IgnoreProjector"="True"
             "Queue"="Transparent"
         }
         
         pass{
+            Name "ForwardLit"
+            Tags{"LightMode" = "UniversalForward"}
             Blend SrcAlpha OneMinusSrcAlpha
             Cull Off
             HLSLPROGRAM

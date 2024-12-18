@@ -13,7 +13,7 @@
     SubShader
     {
         Tags{
-        "RenderPipeline"="UniversalRenderPipeline"
+        "RenderPipeline"="UniversalPipeline"
         }
         HLSLINCLUDE
         #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"

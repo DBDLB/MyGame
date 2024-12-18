@@ -17,8 +17,7 @@ Shader "MY_PBR_MultiLight"
 	{
 		Tags
 		{
-			"RenderPipeLine"="UniversalRenderPipeline"
-			"RenderType"="Opaque"
+			"RenderPipeLine"="UniversalPipeline"
 		}
 
 		HLSLINCLUDE
@@ -140,7 +139,7 @@ Shader "MY_PBR_MultiLight"
                 float3 IndirColor=IndirSpeColor+IndirDiffColor;
                 //return float4(IndirColor,1);
                 //间接光部分计算完成
-                float4 color=float4((IndirColor+DirectColor),1)*pbr.light.shadowAttenuation*pbr.light.distanceAttenuation;
+                float4 color=float4((IndirColor+DirectColor*pbr.light.shadowAttenuation*pbr.light.distanceAttenuation),1);
 			return color;
 		};
 
@@ -150,6 +149,7 @@ Shader "MY_PBR_MultiLight"
 		{
 			Tags{
 				"LightMode"="UniversalForward"
+				"RenderType"="Opaque"
 			}
 
 			HLSLPROGRAM

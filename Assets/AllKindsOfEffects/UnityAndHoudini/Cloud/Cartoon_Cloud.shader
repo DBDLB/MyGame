@@ -11,7 +11,7 @@ Shader "MY_test/Cartoon_Cloud"{
     SubShader{
         Tags{
             "RenderType"="Transparent"
-            "RenderPipeline"="UniversalRenderPipeline"
+            "RenderPipeline"="UniversalPipeline"
             "IgnoreProjector"="True"
             "Queue"="Transparent"
         }

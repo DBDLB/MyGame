@@ -249,5 +249,166 @@ Shader "Flocker_new"
             }
             ENDHLSL
         }
+        
+        Pass
+        {
+            Name "DepthNormals"
+            Tags
+            {
+                "LightMode" = "DepthNormals"
+            }
+
+            // -------------------------------------
+            // Render State Commands
+            ZWrite On
+            Cull[_Cull]
+
+            HLSLPROGRAM
+            #pragma target 2.0
+
+            // -------------------------------------
+            // Shader Stages
+            #pragma vertex vert
+            #pragma fragment frag
+
+            // -------------------------------------
+            // Material Keywords
+            #pragma shader_feature_local _NORMALMAP
+            #pragma shader_feature_local _PARALLAXMAP
+            #pragma shader_feature_local _ _DETAIL_MULX2 _DETAIL_SCALED
+            #pragma shader_feature_local _ALPHATEST_ON
+            #pragma shader_feature_local_fragment _SMOOTHNESS_TEXTURE_ALBEDO_CHANNEL_A
+
+            #pragma shader_feature_local _ COMPUTE_SHADER_ON
+            #pragma shader_feature_local FISH_OFF INSTNCED_INDIRECT
+
+            // -------------------------------------
+            // Unity defined keywords
+            #pragma multi_compile_fragment _ LOD_FADE_CROSSFADE
+            
+            // Includes
+            // #include "Packages/com.unity.render-pipelines.universal/Shaders/LitInput.hlsl"
+            #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/SurfaceInput.hlsl"
+            #include "Packages/com.unity.render-pipelines.universal/Shaders/LitDepthNormalsPass.hlsl"
+
+            struct appdata
+            {
+                float4 positionOS : POSITION;
+                float2 texcoord : TEXCOORD0;
+                half4 tangentOS : TANGENT;
+            	half4 normalOS : NORMAL;
+                uint instanceID: SV_InstanceID;
+                float4 vertexColor : COLOR;
+                // UNITY_VERTEX_INPUT_INSTANCE_ID  //GPU Instancing
+            };
+
+            struct v2f
+            {
+                float2 uv : TEXCOORD0;
+                float3 color : COLOR;
+                float4 positionCS  : SV_POSITION;
+                float3 positionWS : TEXCOORD1;
+                half4 tangentWS : TEXCOORD2;
+                half3 normalWS : TEXCOORD3;
+                UNITY_VERTEX_INPUT_INSTANCE_ID  //GPU Instancing
+            };
+
+            // TEXTURE2D(_BaseMap);  SAMPLER(sampler_BaseMap);
+            TEXTURE2D_X_FLOAT(_CameraDepthTexture);  SAMPLER(sampler_CameraDepthTexture);
+            TEXTURE2D(_heightMap);  SAMPLER(sampler_heightMap);
+
+
+            float SampleSceneDepth(float2 uv)
+            {
+                return SAMPLE_TEXTURE2D_X(_CameraDepthTexture, sampler_CameraDepthTexture, UnityStereoTransformScreenSpaceTex(uv)).r;
+            }
+            
+            float GetDepthFade(float3 positionWS, float Distance)
+            {
+                float4 ScreenPosition = ComputeScreenPos(TransformWorldToHClip(positionWS));
+                float depth = LinearEyeDepth(SampleSceneDepth(ScreenPosition.xy / ScreenPosition.w).r, _ZBufferParams);
+                return saturate((depth - ScreenPosition.w) / Distance);
+            }
+
+            void AthenaAlphaDiscard(real alpha, real cutoff, real offset = 0.0h)
+            {
+                // #ifdef _ALPHATEST_ON
+                    clip(alpha - cutoff + offset);
+                // #endif
+            }
+            
+            
+            v2f vert (appdata v)
+            {
+                v2f o;
+                #if defined (INSTNCED_INDIRECT)
+                #if defined (COMPUTE_SHADER_ON)
+                UNITY_SETUP_INSTANCE_ID(v);
+                UNITY_TRANSFER_INSTANCE_ID(v, o);
+                uint instanceID = v.instanceID;
+                BoidOutputData bd = _Boids[instanceID];
+                unity_ObjectToWorld = 0.0;
+                unity_ObjectToWorld._m03_m13_m23_m33 = float4(bd.position, 1.0f);
+                unity_ObjectToWorld._m00_m11_m22 = bd.param3.y;
+                float3 up = float3(0, 1, 0);
+                float3 forward = normalize(bd.velocity);
+                float3 right = normalize(cross(up, forward));
+                float3 up2 = cross(forward, right);
+                float3x3 rot = float3x3(right, up2, forward);
+                v.positionOS.z += sin((v.positionOS.x * 1.1 + _Time.b * length(normalize(bd.velocity)) * _FishtailSpeed + instanceID / 1024)*_FishtailFrequency) * _FishtailAmplitude* v.vertexColor.r;
+                float3 centerOffset = v.positionOS.xyz;
+                float3 rotatedLocal = forward * centerOffset.x + up2 * centerOffset.y + right * centerOffset.z;
+                float3 rotatedNormal = forward * v.normalOS.x + up2  * v.normalOS.y + right * v.normalOS.z;
+                VertexPositionInputs vertexInput = GetVertexPositionInputs(rotatedLocal);
+                o.positionWS = vertexInput.positionWS;
+                o.positionCS = vertexInput.positionCS;
+                o.normalWS = TransformObjectToWorldNormal(rotatedNormal);
+                o.uv = TRANSFORM_TEX(v.texcoord, _BaseMap);
+                #else
+                UNITY_SETUP_INSTANCE_ID(v);
+                UNITY_TRANSFER_INSTANCE_ID(v, o);
+                uint instanceID = v.instanceID;
+                float2 uv = Id2Uv(instanceID*2, 512);
+                float2 uv1 = Id2Uv(instanceID*2+1, 512);
+                BoidOutputData bd;
+                float4 position = SAMPLE_TEXTURE2D_LOD(_TestMap, sampler_PointRepeat, uv,0);
+                bd.position= position.xyz;
+                bd.position = Remap(bd.position, 0,1, _BoxMin, _BoxMax);
+                bd.velocity= SAMPLE_TEXTURE2D_LOD(_TestMap, sampler_PointRepeat, uv1,0);
+                bd.velocity = bd.velocity*2-1;
+                unity_ObjectToWorld = 0.0;
+                unity_ObjectToWorld._m03_m13_m23_m33 = float4(bd.position, 1.0f);
+                unity_ObjectToWorld._m00_m11_m22 = position.w;
+                float3 up = float3(0, 1, 0);
+                float3 forward = normalize(bd.velocity);
+                float3 right = normalize(cross(up, forward));
+                float3 up2 = cross(forward, right);
+                float3x3 rot = float3x3(right, up2, forward);
+                v.positionOS.z += sin((v.positionOS.x * 1.1 + _Time.b * length(normalize(bd.velocity)) * _FishtailSpeed + instanceID / 1024)*_FishtailFrequency) * _FishtailAmplitude* v.vertexColor.r;
+                float3 centerOffset = v.positionOS.xyz;
+                float3 rotatedLocal = forward * centerOffset.x + up2 * centerOffset.y + right * centerOffset.z;
+                float3 rotatedNormal = forward * v.normalOS.x + up2  * v.normalOS.y + right * v.normalOS.z;
+                VertexPositionInputs vertexInput = GetVertexPositionInputs(rotatedLocal);
+                o.positionWS = vertexInput.positionWS;
+                o.positionCS = vertexInput.positionCS;
+                o.normalWS = TransformObjectToWorldNormal(rotatedNormal);
+                o.uv = TRANSFORM_TEX(v.texcoord, _BaseMap);
+                #endif
+            #else
+            o.positionCS = TransformObjectToHClip(v.positionOS.xyz);
+            #endif
+                        return o;
+            }
+
+            float4 frag (v2f i) : SV_Target0
+            {
+                UNITY_SETUP_INSTANCE_ID(i);
+                float2 heightUV  = i.uv;
+                half4 baseMap = SAMPLE_TEXTURE2D(_BaseMap, sampler_BaseMap, heightUV);
+                AthenaAlphaDiscard(baseMap.a, _Cutoff);
+                return float4(0,0,0,1);
+            }
+            ENDHLSL
+        }
     }
 }
