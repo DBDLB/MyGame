@@ -20,7 +20,7 @@ Shader "Unlit/My_Sand"
 	{
 		Tags
 		{
-			"RenderPipeLine"="UniversalRenderPipeline"
+			"RenderPipeLine"="UniversalPipeline"
 			"RenderType"="Opaque"
 		}
 
@@ -30,7 +30,7 @@ Shader "Unlit/My_Sand"
 		#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Shadows.hlsl"
 		#include "GraterNPBR.cginc"
 
-		#pragma multi_compile _ _MAIN_LIGHT_SHADOWS
+		#pragma multi_compile _ _MAIN_LIGHT_SHADOWS _MAIN_LIGHT_SHADOWS_CASCADE _MAIN_LIGHT_SHADOWS_SCREEN
 		#pragma multi_compile _ _MAIN_LIGHT_SHADOWS_CASCADE
 		#pragma multi_compile _ _ADDITIONAL_LIGHT_SHADOWS
 		#pragma multi_compile _ _SHADOWS_SOFT
@@ -331,13 +331,13 @@ Shader "Unlit/My_Sand"
 				// float3 normalWS = N;
 				// float3 viewDirWS = normalize(_WorldSpaceCameraPos.xyz - i.positionWS);
     
-				#if defined(SHADOWS_SHADOWMASK) && defined(LIGHTMAP_ON)
-				    half4 shadowMask = inputData.shadowMask;
-				#elif !defined (LIGHTMAP_ON)
-				    half4 shadowMask = unity_ProbesOcclusion;
-				#else
-				    half4 shadowMask = half4(1, 1, 1, 1);
-				#endif
+				// #if defined(SHADOWS_SHADOWMASK) && defined(LIGHTMAP_ON)
+				//     half4 shadowMask = inputData.shadowMask;
+				// #elif !defined (LIGHTMAP_ON)
+				//     half4 shadowMask = unity_ProbesOcclusion;
+				// #else
+				//     half4 shadowMask = half4(1, 1, 1, 1);
+				// #endif
     
 				real4 color = 0;
 
@@ -352,7 +352,7 @@ Shader "Unlit/My_Sand"
 				int addLightsCount = GetAdditionalLightsCount();
 				for(int t=0; t<addLightsCount;t++)
 				{
-					Light light0 = GetAdditionalLight(t, i.positionWS, shadowMask);
+					Light light0 = GetAdditionalLight(t, i.positionWS);
 					color+=CalculateLight(i,light0);
 				}
 				#endif

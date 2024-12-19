@@ -1,0 +1,32 @@
+#pragma kernel CSMain
+
+// 生物数据结构
+struct Creature {
+    float2 position; // 位置
+    float2 velocity; // 速度
+};
+float _Time;
+
+// 输入缓冲区：生物数组
+StructuredBuffer<Creature> creatures;
+
+// 输出缓冲区：更新后的生物数组
+RWStructuredBuffer<Creature> newCreatures;
+
+// 画布尺寸
+int canvasSize;
+
+// 主函数
+[numthreads(64, 1, 1)]
+void CSMain(uint3 id : SV_DispatchThreadID)
+{
+    // 获取当前生物
+    Creature creature = creatures[id.x];
+    
+    // 模拟生物的移动行为
+    // 这里简单地假设生物只是向前移动，不考虑碰撞检测和其他复杂行为
+    creature.position += creature.velocity * _Time;
+
+    // 将更新后的生物写回输出缓冲区
+    newCreatures[id.x] = creature;
+}

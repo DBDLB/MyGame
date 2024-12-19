@@ -71,7 +71,8 @@ MonoBehaviour:
   - {fileID: -1878332245247344467}
   - {fileID: -256166545750507819}
   - {fileID: 8910312799906172386}
-  m_RendererFeatureMap: adc0de57c6d2eee5d5be3345e2e971fce20d065c48caa77b
+  - {fileID: 4296187322099579627}
+  m_RendererFeatureMap: adc0de57c6d2eee5d5be3345e2e971fce20d065c48caa77beb3a48769b1f9f3b
   m_UseNativeRenderPass: 0
   postProcessData: {fileID: 11400000, guid: 41439944d30ece34e96484bdb6645b55, type: 2}
   xrSystemData: {fileID: 11400000, guid: 60e1133243b97e347b653163a8c01b64, type: 2}
@@ -114,6 +115,20 @@ MonoBehaviour:
   m_CopyDepthMode: 0
   m_AccurateGbufferNormals: 0
   m_IntermediateTextureMode: 1
+--- !u!114 &4296187322099579627
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a61711e90bf490b48acae37aae5ce35c, type: 3}
+  m_Name: The Sand PostProcessing rendering pass
+  m_EditorClassIdentifier: 
+  m_Active: 1
+  Event: 500
 --- !u!114 &8910312799906172386
 MonoBehaviour:
   m_ObjectHideFlags: 0

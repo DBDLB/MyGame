@@ -26,8 +26,7 @@ Shader "MY_PBR_MultiLight"
 		#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Shadows.hlsl"
 		#include "PbrFunction.hlsl"
 
-		#pragma multi_compile _ _MAIN_LIGHT_SHADOWS
-		#pragma multi_compile _ _MAIN_LIGHT_SHADOWS_CASCADE
+		#pragma multi_compile _ _MAIN_LIGHT_SHADOWS _MAIN_LIGHT_SHADOWS_CASCADE _MAIN_LIGHT_SHADOWS_SCREEN
 		#pragma multi_compile _ _ADDITIONAL_LIGHT_SHADOWS
 		#pragma multi_compile _ _SHADOWS_SOFT
 		#pragma shader_feature _ADD_LIGHTS

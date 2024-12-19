@@ -1,0 +1,269 @@
+﻿#pragma kernel CSMain
+
+RWTexture2D<float4> Result;
+int _Size_X;
+int _Size_Y;
+int _Size;
+float _Time;
+float2 _MousePos;
+int _MouseMode;
+
+//元素
+int4 soil;
+int4 sand;
+int4 animals;
+int4 grass;
+int4 water;
+int4 gas;
+
+
+
+//=========================================================================
+// 判断两个 float4 是否相等
+bool IsEqual (int4 a, int4 b)
+{
+	return a.x == b.x && a.y == b.y && a.z == b.z;
+}
+
+bool IsEqualGas (int4 a, int4 b)
+{
+	return a.x == b.x && a.y == b.y && a.z == b.z && a.w != b.w;
+}
+
+// 获取指定像素的信息
+float4 GetResultPixel(int2 pID_new)
+{
+	float4 result = Result[pID_new];
+	//if( pID_new.x < 0 || pID_new.x >= _Size || pID_new.y < 0 || pID_new.y >= _Size ) result = float4(0,1,1,1);  //outside canvas is obstacle
+	return result;
+}
+
+// 根据鼠标模式，在指定位置添加新的像素或者障碍物
+void MakeNewPixelObstacle(int2 id)
+{
+	float4 p = Result[id];
+	int4 p_int4 = int4(p*255);
+
+	//沙子
+	if( _MouseMode == 0 && !IsEqual(soil,p_int4) && !IsEqual(sand,p_int4) && !IsEqual(animals,p_int4)) Result[id] = float4(sand.x,sand.y,sand.z,sand.w)/255;
+	//障碍物(土)
+	else if( _MouseMode == 1 && !IsEqual(soil,p_int4) && !IsEqual(sand,p_int4) && !IsEqual(animals,p_int4)) Result[id] = float4(soil.x,soil.y,soil.z,soil.w)/255;
+	//橡皮擦
+	else if( _MouseMode == 2) Result[id] = float4(0,0,0,1);
+	//草
+	if( _MouseMode == 3 && !IsEqual(soil,p_int4) && !IsEqual(sand,p_int4) && !IsEqual(animals,p_int4)) Result[id] = float4(grass.x,grass.y,grass.z,grass.w)/255;
+	//水
+	if( _MouseMode == 4 && !IsEqual(soil,p_int4) && !IsEqual(sand,p_int4) && !IsEqual(animals,p_int4)&& !IsEqual(grass,p_int4)) Result[id] = float4(water.x,water.y,water.z,water.w)/255;
+	//气体
+	if( _MouseMode == 5 && !IsEqual(soil,p_int4) && !IsEqual(sand,p_int4) && !IsEqual(animals,p_int4)&& !IsEqual(grass,p_int4)&& !IsEqual(water,p_int4)) Result[id] = float4(gas.x*gas.w,gas.y*gas.w,gas.z*gas.w,gas.w)/255;
+}
+
+// 生成一个范围在[0, 1)的随机数
+float random(float2 st) 
+{
+	return frac(sin(dot(st.xy,float2(12.9898f, 78.233f)))*43758.5453123f);
+}
+
+//============================= MAIN ====================================
+// 主函数，每个线程执行一次
+[numthreads(8,8,1)]
+void CSMain (uint3 id : SV_DispatchThreadID)
+{
+	gas = int4(25,25,25,1);
+	if(random(float2(id.xy) + _Time)>0.5f)
+	{
+		gas.w = gas.w*2;
+	}
+	
+	// 根据鼠标模式，在画布上添加新的像素或者障碍物
+	int2 newPixelID = int2(_MousePos.x*_Size_X, _MousePos.y*_Size_Y);
+	
+	if( _MouseMode == 1||_MouseMode == 2)
+	{
+		// 使笔触更厚
+		float dist = distance(float2(id.xy),float2(newPixelID));
+		if(dist < (_Size*1.5) ) MakeNewPixelObstacle(id.xy);
+	}
+	else
+	{
+		float dist = distance(float2(id.xy),float2(newPixelID));
+		if(dist < _Size*0.6 ) MakeNewPixelObstacle(id.xy);
+	}
+
+	// 移动像素
+	int2 pID = id.xy;
+	float4 p = Result[pID];
+	int4 p_int4 = int4(p*255);
+	//暂时为气体服务
+	p_int4 = int4(p_int4.x/p_int4.w,p_int4.y/p_int4.w,p_int4.z/p_int4.w,p_int4.w);
+
+	//沙子
+	if(IsEqual(sand,p_int4))
+	{
+		// 向下移动
+		int2 direction = int2( 0 , -1 );
+		int2 pID_new = pID+direction;//*(10*p.y);
+		float4 p_new = GetResultPixel(pID_new);
+		int4 p_new_int4 = int4(p_new*255);
+
+		// 如果目标位置不为空，则尝试向左或向右移动一个单位
+		if(IsEqual(p_new_int4, soil) || IsEqual(p_new_int4, sand))
+		{
+			direction = int2( sign(random(float2(pID) + _Time)-0.5f) , -1 );
+			pID_new = pID+direction;
+			p_new = GetResultPixel(pID_new);
+		}
+		p_new_int4 = int4(p_new*255);
+		// 如果目标位置为空，则将当前像素移动到目标位置
+		if(!IsEqual(soil,p_new_int4) && !IsEqual(sand,p_new_int4))
+		{
+			Result[pID_new] = p;
+			//对水特殊处理
+			if(IsEqual(water,p_new_int4))
+			{
+				Result[pID_new] = p;
+				Result[pID] = float4(water.x,water.y,water.z,water.w)/255;
+			}
+			else
+			{
+				Result[pID] = float4(0,0,0,1);
+			}
+		}
+	}
+
+	//草
+	if(IsEqual(grass,p_int4))
+	{
+		// 向下移动
+		int2 direction = int2( 0 , -1 );
+		int2 pID_new = pID+direction;//*(10*p.y);
+		float4 p_new = GetResultPixel(pID_new);
+		int4 p_new_int4 = int4(p_new*255);
+
+		// 如果目标位置不为空，则尝试向左或向右移动一个单位
+		// if( IsEqual(p_new_int4, grass))
+		// {
+		// 	direction = int2( sign(random(float2(pID) + _Time)-0.5f) , -1 );
+		// 	pID_new = pID+direction;
+		// 	p_new = GetResultPixel(pID_new);
+		// }
+		// 如果目标位置为空，则将当前像素移动到目标位置
+		    
+			if(!IsEqual(soil,p_new_int4)&&!IsEqual(sand,p_new_int4)&&!((IsEqual(int4(GetResultPixel(pID_new + direction)*255), soil)||IsEqual(int4(GetResultPixel(pID_new + direction)*255), sand))&&IsEqual(int4(GetResultPixel(pID_new)*255), grass))&&!(IsEqual(int4(GetResultPixel(pID_new + direction*2)*255), soil)&&IsEqual(int4(GetResultPixel(pID_new + direction)*255), grass)&&IsEqual(int4(GetResultPixel(pID_new)*255), grass)))
+			{
+				Result[pID_new] = p;
+
+				//对水特殊处理
+				if(IsEqual(water,p_new_int4))
+				{
+					Result[pID_new] = p;
+					Result[pID] = float4(water.x,water.y,water.z,water.w)/255;
+				}
+				else
+				{
+					Result[pID] = float4(0,0,0,1);
+				}
+			}
+			
+		
+		// else if(IsEqual(int4(GetResultPixel(pID_new + direction)*255), soil))
+		// {	
+		// 	Result[pID_new] = p;
+		// 	Result[pID] = float4(0,0,0,1);
+		// }
+	}
+
+	//水
+	if(IsEqual(water,p_int4))
+	{
+		// 向下移动
+		int2 direction = int2( 0 , -1 );
+		int2 direction_LR = int2( 0 , 0 );
+		int2 direction_LR_Half = int2( 0 , 0 );
+		int2 pID_new = pID+direction;//*(10*p.y);
+		float4 p_new = GetResultPixel(pID_new);
+		int4 p_new_int4 = int4(p_new*255);
+
+		// 如果目标位置不为空，则尝试向左或向右移动一个单位
+		if(IsEqual(p_new_int4, soil) || IsEqual(p_new_int4, sand)|| IsEqual(p_new_int4, water)|| IsEqual(p_new_int4, grass))
+		{
+			int waterMoveHalf = round((random(float2(pID) + _Time) * 2 - 1)); // 水移动
+			int waterMove = waterMoveHalf*2; // 水移动
+			direction_LR = int2(waterMove,0);
+			direction_LR_Half = int2(waterMoveHalf,0);
+			if (!IsEqual(int4(GetResultPixel(pID + direction_LR*2)*255),water))
+			{
+				pID_new = pID+ direction_LR;
+				p_new = GetResultPixel(pID_new);
+			}
+			else if (!IsEqual(int4(GetResultPixel(pID + direction_LR_Half*2)*255),water))
+			{
+				pID_new = pID+ direction_LR_Half;
+				p_new = GetResultPixel(pID_new);
+			}
+		}
+		p_new_int4 = int4(p_new*255);
+		// 如果目标位置为空，则将当前像素移动到目标位置
+		if(!IsEqual(soil,p_new_int4) && !IsEqual(sand,p_new_int4)&& !IsEqual(water,p_new_int4)&& !IsEqual(grass,p_new_int4))
+		{
+			Result[pID_new] = p;
+			Result[pID] = float4(0,0,0,1);
+		}
+	}
+
+	//气体
+	if(IsEqual(gas,p_int4))
+	{
+		// 向下移动
+		int2 direction = int2( 0 , 1 );
+		int2 direction_LR = int2( 0 , 0 );
+		int2 direction_LR_Half = int2( 0 , 0 );
+		int2 pID_new = pID+direction;//*(10*p.y);
+		float4 p_new = GetResultPixel(pID_new);
+		int4 p_new_int4 = int4(p_new*255);
+		p_new_int4 = int4(p_new_int4.x/p_new_int4.w,p_new_int4.y/p_new_int4.w,p_new_int4.z/p_new_int4.w,p_new_int4.w);
+
+		//交换
+		int4 exchange = gas;
+
+		
+		// 如果目标位置不为空，则尝试向左或向右移动一个单位
+		if(IsEqual(p_new_int4, soil) || IsEqual(p_new_int4, sand)|| IsEqual(p_new_int4, gas)|| IsEqual(p_new_int4, grass))
+		{
+			int waterMoveHalf = round((random(float2(pID) + _Time) * 2 - 1)); // 水移动
+			int waterMove = waterMoveHalf*2; // 水移动
+			direction_LR = int2(waterMove,0);
+			direction_LR_Half = int2(waterMoveHalf,0);
+			if (!IsEqual(int4(GetResultPixel(pID + direction_LR*2)*255),gas))
+			{
+				pID_new = pID+ direction_LR;
+				p_new = GetResultPixel(pID_new);
+			}
+			else if (!IsEqual(int4(GetResultPixel(pID + direction_LR_Half*2)*255),gas))
+			{
+				pID_new = pID+ direction_LR_Half;
+				p_new = GetResultPixel(pID_new);
+			}
+		}
+		
+		if(random(float2(id.xy)-_Time)>0.98f)
+		{
+			if(random(float2(id.xy) + _Time)>0.5f)
+			{
+				exchange.w = 1;
+				exchange.w = exchange.w*2;
+			}
+			Result[pID] = float4(exchange.x*exchange.w,exchange.y*exchange.w,exchange.z*exchange.w,exchange.w)/255;
+		}
+
+		p_new_int4 = int4(p_new*255);
+		p_new_int4 = int4(p_new_int4.x/p_new_int4.w,p_new_int4.y/p_new_int4.w,p_new_int4.z/p_new_int4.w,p_new_int4.w);
+		// 如果目标位置为空，则将当前像素移动到目标位置
+		if(!IsEqual(soil,p_new_int4) && !IsEqual(sand,p_new_int4)&& !IsEqual(gas,p_new_int4)&& !IsEqual(grass,p_new_int4))
+		{
+			Result[pID_new] = p;
+			Result[pID] = float4(0,0,0,1);
+		}
+	}
+}
+

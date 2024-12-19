@@ -73,6 +73,7 @@ Shader "MY_PBR_Effect"
 		    float _Smoothness;
 			float _Metallic;
 			float _NormalScale;
+			float4 _BaseMap_ST;
 
 			//亚克力
 			half _UseAcrylic;

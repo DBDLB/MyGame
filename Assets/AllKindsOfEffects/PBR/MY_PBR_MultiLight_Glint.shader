@@ -28,8 +28,7 @@ Shader "MY_PBR_MultiLight_Glint"
 		#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Shadows.hlsl"
 		#include "PbrFunction.hlsl"
 
-		#pragma multi_compile _ _MAIN_LIGHT_SHADOWS
-		#pragma multi_compile _ _MAIN_LIGHT_SHADOWS_CASCADE
+		#pragma multi_compile _ _MAIN_LIGHT_SHADOWS _MAIN_LIGHT_SHADOWS_CASCADE _MAIN_LIGHT_SHADOWS_SCREEN
 		#pragma multi_compile _ _ADDITIONAL_LIGHT_SHADOWS
 		#pragma multi_compile _ _SHADOWS_SOFT
 		#pragma shader_feature _ADD_LIGHTS
@@ -642,13 +641,13 @@ Shader "MY_PBR_MultiLight_Glint"
                     vertexTangent.z, vertexBinormal.z, vertexNormal.z ) ;
 				//Glint
 
-				#if defined(SHADOWS_SHADOWMASK) && defined(LIGHTMAP_ON)
-				    half4 shadowMask = inputData.shadowMask;
-				#elif !defined (LIGHTMAP_ON)
-				    half4 shadowMask = unity_ProbesOcclusion;
-				#else
-				    half4 shadowMask = half4(1, 1, 1, 1);
-				#endif
+				// #if defined(SHADOWS_SHADOWMASK) && defined(LIGHTMAP_ON)
+				//     half4 shadowMask = inputData.shadowMask;
+				// #elif !defined (LIGHTMAP_ON)
+				//     half4 shadowMask = unity_ProbesOcclusion;
+				// #else
+				//     half4 shadowMask = half4(1, 1, 1, 1);
+				// #endif
 
 				real4 color = 0;
 
@@ -671,7 +670,7 @@ Shader "MY_PBR_MultiLight_Glint"
 				{
 					PBR pbr;
 
-					Light light0 = GetAdditionalLight(t, i.positionWS, shadowMask);
+					Light light0 = GetAdditionalLight(t, i.positionWS);
 					pbr.light = light0;
 					pbr.normalWS = normalWS;
 					pbr.viewDirWS = viewDirWS;
