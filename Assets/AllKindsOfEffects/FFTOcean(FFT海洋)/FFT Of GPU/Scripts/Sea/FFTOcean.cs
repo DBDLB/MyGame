@@ -301,6 +301,7 @@ public class FFTOcean : MonoBehaviour
         OutputRT = rt;
     }
     //设置材质纹理
+    public Material underWaterMat;
     private void SetMaterialTex()
     {
         //设置海洋材质纹理

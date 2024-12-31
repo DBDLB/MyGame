@@ -272,6 +272,7 @@ public class VolumetricLightPass : ScriptableRenderPass
         CommandBufferPool.Release(cmd);
     }
 
+    //光线步进
     public void DoRayMarching(ScriptableRenderContext context, ref RenderingData renderingData,CommandBuffer cmd)
     {
         // 设置全局着色器变量 "_LightPreVP" 为 m_preVP（可能是预先计算的投影矩阵）

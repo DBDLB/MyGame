@@ -11,7 +11,8 @@ Material:
   m_Shader: {fileID: 4800000, guid: 6d04a9ab0b9cf31438690c4eaf6655c3, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
-  m_ValidKeywords: []
+  m_ValidKeywords:
+  - _REFLECTION_SSPR
   m_InvalidKeywords: []
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
@@ -39,6 +40,7 @@ Material:
     - _CausticsSize: 0.25
     - _CausticsSpeed: 1
     - _DeepRange: 0.44
+    - _EnableSSPR: 1
     - _FoamBlend: 1
     - _FoamDissolve: 1
     - _FoamFrequency: 143.9

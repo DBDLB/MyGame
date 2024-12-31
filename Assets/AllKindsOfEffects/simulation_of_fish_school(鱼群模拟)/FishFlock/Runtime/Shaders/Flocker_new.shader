@@ -4,7 +4,7 @@ Shader "Flocker_new"
     {
         [Header(Unlit)][Space(10)]
         [SinglelineTexture(_BaseColor)][MainTexture] _BaseMap("Albedo(rgba)", 2D) = "white" {}
-        [HideInInspector][MainColor] _BaseColor("Color", Color) = (1.0, 1.0, 1.0, 1.0)
+        [HDR] _BaseColor("Color", Color) = (1.0, 1.0, 1.0, 1.0)
         [Header(EdgeAlphaFalloff)][Space(10)]
         [Toggle(USE_EDGE_ALPHA_FALLOFF)]_FallOffEnable("开启底部渐变", float) = 0
         [ShowIf(_FallOffEnable)]_EdgeAlphaFadeDistance("Edge Alpha Fade Distance", Range(0,3)) = 0.5
@@ -89,11 +89,14 @@ Shader "Flocker_new"
         Pass
         {
             Name "ForwardLit"
-            Tags{"LightMode" = "UniversalForward"}
+            Tags{
+				"LightMode"="UniversalForward"
+				"RenderType"="Opaque"
+			}
             
             Cull[_Cull]
             Blend[_SrcBlend][_DstBlend]
-            ZWrite[_ZWrite]
+            ZWrite on
             
             HLSLPROGRAM
             #pragma prefer_hlslcc gles

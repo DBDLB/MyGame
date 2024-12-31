@@ -12,6 +12,7 @@ Shader "MY_PBR_MultiLight"
     	_NormalScale("NormalScale",Range(0,1))=1
 		_TestValue("Test",Range(1,20))=5.0
 		[Toggle(_ADD_LIGHTS)]_AddLights("AddLights", float)=1.0
+		[Toggle(_REFLECTION_SSPR)] _EnableSSPR("开启屏幕空间反射", Int) = 0
 	}
 	SubShader
 	{
@@ -25,11 +26,13 @@ Shader "MY_PBR_MultiLight"
 		#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
 		#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Shadows.hlsl"
 		#include "PbrFunction.hlsl"
+		#include "Assets/AllKindsOfEffects/SSPR（屏幕空间平面反射）/Runtime/SSPR/MY_SSPR.hlsl"
 
 		#pragma multi_compile _ _MAIN_LIGHT_SHADOWS _MAIN_LIGHT_SHADOWS_CASCADE _MAIN_LIGHT_SHADOWS_SCREEN
 		#pragma multi_compile _ _ADDITIONAL_LIGHT_SHADOWS
 		#pragma multi_compile _ _SHADOWS_SOFT
 		#pragma shader_feature _ADD_LIGHTS
+		#pragma shader_feature_local _ _REFLECTION_SSPR
 
 		CBUFFER_START(UnityPerMaterial)
 			float4 _MainTex_ST;
@@ -136,10 +139,12 @@ Shader "MY_PBR_MultiLight"
                 float3 IndirSpeColor=IndirSpeCubeColor*IndirSpeCubeFactor;
                 //return float4(IndirSpeColor,1);
                 float3 IndirColor=IndirSpeColor+IndirDiffColor;
+			
+				SampleReflection(IndirColor,pbr.positionWS,pbr.normalWS,smoothness);
                 //return float4(IndirColor,1);
                 //间接光部分计算完成
                 float4 color=float4((IndirColor+DirectColor*pbr.light.shadowAttenuation*pbr.light.distanceAttenuation),1);
-			return color;
+			return float4(color.xyz,1);
 		};
 
 		ENDHLSL
@@ -224,7 +229,7 @@ Shader "MY_PBR_MultiLight"
 				}
 				#endif
 
-				return color;
+				return CalculateLight(mainPBR);
 			}
 			ENDHLSL
 		}

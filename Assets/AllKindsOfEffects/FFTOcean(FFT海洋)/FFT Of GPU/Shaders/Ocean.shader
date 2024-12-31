@@ -49,11 +49,17 @@ Shader "Scarecrow/Ocean"
     }
     SubShader
     {
-        Tags { "Queue"="Transparent" "RenderType" = "Transparent" "IgnoreProjector" = "True" "RenderPipeline" = "UniversalPipeline" }
+        Tags { "RenderType"="Opaque" "IgnoreProjector" = "True" "RenderPipeline" = "UniversalPipeline" }
         LOD 100
         
         Pass
         {
+            Tags{
+				"LightMode"="UniversalForward"
+				"RenderType"="Opaque"
+			}
+            ZWrite On
+            Cull off
             HLSLPROGRAM
             #pragma target 3.0
             #pragma vertex vert
@@ -181,12 +187,13 @@ Shader "Scarecrow/Ocean"
             {
                 v2f o;
                 o.uv = TRANSFORM_TEX(v.uv, _Displace);
-                float4 displcae = SAMPLE_TEXTURE2D_LOD(_Displace,sampler_LinearRepeat, float4(o.uv, 0, 0),0.1 * UNITY_SPECCUBE_LOD_STEPS);
+                o.worldPos = mul(unity_ObjectToWorld, v.vertex).xyz;
+                float4 displcae = SAMPLE_TEXTURE2D_LOD(_Displace,sampler_LinearRepeat, float4((o.worldPos/256/0.2).xz, 0, 0),0.1 * UNITY_SPECCUBE_LOD_STEPS);
                 v.vertex += float4(displcae.xyz, 0);
                 o.pos = TransformObjectToHClip(v.vertex);
                 o.screenPosition = ComputeScreenPos(o.pos);
                 
-                o.worldPos = mul(unity_ObjectToWorld, v.vertex).xyz;
+
                 return o;
             }
             
@@ -204,6 +211,7 @@ Shader "Scarecrow/Ocean"
                 //获取深度
                 float2 screenPos = i.screenPosition.xy / i.screenPosition.w;
                 float depth = SAMPLE_TEXTURE2D_X(_CameraDepthTexture, sampler_CameraDepthTexture, screenPos).r;
+                
                 float depthValue = LinearEyeDepth(depth, _ZBufferParams);
                 float waterDepth = i.screenPosition.w;
                 float depthDifference = min(1,exp(-(depthValue - waterDepth)/_DeepRange));
@@ -265,5 +273,89 @@ Shader "Scarecrow/Ocean"
             ENDHLSL
             
         }
+        
+//        Pass
+//        {
+//            Name "DepthNormals"
+//            Tags
+//            {
+//                "LightMode" = "DepthNormals"
+//            }
+//
+//            // -------------------------------------
+//            // Render State Commands
+//            ZWrite On
+//            Cull off
+//
+//            HLSLPROGRAM
+//            #pragma target 2.0
+//
+//            // -------------------------------------
+//            // Shader Stages
+//            #pragma vertex vert
+//            #pragma fragment frag
+//
+//            // -------------------------------------
+//            // Material Keywords
+//            #pragma shader_feature_local _NORMALMAP
+//            #pragma shader_feature_local _PARALLAXMAP
+//            #pragma shader_feature_local _ _DETAIL_MULX2 _DETAIL_SCALED
+//            #pragma shader_feature_local _ALPHATEST_ON
+//            #pragma shader_feature_local_fragment _SMOOTHNESS_TEXTURE_ALBEDO_CHANNEL_A
+//
+//            #pragma shader_feature_local _ COMPUTE_SHADER_ON
+//            #pragma shader_feature_local FISH_OFF INSTNCED_INDIRECT
+//
+//            // -------------------------------------
+//            // Unity defined keywords
+//            #pragma multi_compile_fragment _ LOD_FADE_CROSSFADE
+//            
+//            // Includes
+//            // #include "Packages/com.unity.render-pipelines.universal/Shaders/LitInput.hlsl"
+//            #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Common.hlsl"
+//            #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/SurfaceInput.hlsl"
+//            #include "Packages/com.unity.render-pipelines.universal/Shaders/LitDepthNormalsPass.hlsl"
+//
+//            struct appdata
+//            {
+//                float4 vertex: POSITION;
+//                float3 normalOS : NORMAL;
+//                float2 uv: TEXCOORD0;
+//            };
+//            
+//            struct v2f
+//            {
+//                float4 pos: SV_POSITION;
+//                float2 uv: TEXCOORD0;
+//                float3 worldPos: TEXCOORD1;
+//                float4 screenPosition : TEXCOORD2;
+//                float3 normalOS : TEXCOORD3;
+//            };
+//
+//            CBUFFER_START(UnityPerMaterial)
+//            float4 _Displace_ST;
+//            CBUFFER_END
+//            TEXTURE2D(_Displace);SAMPLER(sampler_Displace);
+//            
+//            
+//            v2f vert(appdata v)
+//            {
+//                v2f o;
+//                o.uv = TRANSFORM_TEX(v.uv, _Displace);
+//                float4 displcae = SAMPLE_TEXTURE2D_LOD(_Displace,sampler_LinearRepeat, float4(o.uv, 0, 0),0.1 * UNITY_SPECCUBE_LOD_STEPS);
+//                v.vertex += float4(displcae.xyz, 0);
+//                o.pos = TransformObjectToHClip(v.vertex);
+//                o.screenPosition = ComputeScreenPos(o.pos);
+//                
+//                o.worldPos = mul(unity_ObjectToWorld, v.vertex).xyz;
+//                return o;
+//            }
+//
+//            float4 frag (v2f i) : SV_Target0
+//            {
+//                return float4(i.pos.zzzz);
+//            }
+//            ENDHLSL
+//        }
     }
 }

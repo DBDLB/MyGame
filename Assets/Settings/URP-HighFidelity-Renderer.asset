@@ -51,6 +51,22 @@ MonoBehaviour:
   settings:
     renderPassEvent: 300
     shader: {fileID: 4800000, guid: c7bc63701c1dc144caf4d68c61c72555, type: 3}
+--- !u!114 &-225775213531630532
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7b60ec6f56aeb6c448e5a838babb5c85, type: 3}
+  m_Name: Underwater rendering pass
+  m_EditorClassIdentifier: 
+  m_Active: 0
+  material: {fileID: 2100000, guid: eaeee9b470618c248a93b4ed155bf780, type: 2}
+  rt: {fileID: 8400000, guid: 32d2a027bfe83314ca9869f24786f323, type: 2}
+  Event: 500
 --- !u!114 &11400000
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -72,7 +88,9 @@ MonoBehaviour:
   - {fileID: -256166545750507819}
   - {fileID: 8910312799906172386}
   - {fileID: 4296187322099579627}
-  m_RendererFeatureMap: adc0de57c6d2eee5d5be3345e2e971fce20d065c48caa77beb3a48769b1f9f3b
+  - {fileID: -225775213531630532}
+  - {fileID: 2801058016665469559}
+  m_RendererFeatureMap: adc0de57c6d2eee5d5be3345e2e971fce20d065c48caa77beb3a48769b1f9f3b3cf45bb6a3e2ddfc77029bee6c5bdf26
   m_UseNativeRenderPass: 0
   postProcessData: {fileID: 11400000, guid: 41439944d30ece34e96484bdb6645b55, type: 2}
   xrSystemData: {fileID: 11400000, guid: 60e1133243b97e347b653163a8c01b64, type: 2}
@@ -115,6 +133,29 @@ MonoBehaviour:
   m_CopyDepthMode: 0
   m_AccurateGbufferNormals: 0
   m_IntermediateTextureMode: 1
+--- !u!114 &2801058016665469559
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 23618bf8931423a4e91ab50fd8d799c4, type: 3}
+  m_Name: SSPRRenderFeature
+  m_EditorClassIdentifier: 
+  m_Active: 1
+  setting:
+    ssprCS: {fileID: 7200000, guid: 6ce46c60beb9da9488c22c8c3a44f490, type: 3}
+    rtSize: 512
+    renderEvent: 450
+  ReflectionPlaneHeightWS: 0.1
+  FadeOutVerticle: 0.25
+  FadeOutHorizontal: 0.35
+  _ScreenLRStretchThreshold: 0.7
+  _ScreenLRStretchIntensity: 0.7
+  BlurRadius: 0.7
 --- !u!114 &4296187322099579627
 MonoBehaviour:
   m_ObjectHideFlags: 0

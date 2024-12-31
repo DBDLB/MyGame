@@ -162,6 +162,7 @@ public class Flocker : MonoBehaviour
         
 
         int groups = Mathf.CeilToInt(numFish / 64f);
+        
         computeShader.Dispatch(0, groups, 1, 1);
 
         material.SetBuffer("_Boids", outputDataBuffer);

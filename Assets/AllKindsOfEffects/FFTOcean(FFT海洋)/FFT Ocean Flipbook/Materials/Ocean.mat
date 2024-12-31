@@ -122,7 +122,7 @@ Material:
     - _DstBlend: 0
     - _EnvironmentReflections: 1
     - _FrameRate: 30
-    - _FresnelScale: 0.2
+    - _FresnelScale: 0.1
     - _Gloss: 256
     - _GlossMapScale: 0
     - _Glossiness: 0
