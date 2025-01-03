@@ -39,6 +39,15 @@
                 return output;
             }
 
+            float GetCameraFOV()
+            {
+                //https://answers.unity.com/questions/770838/how-can-i-extract-the-fov-information-from-the-pro.html
+                float t = unity_CameraProjection._m11;
+                float Rad2Deg = 180 / 3.1415;
+                float fov = atan(1.0f / t) * 2.0 * Rad2Deg;
+                return fov;
+            }
+
             TEXTURE2D_X(_BlitTexture);
             SAMPLER(sampler_BlitTexture);
 
@@ -49,10 +58,15 @@
             SAMPLER(sampler_CameraDepthTexture);
 
 
-            float4 _ColorTint;
+            // float4 _ColorTint;
+        CBUFFER_START (UnityPerMaterial)
             float4 _CameraNormalsTexture_TexelSize;
             float depth_threshold = 0.01;
-
+            float normal_threshold = 0.01;
+            float outline_width = 1;
+            float4 outline_color;
+        CBUFFER_END
+            
             float get_depth(float2 uv)
             {
                 float depth = SAMPLE_TEXTURE2D_X(_CameraDepthTexture, sampler_CameraDepthTexture, uv).r;
@@ -79,10 +93,10 @@
                 // uvs[2] = input.uv+ offset.xz;
                 // uvs[3] = input.uv- offset.xz;
 
-                uvs[0] = input.uv + _CameraNormalsTexture_TexelSize.xy * float2(0, -1);
-                uvs[1] = input.uv + _CameraNormalsTexture_TexelSize.xy * float2(-1, 0);
-                uvs[2] = input.uv + _CameraNormalsTexture_TexelSize.xy * float2(1, 0);
-                uvs[3] = input.uv + _CameraNormalsTexture_TexelSize.xy * float2(0, 1);
+                uvs[0] = input.uv + _CameraNormalsTexture_TexelSize.xy * float2(0, -1)*outline_width;
+                uvs[1] = input.uv + _CameraNormalsTexture_TexelSize.xy * float2(-1, 0)*outline_width;
+                uvs[2] = input.uv + _CameraNormalsTexture_TexelSize.xy * float2(1, 0)*outline_width;
+                uvs[3] = input.uv + _CameraNormalsTexture_TexelSize.xy * float2(0, 1)*outline_width;
 
                 float depth_diff = 0.0;
                 float nearest_depth = depth;
@@ -111,33 +125,42 @@
                     normal_sum += dot(normal_diff, normal_diff) * normal_indicator;
                 }
 
-                float depth_edge = step(0.005, depth_diff);
-                //depth_diff = step(depth_threshold, depth_diff);
+                // float depth_edge = step(0.005, depth_diff);
+                float depth_edge = step(depth_threshold, depth_diff);
 
                 float indicator = sqrt(normal_sum);
-                float normal_edge = step(0.5, indicator);
-                // float normal_edge = step(normal_threshold, indicator);
+                // float normal_edge = step(2, indicator);
+                float normal_edge = step(normal_threshold, indicator);
                 
                 float3 nearest = SAMPLE_TEXTURE2D_X(_BlitTexture, sampler_BlitTexture, nearest_uv);
 
-                float ld = dot((normal), -lightDir);
+                float ld = saturate(normalize(dot((normal), -lightDir)));
 
                 float3 edge_mix;
                 if (depth_edge > 0.0)
                 {
-                    edge_mix = lerp(color, nearest * 0.1, depth_edge);
+                    edge_mix = lerp(color, nearest * (ld > 0 ? 0.1 : 2)*outline_color, depth_edge);
                 }
                 else
                 {
-                    edge_mix = lerp(color, color * (ld > 0.0 ? 0.1 : 2), normal_edge);
+                    edge_mix = lerp(color, nearest * (ld > 0 ? 0.1 : 2)*outline_color, normal_edge);
                 }
+
+                // if (depth_edge > 0.0)
+                // {
+                //     edge_mix = lerp(0, nearest * (ld > 0 ? 0.1 : 2), depth_edge);
+                // }
+                // else
+                // {
+                //     edge_mix = lerp(0, nearest * (ld > 0 ? 0.1 : 2), normal_edge);
+                // }
                 
-                 float3 edgeMix = lerp(0,  (ld > 0.0 ? 0.1 : 2), depth_edge);
+                 float3 edgeMix = lerp(0,  (ld > 0 ? 0.1 : 2), normal_edge);
                 // ALBEDO = vec3(depth_diff);
 
 
                 return float4(edge_mix, 1.0);
-                return color * _ColorTint ;
+                // return color * _ColorTint ;
             }
             ENDHLSL
         }

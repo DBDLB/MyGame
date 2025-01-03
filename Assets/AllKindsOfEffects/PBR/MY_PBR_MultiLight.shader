@@ -36,6 +36,7 @@ Shader "MY_PBR_MultiLight"
 
 		CBUFFER_START(UnityPerMaterial)
 			float4 _MainTex_ST;
+			float4 _BaseMap_ST;
 			float4 _BaseColor;
 			float4 _SpecularColor;
 			float _SpecularRange;
@@ -43,6 +44,7 @@ Shader "MY_PBR_MultiLight"
 		    float _Smoothness;
 			float _Metallic;
 			float _NormalScale;
+			half _Cutoff;
 		CBUFFER_END
 
 		TEXTURE2D(_MainTex);	SAMPLER(sampler_MainTex);
@@ -269,7 +271,7 @@ Shader "MY_PBR_MultiLight"
 			ENDHLSL
 		}
 		
-		Pass
+Pass
         {
             Name "DepthNormals"
             Tags
@@ -301,9 +303,19 @@ Shader "MY_PBR_MultiLight"
             // -------------------------------------
             // Unity defined keywords
             #pragma multi_compile_fragment _ LOD_FADE_CROSSFADE
-            
+
+            // // -------------------------------------
+            // // Universal Pipeline keywords
+            // #include_with_pragmas "Packages/com.unity.render-pipelines.universal/ShaderLibrary/RenderingLayers.hlsl"
+            //
+            // //--------------------------------------
+            // // GPU Instancing
+            // #pragma multi_compile_instancing
+            // #include_with_pragmas "Packages/com.unity.render-pipelines.universal/ShaderLibrary/DOTS.hlsl"
+
             // -------------------------------------
             // Includes
+            #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/SurfaceInput.hlsl"
             #include "Packages/com.unity.render-pipelines.universal/Shaders/LitDepthNormalsPass.hlsl"
             ENDHLSL
         }

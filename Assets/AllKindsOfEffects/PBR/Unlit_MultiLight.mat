@@ -44,6 +44,7 @@ Material:
     m_Ints: []
     m_Floats:
     - _AddLights: 1
+    - _EnableSSPR: 0
     - _Gloss: 20
     - _Metallic: 1
     - _NormalScale: 1

@@ -2,6 +2,7 @@
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
 
+[System.Serializable]
 public class ColorTint : VolumeComponent
 {
     //【设置颜色参数】

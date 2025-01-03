@@ -51,6 +51,10 @@ MonoBehaviour:
   settings:
     renderPassEvent: 300
     shader: {fileID: 4800000, guid: c7bc63701c1dc144caf4d68c61c72555, type: 3}
+    outline_width: 1
+    outline_color: {r: 0, g: 0.15871708, b: 2.9960785, a: 1}
+    depth_threshold: 0.01
+    normal_threshold: 2
 --- !u!114 &-225775213531630532
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -63,7 +67,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7b60ec6f56aeb6c448e5a838babb5c85, type: 3}
   m_Name: Underwater rendering pass
   m_EditorClassIdentifier: 
-  m_Active: 0
+  m_Active: 1
   material: {fileID: 2100000, guid: eaeee9b470618c248a93b4ed155bf780, type: 2}
   rt: {fileID: 8400000, guid: 32d2a027bfe83314ca9869f24786f323, type: 2}
   Event: 500

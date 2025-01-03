@@ -1,0 +1,141 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!21 &2100000
+Material:
+  serializedVersion: 8
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: mtl_chr1009_00_cheek
+  m_Shader: {fileID: 4800000, guid: 965166e474fd30a4383375d59dd5f9b4, type: 3}
+  m_Parent: {fileID: 0}
+  m_ModifiedSerializedProperties: 0
+  m_ValidKeywords:
+  - _ADD_LIGHTS
+  m_InvalidKeywords:
+  - _ACRYLICFOLDOUT1_ON
+  - _EMISSIONMAPFOLDOUT_ON
+  - _ISFACE
+  - _OCCLUSIONMAPFOLDOUT_ON
+  - _OTHER_ON
+  - _SPECULARMAPFOLDOUT_ON
+  - _USEALPHAOVERRIDETEX_ON
+  m_LightmapFlags: 4
+  m_EnableInstancingVariants: 0
+  m_DoubleSidedGI: 0
+  m_CustomRenderQueue: 3000
+  stringTagMap:
+    RenderType: Transparent
+  disabledShaderPasses: []
+  m_LockedProperties: 
+  m_SavedProperties:
+    serializedVersion: 3
+    m_TexEnvs:
+    - _AlphaOverrideTex:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _BaseMap:
+        m_Texture: {fileID: 2800000, guid: 3573f649a83f80a47b6159b05c0bc7dd, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _EmissionMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _MainTex:
+        m_Texture: {fileID: 2800000, guid: 3573f649a83f80a47b6159b05c0bc7dd, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _MaskMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _MixMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _NormalMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _OcclusionMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _SmoothnessMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _SpecularMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    m_Ints: []
+    m_Floats:
+    - _ALPHATEST: 0
+    - _AcrylicFoldout1: 1
+    - _AddLights: 1
+    - _AlphaOverrideTexFoldout: 0
+    - _AlphaTest: 0
+    - _Cull: 0
+    - _Cutoff: 0.5
+    - _DitherOpacity: 1
+    - _DstBlend: 0
+    - _Emission: 0
+    - _EmissionIntensity: 1
+    - _EmissionMapFoldout: 1
+    - _EnableAlphaTest: 0
+    - _EnableSSPR: 0
+    - _FadeoutByBaseMapAlpha: 0
+    - _Metallic: 0
+    - _MultiplyBaseColorToEmissionColor: 0
+    - _MultiplyBaseColorToSpecularColor: 0
+    - _NormalScale: 1
+    - _OcclusionMapFoldout: 1
+    - _OcclusionRemapMinMaxSlider: 0
+    - _OcclusionStrength: 1
+    - _Other: 1
+    - _PerspectiveRemovalAmount: 0
+    - _PerspectiveRemovalRadius: 1
+    - _Smoothness: 0
+    - _SpecularIntensity: 1
+    - _SpecularMapFoldout: 1
+    - _SpecularMapRemapMinMaxSlider: 0
+    - _SpecularRange: 50
+    - _SrcBlend: 2
+    - _TestValue: 5
+    - _UseAlphaOverrideTex: 0
+    - _ZOffset: -0.1
+    - _ZWrite: 0
+    m_Colors:
+    - _AlphaOverrideTexChannelMask: {r: 1, g: 1, b: 1, a: 1}
+    - _BaseColor: {r: 1, g: 1, b: 1, a: 1}
+    - _CharacterBoundCenterPosWS: {r: 0, g: 0, b: 0, a: 1}
+    - _EmissionColor: {r: 0, g: 0, b: 0, a: 0}
+    - _EmissionMapTilingXyOffsetZw: {r: 1, g: 1, b: 0, a: 0}
+    - _GlobalVolumeBaseColorTintColor: {r: 1, g: 1, b: 1, a: 1}
+    - _HeadBonePositionWS: {r: 0, g: 0, b: 0, a: 1}
+    - _OcclusionMapChannelMask: {r: 0, g: 1, b: 0, a: 0}
+    - _OcclusionRemapMinMaxSlider: {r: 0.4, g: 0.6, b: -1, a: 1}
+    - _OcclusionRemapSlider: {r: 0, g: 0, b: 0, a: 1}
+    - _PerCharEffectTintColor: {r: 1, g: 1, b: 1, a: 1}
+    - _PerCharacterBaseColorTint: {r: 1, g: 1, b: 1, a: 1}
+    - _SpecularColor: {r: 1, g: 1, b: 1, a: 1}
+    - _SpecularMapChannelMask: {r: 0, g: 0, b: 1, a: 0}
+    - _SpecularMapRemapMinMaxSlider: {r: 0, g: 0, b: 0, a: 1}
+  m_BuildTextureStacks: []
+--- !u!114 &7719666578504767107
+MonoBehaviour:
+  m_ObjectHideFlags: 11
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d0353a89b1f911e48b9e16bdc9f2e058, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  version: 4
