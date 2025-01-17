@@ -50,6 +50,28 @@ Shader "MY_PBR_MultiLight_Cartoon"
     	_Cutoff("不透明蒙版剪辑值", Range(0.0, 1.0)) = 0.5
     	
     	[Foldout(1, 1, 1, 1)]
+    	_LightingStyleFoldout("LightingStyle_Foldout", float) = 1
+    	_CelShadeMidPoint("_CelShadeMidPoint (Default 0)", Range(-1,1)) = 0
+    	_CelShadeSoftness("_CelShadeSoftness (Default 0.05)", Range(0,1)) = 0.05
+    	_MainLightIgnoreCelShade("_MainLightIgnoreCelShade (fake SSS) (Default 0)", Range(0,1)) = 0
+    	
+    	[Foldout(1, 1, 1, 1)]
+    	_SelfShadowFoldout ("SelfShadow_Foldout", float) = 1
+    	_SelfShadowAreaHueOffset("_SelfShadowAreaHueOffset (Default 0)", Range(-1,1)) = 0
+    	_SelfShadowAreaSaturationBoost("_SelfShadowAreaSaturationBoost (Default 0.5)", Range(0,1)) = 0.5
+    	_SelfShadowAreaValueMul("_SelfShadowAreaValueMul (Default 0.7)", Range(0,1)) = 0.7
+    	[HDR]_SelfShadowTintColor("_SelfShadowTintColor (Default White)", Color) = (1,1,1)
+    	
+    	_LitToShadowTransitionAreaIntensity("LitToShadowTransitionAreaIntensity", Range(0,32)) = 1
+    	
+    	_LitToShadowTransitionAreaHueOffset("_LitToShadowTransitionAreaHueOffset (Default 0.01)", Range(-1,1)) = 0.01
+    	_LitToShadowTransitionAreaSaturationBoost("_LitToShadowTransitionAreaSaturationBoost (Default 0.5)", Range(0,1)) = 0.5
+    	_LitToShadowTransitionAreaValueMul("_LitToShadowTransitionAreaValueMul (Default 1)", Range(0,1)) = 1
+    	[HDR]_LitToShadowTransitionAreaTintColor("_LitToShadowTransitionAreaTintColor (Default White)", Color) = (1,1,1)
+    	
+    	[HDR]_LowSaturationFallbackColor("_LowSaturationFallbackColor (Default H:222,S:25,V:50) (Default alpha as intensity = 100)", Color) = (0.3764706,0.4141177,0.5019608,1)
+    	
+    	[Foldout(1, 1, 1, 1)]
     	_Other ("Other_Foldout", float) = 1
     	// dither
         _DitherOpacity("_DitherOpacity", Range(0,1)) = 1
@@ -77,6 +99,7 @@ Shader "MY_PBR_MultiLight_Cartoon"
 		#include "Assets/AllKindsOfEffects/SSPR（屏幕空间平面反射）/Runtime/SSPR/MY_SSPR.hlsl"
 		#include "Assets/AllKindsOfEffects/CartoonCharacter（卡通角色）/HLSL/DitherFadeoutClipUtil.hlsl"
 		#include "Assets/AllKindsOfEffects/CartoonCharacter（卡通角色）/HLSL/InvLerpRemapUtil.hlsl"
+		#include "Assets/AllKindsOfEffects/CartoonCharacter（卡通角色）/HLSL/HSVRGBConvert.hlsl"
 		
 
 		#pragma multi_compile _ _MAIN_LIGHT_SHADOWS _MAIN_LIGHT_SHADOWS_CASCADE _MAIN_LIGHT_SHADOWS_SCREEN
@@ -116,6 +139,30 @@ Shader "MY_PBR_MultiLight_Cartoon"
 			half4   _EmissionColor;
 			half    _EmissionIntensity;
 			half    _MultiplyBaseColorToEmissionColor;
+
+			//SelfShadow
+			half _LitToShadowTransitionAreaIntensity;
+			half    _SelfShadowAreaHueOffset;
+			half    _LitToShadowTransitionAreaHueOffset;
+			half    _SelfShadowAreaSaturationBoost;
+			half    _LitToShadowTransitionAreaSaturationBoost;
+			half    _SelfShadowAreaValueMul;
+			half    _LitToShadowTransitionAreaValueMul;
+			half4   _LowSaturationFallbackColor;
+			half3   _SelfShadowTintColor;
+			half3   _LitToShadowTransitionAreaTintColor;
+
+			// lighting style
+			half    _CelShadeMidPoint;
+			half    _CelShadeSoftness;
+			half    _MainLightIgnoreCelShade;
+
+			//去除透视效果
+			float3  _HeadBonePositionWS;
+			float   _PerspectiveRemovalRadius;
+			float   _PerspectiveRemovalAmount;
+			float   _PerspectiveRemovalStartHeight;
+			float   _PerspectiveRemovalEndHeight;
 		CBUFFER_END
 
 		TEXTURE2D(_MaskMap);    SAMPLER(sampler_MaskMap);
@@ -135,6 +182,8 @@ Shader "MY_PBR_MultiLight_Cartoon"
 			float3 positionWS: TEXCOORD2;
 			float3 BtangentWS: TEXCOORD3;
 			float3 tangentWS: TEXCOORD4;
+			half3 additionalLightSum: TEXCOORD5;
+			half4 SH_fogFactor: TEXCOORD6; 
 		};
 
 		struct PBR
@@ -153,15 +202,17 @@ Shader "MY_PBR_MultiLight_Cartoon"
 		    half3   normalWS;
 		    float3  positionWS;
 		    half3   viewDirectionWS;
-		    float   selfLinearEyeDepth;
-		    half    averageShadowAttenuation;
+		    // float   selfLinearEyeDepth;
+		    // half    averageShadowAttenuation;
 		    half3   SH;
-		    half    isFaceArea; // default 0, = not face, see InitializeLightingData(...)
-		    half    isSkinArea; // default 0, = not skin, see InitializeLightingData(...)
+		    // half    isFaceArea; // default 0, = not face, see InitializeLightingData(...)
+		    // half    isSkinArea; // default 0, = not skin, see InitializeLightingData(...)
 		    float2  SV_POSITIONxy;
 		    half3   normalVS;
 		    half3   reflectionVectorVS;
 		    half    NdotV;
+
+			half3   additionalLightSum;
 		
 		// #if VaryingsHasTangentWS
 		//     half3x3 TBN_WS;
@@ -180,9 +231,50 @@ Shader "MY_PBR_MultiLight_Cartoon"
 		    half3   emission;
 		    half    occlusion;
 		    half3   specular;
-		    half3   normalTS;
-		    half    smoothness;
+		    // half3   normalTS;
+		    // half    smoothness;
 		};
+
+			float4 DoPerspectiveRemoval(float4 originalPositionCS, float perspectiveRemovalAmount, float centerPosVSz)
+			{
+			    // resources:
+			    // - https://zhuanlan.zhihu.com/p/268433650?utm_source=ZHShareTargetIDMore
+			    // - https://zhuanlan.zhihu.com/p/332804613
+			
+			    // resources link's demo method
+			    /*
+			    float originalPositionCSZ = output.positionCS.z;
+			    float4 perspectiveCorrectPosVS = mul(UNITY_MATRIX_I_P, output.positionCS);
+			    perspectiveCorrectPosVS.z -= centerPosVSz;
+			    perspectiveCorrectPosVS.z *= lerp(1,0.1,perspectiveCorrectUsage); // Flatten model's pos z in view space
+			    perspectiveCorrectPosVS.z += centerPosVSz;    
+			    output.positionCS = mul(UNITY_MATRIX_P, perspectiveCorrectPosVS);
+			    output.positionCS.z = originalPositionCSZ;
+			    */
+			
+			    // our method
+			    float2 newPosCSxy = originalPositionCS.xy;
+			    newPosCSxy *= abs(originalPositionCS.w); // cancel Hardware w-divide
+			    newPosCSxy *= rcp(abs(centerPosVSz)); // do our flattened w-divide
+			    originalPositionCS.xy = lerp(originalPositionCS.xy, newPosCSxy, perspectiveRemovalAmount); // apply 0~100% perspective removal  
+			
+			    return originalPositionCS;    
+			}
+
+			float4 DoPerspectiveRemoval(float4 originalPositionCS, float3 positionWS, float3 removalCenterPositionWS, float removalRadius, float removalAmount, float removalStartHeight, float removalEndHeight)
+			{
+			    // only do perspective removal if is perspective camera
+			    // high level function contain global disable logic, to reduce code complexity of this .hlsl's user code
+			    // if(_GlobalShouldDisableToonPerspectiveRemoval || unity_OrthoParams.w == 1)
+			    //     return originalPositionCS;
+			
+			    float perspectiveRemovalAreaSphere = saturate(removalRadius - distance(positionWS,removalCenterPositionWS) / removalRadius);
+			    float perspectiveRemovalAreaWorldHeight = saturate(invLerp(removalStartHeight, removalEndHeight, positionWS.y));
+			    float perspectiveRemovalFinalAmount = removalAmount * perspectiveRemovalAreaSphere * perspectiveRemovalAreaWorldHeight;
+			    float centerPosVSz = mul(UNITY_MATRIX_V, float4(removalCenterPositionWS,1)).z;
+			
+			    return DoPerspectiveRemoval(originalPositionCS, perspectiveRemovalFinalAmount, centerPosVSz);
+			}
 		
 		ENDHLSL
 
@@ -267,6 +359,25 @@ Shader "MY_PBR_MultiLight_Cartoon"
 			    return 0; // default emission value is black when turn off
 			#endif
 			}
+			ToonSurfaceData InitializeSurfaceData(v2f input)
+			{
+				ToonSurfaceData output;
+
+				half4 baseColorFinal = GetFinalBaseColor(input);
+				DoClipTestToTargetAlphaValue(baseColorFinal.a);
+				DoDitherFadeoutClip(input.positionCS.xy, _DitherOpacity);
+				half4 MixTexValue = SAMPLE_TEXTURE2D(_MixMap,sampler_MixMap, input.uv);
+
+    			output.albedo = baseColorFinal.rgb;
+    			output.alpha = baseColorFinal.a;
+				// occlusion
+				output.occlusion = GetFinalOcculsion(input, MixTexValue);
+				// specular & roughness
+				output.specular = GetFinalSpecularRGB(input, baseColorFinal.rgb,MixTexValue);
+				// emission
+				output.emission = GetFinalEmissionColor(input, baseColorFinal.rgb);
+				return output;
+			}
 
 			ToonLightingData InitializeLightingData(v2f input, ToonSurfaceData surfaceData)
 			{
@@ -276,85 +387,126 @@ Shader "MY_PBR_MultiLight_Cartoon"
 			    lightingData.viewDirectionWS = normalize(GetCameraPositionWS() - lightingData.positionWS);  
 			
 			    half3 normalWS = input.normalWS;
-			
-			// #if VaryingsHasTangentWS
-			//     // we have to do this when an odd number of dimensions in transform scale are negative.
-			//     half sgn = input.tangentWS.w * unity_WorldTransformParams.w; // should be either +1 or -1
-			//
-			//     // no need to normalize bitangentWS if you only use normalWS, 
-			//     // since we normalize normalWS at the end when we assign normalWS's result to lightingData. (see LitForwardPass.hlsl)
-			//     half3 bitangentWS = sgn * cross(normalWS, input.tangentWS.xyz);
-			//
-			//     lightingData.TBN_WS = half3x3(input.tangentWS.xyz, bitangentWS, normalWS);
-			//     lightingData.viewDirectionTS = TransformWorldToTangent(lightingData.viewDirectionWS,lightingData.TBN_WS);
-			// #endif
-			
-			    // if any normalmap is enabled, convert normalTS in normalmap to normalWS
-			// #if _NORMALMAP || _DETAIL     
-			//     normalWS = TransformTangentToWorld(surfaceData.normalTS,lightingData.TBN_WS); // apply normalmapped result normalWS (rotation-only matrix's transpose equals inverse)
-			// #endif
-			
-			    // In theory we should re-normalize all directions vector after interpolation.
-			    // Here even _NORMALMAP is false, we still normalzie() to ensure correctness.
-			    // Not normalize() will affect specular result greatly!
-			    // The only case we want to skip normalize() is on mobile / switch
 			    lightingData.normalWS = NormalizeNormalPerPixel(normalWS);
-			
-			    // material default is not face
-			    lightingData.isFaceArea = 0;
-			
-			    // toggle "_ISFACE" will affect face lighting and shadowing
-			    // if is face: override normalWS by user defined face forward direction & face area mask, in vertex shader
-			    // if is not face: don't edit normal, use mesh's normal directly
-			// #if _ISFACE
-			//     // normalWS face area edit already done in vertex shader
-			//     // so here we don't need to edit normalWS, passing isFaceArea to ToonLightingData struct is enough
-			//     #if _FACE_MASK_ON
-			//         lightingData.isFaceArea = input.isFaceArea;
-			//     #else
-			//         lightingData.isFaceArea = 1;
-			//     #endif
-			// #endif
-			    
-			
-			    // toggle "_IsSkin" will affect skin lighting color
-			//     lightingData.isSkinArea = _IsSkin;
-			// #if _SKIN_MASK_ON
-			//     lightingData.isSkinArea *= dot(tex2D(_SkinMaskMap, input.uv), _SkinMaskMapChannelMask);             
-			// #endif
-			
-			    // input.positionCS(: SV_POSITION) in fragment shader is in window space
-			    // x = [0, RT width]
-			    // y = [0, RT height]
 			    lightingData.SV_POSITIONxy = input.positionCS.xy;
-			
-			    // note for future XR development:
-			    // ref code that may help fixing VR problem: https://docs.unity3d.com/Manual/SinglePassStereoRendering.html
-			    //lightingData.screenUV = input.screenPos.xy / input.screenPos.w;
-			    //lightingData.screenUV = UnityStereoTransformScreenSpaceTex(lightingData.screenUV);
-			    
-			    // [why not just pass abs(positionVS.z) from vertex shader? it seems it is also linearEyeDepth]
-			    // because we want lightingData.selfLinearEyeDepth having the same format as Convert_SV_PositionZ_ToLinearViewSpaceDepth(tex2D(_CameraDepthTexture))
-			    // recalcuate selfLinearEyeDepth from positionCS.z provided much better precision when doing depth texture shadow depth comparsion logic
-			    // a Samsung A70 mobile precision test @ 2021-3-23 confirmed depth texture shadow precision improved a lot using this line instead of abs(positionVS.z) from vertex shader  
-			    // lightingData.selfLinearEyeDepth = Convert_SV_PositionZ_ToLinearViewSpaceDepth(input.positionCS.z);
-			    //
-			    // lightingData.SH = input.SH_fogFactor.xyz;
-			
-			// #if NeedCalculateAdditionalLight
-			//     lightingData.additionalLightSum = input.additionalLightSum;
-			// #endif
-			
-			    // lightingData.averageShadowAttenuation = input.normalWS_averageShadowAttenuation.w;
-			
-			    // if no one use lightingData.normalVS, unity's shader compiler will remove this line's calculation,
-			    // same as URP's VertexPositionInputs and VertexNormalInputs struct
 			    lightingData.normalVS = mul((half3x3)UNITY_MATRIX_V, lightingData.normalWS).xyz;
 			
 			    lightingData.reflectionVectorVS = reflect(-lightingData.viewDirectionWS,lightingData.normalWS); // see URP Lighting.hlsl
-			
+				lightingData.SH = input.SH_fogFactor.xyz;
+				lightingData.additionalLightSum = input.additionalLightSum;
 			    lightingData.NdotV = saturate(dot(lightingData.normalWS,lightingData.viewDirectionWS));
 			    return lightingData;
+			}
+
+			half3 ShadeGI(ToonSurfaceData surfaceData, ToonLightingData lightingData)
+			{
+				half indirectOcclusion = 1;
+				half3 indirectLight = lightingData.SH * indirectOcclusion;
+				return indirectLight * surfaceData.albedo; 
+			}
+
+			half3 CalculateLightIndependentSelfShadowAlbedoColor(ToonSurfaceData surfaceData, ToonLightingData lightingData, half finalShadowArea)
+			{
+				half3 rawAlbedo = surfaceData.albedo;
+    			// half isFace = lightingData.isFaceArea;
+    			// half isSkin = lightingData.isSkinArea;
+    			float2 uv = lightingData.uv;
+
+				half isLitToShadowTransitionArea = saturate((1-abs(finalShadowArea-0.5)*2)*_LitToShadowTransitionAreaIntensity);
+
+    			// [hsv]
+    			half HueOffset = _SelfShadowAreaHueOffset + _LitToShadowTransitionAreaHueOffset * isLitToShadowTransitionArea;
+    			half SaturationBoost = _SelfShadowAreaSaturationBoost + _LitToShadowTransitionAreaSaturationBoost * isLitToShadowTransitionArea;
+    			half ValueMul = _SelfShadowAreaValueMul * lerp(1,_LitToShadowTransitionAreaValueMul, isLitToShadowTransitionArea);
+
+				half3 originalColorHSV; // for output from ApplyHSVChange(...)
+				half3 result = ApplyHSVChange(rawAlbedo, HueOffset, SaturationBoost, ValueMul, originalColorHSV);
+
+    			half3 fallbackColor = rawAlbedo * _LowSaturationFallbackColor.rgb;
+    			result = lerp(fallbackColor,result, lerp(1,saturate(originalColorHSV.y * 5),_LowSaturationFallbackColor.a)); //only 0~20% saturation area affected, 0% saturation area use 100% fallback
+
+				// [tint]
+				result *= _SelfShadowTintColor;
+
+    			// [lit to shadow area transition tint]
+    			result *= lerp(1,_LitToShadowTransitionAreaTintColor, isLitToShadowTransitionArea);
+
+				// result = lerp(result, rawAlbedo * _SkinShadowTintColor, isSkin * _OverrideBySkinShadowTintColor);
+
+				return result;
+			}
+
+			half3 ShadeMainLight(ToonSurfaceData surfaceData, ToonLightingData lightingData, Light light)
+			{
+				half3 N = lightingData.normalWS;
+    			half3 L = light.direction;
+			
+    			half3 V = lightingData.viewDirectionWS;
+    			half3 H = normalize(L+V);
+			
+    			half NoL = dot(N,L); // no need saturate() due to smoothstep()
+    			half NoV = saturate(dot(N,V));
+    			half NoH = dot(N,H);
+    			half VoV = saturate(dot(V,V));
+			
+    			// half orthographicCameraAmount = lerp(unity_OrthoParams.w,1,_PerspectiveRemovalAmount);
+    			half orthographicCameraAmount = lerp(unity_OrthoParams.w,1,0);
+				half smoothstepNoL = smoothstep(_CelShadeMidPoint-_CelShadeSoftness,_CelShadeMidPoint+_CelShadeSoftness, NoL);
+				half selfLightAttenuation = lerp(smoothstepNoL,1, _MainLightIgnoreCelShade);
+				// half selfLightAttenuation = 1;
+				half depthDiffShadow = 1;
+				half selfShadowMapShadow = 1; // default no self shadow map effect
+
+				half finalShadowArea = selfLightAttenuation * depthDiffShadow * selfShadowMapShadow;
+    			half3 inSelfShadowAlbedoColor = CalculateLightIndependentSelfShadowAlbedoColor(surfaceData, lightingData, finalShadowArea);
+    			half3 lightColorIndependentLitColor = lerp(inSelfShadowAlbedoColor,surfaceData.albedo, finalShadowArea);
+
+				// half3 result = min(_GlobalMainDirectionalLightMaxContribution, light.color * lightingData.averageShadowAttenuation) * lightColorIndependentLitColor * _GlobalMainDirectionalLightMultiplier;
+				return lightColorIndependentLitColor;
+			}
+
+			half3 ShadeEmission(ToonSurfaceData surfaceData, ToonLightingData lightingData)
+			{
+			    // do nothing, just return.
+			    // this function is created incase we need to edit emission's equation in the future
+			    half3 emissionResult = surfaceData.emission;
+			    return emissionResult;
+			}
+
+			half3 CompositeAllLightResults(half3 indirectResult, half3 mainLightResult, half3 additionalLightSumResult, half3 emissionResult, ToonSurfaceData surfaceData, ToonLightingData lightingData)
+			{
+			    half3 directLightResult = mainLightResult;
+			// #if NeedCalculateAdditionalLight
+			//     directLightResult += additionalLightSumResult;
+			// #endif
+			    half3 finalLightResult = max(indirectResult, directLightResult); 
+			
+			#if _EMISSION_ON
+			    finalLightResult += emissionResult;
+			#endif
+			
+			    return finalLightResult;
+			}
+
+			half3 ShadeAllLights(ToonSurfaceData surfaceData, ToonLightingData lightingData)
+			{
+				half3 indirectResult = ShadeGI(surfaceData, lightingData);
+				Light mainLight = GetMainLight();
+				half3 mainLightResult = ShadeMainLight(surfaceData, lightingData, mainLight);
+
+			    half3 additionalLightResult = 0;
+			// #if NeedCalculateAdditionalLight
+			    // default weaker occlusion for additional light
+			    half directOcclusion = lerp(1, surfaceData.occlusion, 0.5); // hardcode 50% usage
+			    additionalLightResult =  surfaceData.albedo * directOcclusion;
+			// #endif
+				
+			    half3 emissionResult = 0;
+			#if _EMISSION_ON
+			    emissionResult = ShadeEmission(surfaceData, lightingData);
+			#endif
+				
+				return CompositeAllLightResults(indirectResult, mainLightResult, additionalLightResult, emissionResult, surfaceData, lightingData);
 			}
 
 			real4 CalculateLight(PBR pbr)
@@ -442,6 +594,11 @@ Shader "MY_PBR_MultiLight_Cartoon"
 				o.tangentWS = worldTangent;
 				o.BtangentWS = worldBinormal;
 				o.positionWS = TransformObjectToWorld(v.positionOS);
+
+				o.positionCS = DoPerspectiveRemoval(o.positionCS,o.positionWS,_HeadBonePositionWS,_PerspectiveRemovalRadius,_PerspectiveRemovalAmount, _PerspectiveRemovalStartHeight, _PerspectiveRemovalEndHeight);
+				
+				half3 SH = SampleSH(worldNormal) * 1 ;
+				o.SH_fogFactor = half4(SH, 0);
 				return o;
 			}
 
@@ -497,20 +654,17 @@ Shader "MY_PBR_MultiLight_Cartoon"
 				// 	color+=CalculateLight(pbr);
 				// }
 				// #endif
+				
 
-				half4 baseColorFinal = GetFinalBaseColor(i);
-				DoClipTestToTargetAlphaValue(baseColorFinal.a);
-				NiloDoDitherFadeoutClip(i.positionCS.xy, _DitherOpacity);
+				ToonSurfaceData surfaceData = InitializeSurfaceData(i);
+				ToonLightingData lightingData = InitializeLightingData(i, surfaceData);
+				half3 color = ShadeAllLights(surfaceData, lightingData);
 
-				half4 MixTexValue = SAMPLE_TEXTURE2D(_MixMap,sampler_MixMap, i.uv);
-				// occlusion
-				half occlusion = GetFinalOcculsion(i, MixTexValue);
-				// specular & roughness
-				half3 specular = GetFinalSpecularRGB(i, baseColorFinal.rgb,MixTexValue);
-				// emission
-				half3 emission = GetFinalEmissionColor(i, baseColorFinal.rgb);
+				
 
-				return float4(baseColorFinal.xyz,baseColorFinal.a);
+				half3 indirectResult = ShadeGI(surfaceData, lightingData);
+
+				return float4(color,surfaceData.alpha);
 			}
 			ENDHLSL
 		}
@@ -569,7 +723,7 @@ Shader "MY_PBR_MultiLight_Cartoon"
 
             // -------------------------------------
             // Shader Stages
-            #pragma vertex DepthNormalsVertex
+            #pragma vertex vert
             #pragma fragment DepthNormalsFragment
 
             // -------------------------------------
@@ -597,6 +751,73 @@ Shader "MY_PBR_MultiLight_Cartoon"
             // Includes
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/SurfaceInput.hlsl"
             #include "Packages/com.unity.render-pipelines.universal/Shaders/LitDepthNormalsPass.hlsl"
+
+   //          half3 GetViewDirectionTangentSpace(half4 tangentWS, half3 normalWS, half3 viewDirWS)
+			// {
+			//     // must use interpolated tangent, bitangent and normal before they are normalized in the pixel shader.
+			//     half3 unnormalizedNormalWS = normalWS;
+			//     const half renormFactor = 1.0 / length(unnormalizedNormalWS);
+			//
+			//     // use bitangent on the fly like in hdrp
+			//     // IMPORTANT! If we ever support Flip on double sided materials ensure bitangent and tangent are NOT flipped.
+			//     half crossSign = (tangentWS.w > 0.0 ? 1.0 : -1.0); // we do not need to multiple GetOddNegativeScale() here, as it is done in vertex shader
+			//     half3 bitang = crossSign * cross(normalWS.xyz, tangentWS.xyz);
+			//
+			//     half3 WorldSpaceNormal = renormFactor * normalWS.xyz;       // we want a unit length Normal Vector node in shader graph
+			//
+			//     // to preserve mikktspace compliance we use same scale renormFactor as was used on the normal.
+			//     // This is explained in section 2.2 in "surface gradient based bump mapping framework"
+			//     half3 WorldSpaceTangent = renormFactor * tangentWS.xyz;
+			//     half3 WorldSpaceBiTangent = renormFactor * bitang;
+			//
+			//     half3x3 tangentSpaceTransform = half3x3(WorldSpaceTangent, WorldSpaceBiTangent, WorldSpaceNormal);
+			//     half3 viewDirTS = mul(tangentSpaceTransform, viewDirWS);
+			//
+			//     return viewDirTS;
+			// }
+            Varyings vert(Attributes input)
+			{
+				// v2f o;
+				// o.positionCS = TransformObjectToHClip(v.positionOS);
+				//
+				// o.positionWS = TransformObjectToWorld(v.positionOS);
+				//
+				// o.positionCS = DoPerspectiveRemoval(o.positionCS,o.positionWS,_HeadBonePositionWS,_PerspectiveRemovalRadius,_PerspectiveRemovalAmount, _PerspectiveRemovalStartHeight, _PerspectiveRemovalEndHeight);
+
+
+				Varyings output = (Varyings)0;
+    			UNITY_SETUP_INSTANCE_ID(input);
+    			UNITY_TRANSFER_INSTANCE_ID(input, output);
+    			UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(output);
+			
+    			#if defined(REQUIRES_UV_INTERPOLATOR)
+    			    output.uv = TRANSFORM_TEX(input.texcoord, _BaseMap);
+    			#endif
+    			output.positionCS = TransformObjectToHClip(input.positionOS.xyz);
+			
+    			VertexPositionInputs vertexInput = GetVertexPositionInputs(input.positionOS.xyz);
+    			VertexNormalInputs normalInput = GetVertexNormalInputs(input.normal, input.tangentOS);
+			
+    			output.normalWS = half3(normalInput.normalWS);
+    			#if defined(REQUIRES_WORLD_SPACE_TANGENT_INTERPOLATOR) || defined(REQUIRES_TANGENT_SPACE_VIEW_DIR_INTERPOLATOR)
+    			    float sign = input.tangentOS.w * float(GetOddNegativeScale());
+    			    half4 tangentWS = half4(normalInput.tangentWS.xyz, sign);
+    			#endif
+			
+    			#if defined(REQUIRES_WORLD_SPACE_TANGENT_INTERPOLATOR)
+    			    output.tangentWS = tangentWS;
+    			#endif
+			
+    			#if defined(REQUIRES_TANGENT_SPACE_VIEW_DIR_INTERPOLATOR)
+    			    half3 viewDirWS = GetWorldSpaceNormalizeViewDir(vertexInput.positionWS);
+    			    half3 viewDirTS = GetViewDirectionTangentSpace(tangentWS, output.normalWS, viewDirWS);
+    			    output.viewDirTS = viewDirTS;
+    			#endif
+
+								output.positionCS = DoPerspectiveRemoval(output.positionCS,TransformObjectToWorld(input.positionOS),_HeadBonePositionWS,_PerspectiveRemovalRadius,_PerspectiveRemovalAmount, _PerspectiveRemovalStartHeight, _PerspectiveRemovalEndHeight);
+    			return output;
+			}
+            
             ENDHLSL
         }
 	} 

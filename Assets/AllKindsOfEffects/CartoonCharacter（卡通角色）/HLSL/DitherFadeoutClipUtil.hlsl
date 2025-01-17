@@ -1,4 +1,4 @@
-void NiloDoDitherFadeoutClip(float2 SV_POSITIONxy, float ditherOpacity)
+void DoDitherFadeoutClip(float2 SV_POSITIONxy, float ditherOpacity)
 {
     float DITHER_THRESHOLDS[16] =
     {

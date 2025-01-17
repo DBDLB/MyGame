@@ -432,5 +432,5 @@ Shader "MY_PBR_Effect"
             ENDHLSL
         }
 	} 
-	CustomEditor "Scarecrow.SimpleShaderGUI"
+	
 }

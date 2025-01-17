@@ -1,5 +1,23 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
+--- !u!114 &-7445002047363043177
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 40b77f2202313cb46bf99eaeae6aed38, type: 3}
+  m_Name: GrabScreenBlurRendererFeature
+  m_EditorClassIdentifier: 
+  m_Active: 1
+  setting:
+    MipCS: {fileID: 7200000, guid: 3fd881d9a44e50943b9f4522183b16fe, type: 3}
+    rtSize: 1024
+    renderEvent: 450
+  MipCameraTexture: {fileID: 0}
 --- !u!114 &-1878332245247344467
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -49,7 +67,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_Active: 1
   settings:
-    renderPassEvent: 300
+    renderPassEvent: 400
     shader: {fileID: 4800000, guid: c7bc63701c1dc144caf4d68c61c72555, type: 3}
     outline_width: 1
     outline_color: {r: 0, g: 0.15871708, b: 2.9960785, a: 1}
@@ -94,7 +112,8 @@ MonoBehaviour:
   - {fileID: 4296187322099579627}
   - {fileID: -225775213531630532}
   - {fileID: 2801058016665469559}
-  m_RendererFeatureMap: adc0de57c6d2eee5d5be3345e2e971fce20d065c48caa77beb3a48769b1f9f3b3cf45bb6a3e2ddfc77029bee6c5bdf26
+  - {fileID: -7445002047363043177}
+  m_RendererFeatureMap: adc0de57c6d2eee5d5be3345e2e971fce20d065c48caa77beb3a48769b1f9f3b3cf45bb6a3e2ddfc77029bee6c5bdf2697b0de4e150aae98
   m_UseNativeRenderPass: 0
   postProcessData: {fileID: 11400000, guid: 41439944d30ece34e96484bdb6645b55, type: 2}
   xrSystemData: {fileID: 11400000, guid: 60e1133243b97e347b653163a8c01b64, type: 2}

@@ -134,16 +134,16 @@
                 
                 float3 nearest = SAMPLE_TEXTURE2D_X(_BlitTexture, sampler_BlitTexture, nearest_uv);
 
-                float ld = saturate(normalize(dot((normal), -lightDir)));
+                float ld = normalize(((dot((normal), lightDir)))*0.5+0.5);
 
                 float3 edge_mix;
                 if (depth_edge > 0.0)
                 {
-                    edge_mix = lerp(color, nearest * (ld > 0 ? 0.1 : 2)*outline_color, depth_edge);
+                    edge_mix = lerp(color, nearest * (ld > 0 ? 1 : 0)*outline_color, depth_edge);
                 }
                 else
                 {
-                    edge_mix = lerp(color, nearest * (ld > 0 ? 0.1 : 2)*outline_color, normal_edge);
+                    edge_mix = lerp(color, nearest * (ld > 0 ? 1 : 0)*outline_color, normal_edge);
                 }
 
                 // if (depth_edge > 0.0)

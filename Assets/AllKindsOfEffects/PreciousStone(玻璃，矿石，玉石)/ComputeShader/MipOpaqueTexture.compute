@@ -1,0 +1,106 @@
+﻿#define NUMTHREAD_X 8
+#define NUMTHREAD_Y 8
+
+#pragma kernel GenerateMips
+#pragma kernel GaussianBlur
+
+#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
+
+float2 _RTSize;
+//mips
+RWTexture2D<half4> _SSRPMipSource;
+RWTexture2D<half4> _SSRPMipDest;
+SamplerState LinearClampSampler;
+
+static const float weights[9] = {
+    1.0 / 16.0, 4.0 / 16.0, 6.0 / 16.0, 
+    4.0 / 16.0, 1.0 / 16.0, 0.0 / 16.0, 
+    6.0 / 16.0, 4.0 / 16.0, 1.0 / 16.0
+};
+
+//模糊
+[numthreads(NUMTHREAD_X, NUMTHREAD_Y, 1)]
+void GaussianBlur(uint3 gid : SV_GroupThreadID, uint3 id : SV_DispatchThreadID)
+{
+    int2 uv = id.xy*2;
+	
+    float2 offsetH = float2(-1, 0);
+    float2 offsetV = float2(0,-1);
+
+    float4 blurColorH = 0;
+    float w = 0;
+    for (int i = -4; i < 4; ++i)
+    {
+        float4 sampleH = _SSRPMipSource.Load(int3(uv + int2(offsetH * i), 0));
+        float4 sampleV = _SSRPMipSource.Load(int3(uv + int2(offsetV * i), 0));
+        blurColorH += (sampleH * weights[abs(i) % 9]+sampleV * weights[abs(i) % 9])/2;
+        w += weights[abs(i) % 9];
+    }
+    blurColorH /= w;
+    // _SSRPMipSource[id.xy] = blurColorH;
+	
+    // float2 offsetV = float2(0, 1);
+	   //
+    // float4 blurColorV = 0.0;
+    // w = 0;
+    // for (int i = -4; i < 4; ++i)
+    // {
+    //     float4 sample = _SSRPMipSource.Load(int3(uv + int2(offsetV * i), 0));
+    //     blurColorV += sample * weights[abs(i) % 9];
+    //     w += weights[abs(i) % 9];
+    // }
+    // blurColorV /= w;
+    _SSRPMipDest[id.xy] = blurColorH;
+}
+
+// [numthreads(NUMTHREAD_X, NUMTHREAD_Y, 1)]
+// void GaussianBlurVertical(uint3 gid : SV_GroupThreadID, uint3 id : SV_DispatchThreadID)
+// {
+//     int2 uv = (id.xy*2);
+// 	
+//     float2 offset = float2(0, 1);
+// 	
+//     float4 blurColorV = 0.0;
+//     float w = 0;
+//     for (int i = -4; i < 4; ++i)
+//     {
+//         float4 sample = _SSRPMipSource.Load(int3(uv + int2(offset * i), 0));
+//         blurColorV += sample * weights[abs(i) % 9];
+//         w += weights[abs(i) % 9];
+//     }
+//     blurColorV /= w;
+//     _SSRPMipDest[id.xy] = blurColorV;
+// }
+
+//生成mips
+[numthreads(NUMTHREAD_X, NUMTHREAD_Y, 1)]
+void GenerateMips(uint3 id : SV_DispatchThreadID)
+{
+    if(id.x > (uint)_RTSize.x || id.y > (uint)_RTSize.y)
+    {
+        return;
+    }
+
+    const half gaussWeights[] = { 0.27343750, 0.21875000, 0.10937500, 0.03125000, 0.00390625 };
+	
+    // float2 offset = 1;
+    // float2 offset1 = offset * (1.0 + (gaussWeights[2] / (gaussWeights[1] + gaussWeights[2])));
+    // float2 offset2 = offset * (3.0 + (gaussWeights[4] / (gaussWeights[3] + gaussWeights[4])));
+    //
+    // // uint2 ori_id = id.xy +0.5;
+    // float2 uv_m2 = ori_id - offset;
+    // float2 uv_m1 = ori_id - offset;
+    // float2 uv_p0 = ori_id;
+    // float2 uv_p1 = ori_id + offset;
+    // float2 uv_p2 = ori_id + offset;
+    
+     uint2 ori_id = id.xy * 2;
+    float4 value = (_SSRPMipSource[ori_id] + _SSRPMipSource[ori_id + uint2(1, 0)] + _SSRPMipSource[ori_id + uint2(0, 1)] + _SSRPMipSource[ori_id + uint2(1, 1)]);
+    value /= 4;
+    // _SSRPMipDest[id.xy] = _SSRPMipSource[uv_m2] * (gaussWeights[3] + gaussWeights[4])
+    // + _SSRPMipSource[uv_m1] * (gaussWeights[1] + gaussWeights[2])
+    // + _SSRPMipSource[uv_p0] *  gaussWeights[0]
+    // + _SSRPMipSource[uv_p1] * (gaussWeights[1] + gaussWeights[2])
+    // + _SSRPMipSource[uv_p2] * (gaussWeights[3] + gaussWeights[4]);
+    _SSRPMipDest[id.xy] = float4((id.x*2/_RTSize.x), 0, 0, 1);
+}

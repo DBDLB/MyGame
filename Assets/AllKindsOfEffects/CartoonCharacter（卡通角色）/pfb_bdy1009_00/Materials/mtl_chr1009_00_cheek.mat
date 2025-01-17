@@ -17,8 +17,10 @@ Material:
   - _ACRYLICFOLDOUT1_ON
   - _EMISSIONMAPFOLDOUT_ON
   - _ISFACE
+  - _LIGHTINGSTYLEFOLDOUT_ON
   - _OCCLUSIONMAPFOLDOUT_ON
   - _OTHER_ON
+  - _SELFSHADOWFOLDOUT_ON
   - _SPECULARMAPFOLDOUT_ON
   - _USEALPHAOVERRIDETEX_ON
   m_LightmapFlags: 4
@@ -79,6 +81,8 @@ Material:
     - _AddLights: 1
     - _AlphaOverrideTexFoldout: 0
     - _AlphaTest: 0
+    - _CelShadeMidPoint: 0
+    - _CelShadeSoftness: 0.05
     - _Cull: 0
     - _Cutoff: 0.5
     - _DitherOpacity: 1
@@ -89,6 +93,12 @@ Material:
     - _EnableAlphaTest: 0
     - _EnableSSPR: 0
     - _FadeoutByBaseMapAlpha: 0
+    - _LightingStyleFoldout: 1
+    - _LitToShadowTransitionAreaHueOffset: 0.01
+    - _LitToShadowTransitionAreaIntensity: 1
+    - _LitToShadowTransitionAreaSaturationBoost: 0.5
+    - _LitToShadowTransitionAreaValueMul: 1
+    - _MainLightIgnoreCelShade: 0
     - _Metallic: 0
     - _MultiplyBaseColorToEmissionColor: 0
     - _MultiplyBaseColorToSpecularColor: 0
@@ -99,6 +109,10 @@ Material:
     - _Other: 1
     - _PerspectiveRemovalAmount: 0
     - _PerspectiveRemovalRadius: 1
+    - _SelfShadowAreaHueOffset: 0
+    - _SelfShadowAreaSaturationBoost: 0.5
+    - _SelfShadowAreaValueMul: 0.7
+    - _SelfShadowFoldout: 1
     - _Smoothness: 0
     - _SpecularIntensity: 1
     - _SpecularMapFoldout: 1
@@ -117,11 +131,14 @@ Material:
     - _EmissionMapTilingXyOffsetZw: {r: 1, g: 1, b: 0, a: 0}
     - _GlobalVolumeBaseColorTintColor: {r: 1, g: 1, b: 1, a: 1}
     - _HeadBonePositionWS: {r: 0, g: 0, b: 0, a: 1}
+    - _LitToShadowTransitionAreaTintColor: {r: 1, g: 1, b: 1, a: 1}
+    - _LowSaturationFallbackColor: {r: 0.3764706, g: 0.4141177, b: 0.5019608, a: 1}
     - _OcclusionMapChannelMask: {r: 0, g: 1, b: 0, a: 0}
     - _OcclusionRemapMinMaxSlider: {r: 0.4, g: 0.6, b: -1, a: 1}
     - _OcclusionRemapSlider: {r: 0, g: 0, b: 0, a: 1}
     - _PerCharEffectTintColor: {r: 1, g: 1, b: 1, a: 1}
     - _PerCharacterBaseColorTint: {r: 1, g: 1, b: 1, a: 1}
+    - _SelfShadowTintColor: {r: 1, g: 1, b: 1, a: 1}
     - _SpecularColor: {r: 1, g: 1, b: 1, a: 1}
     - _SpecularMapChannelMask: {r: 0, g: 0, b: 1, a: 0}
     - _SpecularMapRemapMinMaxSlider: {r: 0, g: 0, b: 0, a: 1}

@@ -29,9 +29,11 @@ Material:
   m_InvalidKeywords:
   - _
   - _ISFACE
+  - _LIGHTINGSTYLEFOLDOUT_ON
   - _OCCLUSIONMAPFOLDOUT_ON
   - _OTHER_ON
   - _RECEIVE_URP_SHADOW
+  - _SELFSHADOWFOLDOUT_ON
   - _SPECULARMAPFOLDOUT_ON
   m_LightmapFlags: 0
   m_EnableInstancingVariants: 0
@@ -48,7 +50,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _BaseMap:
-        m_Texture: {fileID: 2800000, guid: b050026f041655f4ea21e639a684882d, type: 3}
+        m_Texture: {fileID: 2800000, guid: ff6d8f3619854884e9edacfaafb06e3b, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _BumpMap:
@@ -273,6 +275,7 @@ Material:
     - _IndirectLightFlatten: 1
     - _IsFace: 1
     - _IsSkin: 0
+    - _LightingStyleFoldout: 1
     - _LightingStyleGroup: 0
     - _LitToShadowTransitionAreaHueOffset: 0.01
     - _LitToShadowTransitionAreaIntensity: 1
@@ -362,6 +365,7 @@ Material:
     - _SelfShadowAreaHueOffset: 0
     - _SelfShadowAreaSaturationBoost: 0.5
     - _SelfShadowAreaValueMul: 0.7
+    - _SelfShadowFoldout: 1
     - _SelfShadowGroup: 0
     - _Smoothness: 0
     - _SmoothnessGroup: 0

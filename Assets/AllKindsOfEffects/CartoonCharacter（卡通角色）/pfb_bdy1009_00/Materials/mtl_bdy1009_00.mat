@@ -17,10 +17,12 @@ Material:
   - _
   - _ACRYLICFOLDOUT1_ON
   - _EMISSIONMAPFOLDOUT_ON
+  - _LIGHTINGSTYLEFOLDOUT_ON
   - _OCCLUSIONMAP
   - _OCCLUSIONMAPFOLDOUT_ON
   - _OTHER_ON
   - _RECEIVE_URP_SHADOW
+  - _SELFSHADOWFOLDOUT_ON
   - _SPECULARMAPFOLDOUT_ON
   - _USEALPHAOVERRIDETEX_ON
   m_LightmapFlags: 0
@@ -272,6 +274,7 @@ Material:
     - _IndirectLightFlatten: 1
     - _IsFace: 0
     - _IsSkin: 0
+    - _LightingStyleFoldout: 1
     - _LightingStyleGroup: 0
     - _LitToShadowTransitionAreaHueOffset: 0.01
     - _LitToShadowTransitionAreaIntensity: 1
@@ -362,6 +365,7 @@ Material:
     - _SelfShadowAreaHueOffset: 0
     - _SelfShadowAreaSaturationBoost: 0.5
     - _SelfShadowAreaValueMul: 1
+    - _SelfShadowFoldout: 1
     - _SelfShadowGroup: 0
     - _Smoothness: 0
     - _SmoothnessGroup: 0

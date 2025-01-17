@@ -9,22 +9,22 @@ Shader "Unlit/MA_Unlit"
         [Toggle(USE_EDGE_ALPHA_FALLOFF)]_FallOffEnable("开启底部渐变", float) = 0
         [ShowIf(_FallOffEnable)]_EdgeAlphaFadeDistance("Edge Alpha Fade Distance", Range(0,3)) = 0.5
         _LightColorIntensity("光照颜色影响强度", Range(0.0, 1.0)) = 0
-
-        [Header(RenderingSettings)][Space(10)]
-        [RenderingMode] _Mode("混合模式", Int) = 0
-        [ShowIf(_ALPHATEST_ON)] _Cutoff("不透明蒙版剪辑值", Range(0.0, 1.0)) = 0.5
-        [Enum(UnityEngine.Rendering.CullMode)] _Cull("剔除模式", Int) = 2
-
-        [HideInInspector] _SrcBlend ("__src", Int) = 1.0
-        [HideInInspector] _DstBlend ("__dst", Int) = 0.0
-        [HideInInspector] _ZWrite ("__zw", Int) = 1.0
-
-
-
-
-
+        
         [Header(Fog)][Space(10)]
         _FogToggle ("雾效强度", Range(0.0,1.0)) = 1.0
+        
+        [Foldout(1, 1, 1, 1)]
+    	_Other ("Other_Foldout", float) = 1
+    	// dither
+        _DitherOpacity("_DitherOpacity", Range(0,1)) = 1
+		_TestValue("Test",Range(1,20))=5.0
+		[Toggle(_ADD_LIGHTS)]_AddLights("AddLights", float)=1.0
+		[Toggle(_REFLECTION_SSPR)] _EnableSSPR("开启屏幕空间反射", Int) = 0
+		
+    	[Enum(UnityEngine.Rendering.BlendMode)]_SrcBlend("Src Blend", float) = 1
+        [Enum(UnityEngine.Rendering.BlendMode)]_DstBlend("Dst Blend", float) = 0
+    	[Enum(UnityEngine.Rendering.CullMode)] _Cull("剔除模式", Int) = 2
+    	[HideInInspector] _ZWrite ("__zw", Int) = 1.0
 
         
     }
@@ -107,9 +107,11 @@ Shader "Unlit/MA_Unlit"
 
             float4 frag (v2f i) : SV_Target0
             {
-                return float4(0,0,1,1);
+            	half4 color = SAMPLE_TEXTURE2D(_BaseMap,sampler_BaseMap, i.uv);
+                return float4(color.xyz,1);
             }
             ENDHLSL
         }
     }
+	CustomEditor "Scarecrow.SimpleShaderGUI"
 }
