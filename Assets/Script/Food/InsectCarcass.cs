@@ -46,7 +46,7 @@ public class InsectCarcass : Food
                     (UnityEngine.Random.Range(0, foodBounds.size.z) * 0.5f - antTransform.localScale.z * 0.5f) *
                     (UnityEngine.Random.Range(0, 2) * 2 - 1);
                 ant.transform.localPosition +=
-                    new Vector3(randomX * (float)(foodBounds.size.x + antTransform.localScale.y * 0.5), 0, randomZ);
+                    new Vector3(randomX * (float)(foodBounds.size.x* 0.5 + antTransform.localScale.y * 0.5f-0.1f), 0, randomZ);
                 //ant.transform.localRotation = Quaternion.LookRotation(transform.position - ant.transform.position);
                 //ant.transform.localPosition += new Vector3(0, 0, (float)(randomZ));
                 return null;

@@ -80,7 +80,7 @@ public abstract class Enemy : MonoBehaviour, IDamageable
             }
             foreach (var target in antListAndFood)
             {
-                if (target != null&&target.activeSelf)
+                if (target != null&&!target.GetComponent<FlyingAnt>() &&target.activeSelf)
                 {
                     if (Vector3.Distance(transform.position, target.transform.position) < collectEnemyRange)
                     {

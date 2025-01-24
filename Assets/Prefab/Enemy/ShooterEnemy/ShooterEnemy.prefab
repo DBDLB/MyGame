@@ -101,7 +101,7 @@ MonoBehaviour:
   - {fileID: 4259068132884459434, guid: 60f586c587d4ed8408bea88010f2769a, type: 3}
   enemyType: 2
   moveSpeed: 3.5
-  health: 20
+  health: 15
   attackPower: 2
   isMovePaused: 0
   isMovingToEnemy: 0

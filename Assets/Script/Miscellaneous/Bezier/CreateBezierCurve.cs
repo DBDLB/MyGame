@@ -17,7 +17,7 @@ public class CreateBezierCurve : MonoBehaviour
         return (1 - t) * (1 - t) * start + 2 * t * (1 - t) * center + t * t * end;
     }
     
-    private static Vector3 InitControlPos(Vector3 startPos, Vector3 targetPos, float startAngle)
+    private static Vector3 InitControlPos(Vector3 startPos, Vector3 targetPos, float startAngle,bool y_axes = true)
     {
         // 计算起始点和结束点之间的中点
         Vector3 midPoint = (startPos + targetPos) / 2f;
@@ -31,7 +31,16 @@ public class CreateBezierCurve : MonoBehaviour
         Vector3 yAxis = Vector3.Cross( zAxis,xAxis).normalized;
 
         // 构建旋转矩阵
-        Quaternion rotation = Quaternion.LookRotation(zAxis, yAxis);
+        //初始化rotation
+        Quaternion rotation = Quaternion.identity;
+        if (y_axes)
+        {
+            rotation = Quaternion.LookRotation(zAxis, yAxis);
+        }
+        else
+        {
+            rotation = Quaternion.LookRotation(zAxis, xAxis);
+        }
         
         // 进行60度绕x轴旋转
         rotation *= Quaternion.Euler(-startAngle, 0f, 0f);
@@ -45,9 +54,9 @@ public class CreateBezierCurve : MonoBehaviour
         return (startPos + localRotationPos);
     }
 
-    public static Vector3[] GetBezierPath(Vector3 startPoint, Vector3 endPoint,float startAngle, int resolution = 10)
+    public static Vector3[] GetBezierPath(Vector3 startPoint, Vector3 endPoint,float startAngle, int resolution = 10,bool y_axes = true)
     {
-        Vector3 bezierControlPoint = InitControlPos(startPoint, endPoint, startAngle);
+        Vector3 bezierControlPoint = InitControlPos(startPoint, endPoint, startAngle,y_axes);
         Vector3[] _path = new Vector3[resolution]; //resolution为int类型，表示要取得路径点数量，值越大，取得的路径点越多，曲线最后越平滑
         for (int i = 0; i < resolution; i++)
         {

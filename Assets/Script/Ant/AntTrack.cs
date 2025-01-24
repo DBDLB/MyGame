@@ -78,29 +78,34 @@ public class AntTrack : MonoBehaviour
                 // 如果射线击中了Ground层的物体
                 if (Physics.Raycast(ray, out hit, Mathf.Infinity, groundLayer))
                 {
-                    if (mousePositions.Count == 0)
+                    if (hit.transform.gameObject.layer == LayerMask.NameToLayer("Ground"))
                     {
-                        mousePositions.Add(AntColony.instance.transform.position);
-                    }
+                        if (mousePositions.Count == 0)
+                        {
+                            mousePositions.Add(AntColony.instance.transform.position);
+                        }
 
-                    float distance = Vector3.Distance(mousePositions[mousePositions.Count - 1], hit.point);
+                        float distance = Vector3.Distance(mousePositions[mousePositions.Count - 1], hit.point);
 
-                    while (distance > minDistance)
-                    {
-                        Vector3 pos = Vector3.MoveTowards(mousePositions[mousePositions.Count - 1], hit.point, minDistance);
-                        pos.y = AntColony.instance.transform.position.y;
-                        mousePositions.Add(pos);
-                        
-                        distance-=minDistance;
+                        while (distance > minDistance)
+                        {
+                            Vector3 pos = Vector3.MoveTowards(mousePositions[mousePositions.Count - 1], hit.point,
+                                minDistance);
+                            pos.y = AntColony.instance.transform.position.y;
+                            mousePositions.Add(pos);
+
+                            distance -= minDistance;
+                        }
+                        // 记录鼠标位置
+                        // if (Vector3.Distance(mousePositions[mousePositions.Count - 1], hit.point) > minDistance)
+                        // {
+                        //     Vector3 pos = hit.point;
+                        //     pos.y = 0;
+                        //     mousePositions.Add(pos);
+                        // }
                     }
-                    // 记录鼠标位置
-                    // if (Vector3.Distance(mousePositions[mousePositions.Count - 1], hit.point) > minDistance)
-                    // {
-                    //     Vector3 pos = hit.point;
-                    //     pos.y = 0;
-                    //     mousePositions.Add(pos);
-                    // }
                 }
+
                 PathHelper.GetWayPoints(mousePositions.ToArray(), amountRadio, ref smoothMousePositions);
                 lineRenderer.positionCount = smoothMousePositions.Count;
                 lineRenderer.SetPositions(smoothMousePositions.ToArray());

@@ -37,7 +37,7 @@ public abstract class Ant : MonoBehaviour, IDamageable
 
     protected Ant previousAnt;
     public bool isPatrolPaused = false;
-    private IEnumerator Patrol()
+    protected virtual IEnumerator Patrol()
     {
         // 循环巡逻
         while (waypoint!=null)
@@ -236,7 +236,7 @@ public abstract class Ant : MonoBehaviour, IDamageable
         }
     }
 
-    private bool isDead = false;
+    public bool isDead = false;
     public virtual void Die()
     {
         if (!isDead)

@@ -12,6 +12,7 @@ public class AntColony : MonoBehaviour
         WorkerAnt,
         SoldierAnt,
         ShooterAnt,
+        FlyingAnt,
     }
     public static AntColony instance;
     public static AntColony Instance
@@ -95,8 +96,15 @@ public class AntColony : MonoBehaviour
         UIManager.Instance.ShowFoodCount();
         foreach (var variousAnt in variousAnts)
         {
-            StartCoroutine(ReallocateAntsCoroutine(variousAnt));
-            UIManager.Instance.ShowAntCount(variousAnt, variousAnt.antPrefab.antPrefab.GetComponent<Ant>().antType);
+            if (variousAnt.antPrefab.antPrefab.GetComponent<Ant>().antType != AntType.FlyingAnt)
+            {
+                StartCoroutine(ReallocateAntsCoroutine(variousAnt));
+                UIManager.Instance.ShowAntCount(variousAnt, variousAnt.antPrefab.antPrefab.GetComponent<Ant>().antType);
+            }
+            else
+            {
+                FlyingAntTrack.flyingAnt = variousAnt;
+            }
         }
     }
 

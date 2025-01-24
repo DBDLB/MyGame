@@ -82,6 +82,7 @@ public class ShooterAnt : Ant
         }
     }
     
+    //攻击敌人
     private void Shoot(Enemy enemy)
     {
         if (shooterAntBullet != null)

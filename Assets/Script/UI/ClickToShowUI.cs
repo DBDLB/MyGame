@@ -106,6 +106,10 @@ public class ClickToShowUI : MonoBehaviour
                 {
                     for (int i= 0; i < AntColony.variousAnts.Count;i++)
                     {
+                        if (AntColony.variousAnts[i].antTrack == null)
+                        {
+                            continue;
+                        }
                         foreach (var antPathList in AntColony.variousAnts[i].antTrack.AntPathList)
                         {
                             // 遍历所有曲线进行选择

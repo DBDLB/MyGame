@@ -13,12 +13,15 @@ Shader "MY_PBR_Glass"
     	
     	[Foldout(1, 1, 1, 0)]_Glass ("玻璃效果_Foldout", float) = 0
     	_PixelBlurScale("PixelBlurScale",Range(0,1))=0.5
-    	_ior("折射率",Range(0,10))=1.5
+    	_GlassIor("折射率",Range(0,10))=1.5
     	_Thickness("厚度",Range(0,10))=0.1
     	
     	[Foldout(1, 1, 1, 0)]_Diamond ("钻石效果_Foldout", float) = 0
+    	_DiamondStrength("钻石强度",Range(0,1))=0.5
     	_Cubemap("Environment", CUBE) = "white" {}
     	_CubeNormal("Noraml Cubemap", CUBE) = "white" {}
+    	_DiamondIor("折射率",Range(0,10))=1.5
+    	_MaxRefractionTime("最大折射次数",Range(1,10))=5
     	
 
     	
@@ -52,7 +55,8 @@ Shader "MY_PBR_Glass"
 		#pragma shader_feature _ADD_LIGHTS
 		#pragma shader_feature_local _ _REFLECTION_SSPR
 
-		#pragma shader_feature_local _GLASS_ON
+		#pragma shader_feature_local _ _GLASS_ON _DIAMOND_ON
+		// #pragma shader_feature_local _ _DIAMOND_ON
 
 		CBUFFER_START(UnityPerMaterial)
 			float4 _MainTex_ST;
@@ -68,8 +72,13 @@ Shader "MY_PBR_Glass"
 
 			//Glass
 			float _PixelBlurScale;
-			float _ior;
+			float _GlassIor;
 			float _Thickness;
+
+			//Diamond
+			float _DiamondStrength;
+			float _DiamondIor;
+			int _MaxRefractionTime;
 		
 			float4 _MainTex_TexelSize;
 		CBUFFER_END
@@ -116,7 +125,7 @@ Shader "MY_PBR_Glass"
 			float3 rayWS;
 		};
 		
-		#if _GLASS_ON
+		// #if _GLASS_ON
 		half3 SampleOpaquePyramid(float2 uv, float smoothness)
 		{
 			smoothness = saturate(1 - (1 - smoothness) * _PixelBlurScale);
@@ -193,50 +202,51 @@ Shader "MY_PBR_Glass"
 		
 		    return result;
 		}
-		#endif
+		// #endif
 		
 
 		#define MAX_BOUNCE 5
 		#define REFRACT_SPREAD float3 (0.0, 0.02, 0.05)
-					#define REFRACT_INDEX float3(2.407, 2.426, 2.451)
-			#define REFRACT_SPREAD float3 (0.0, 0.02, 0.05)
+					// #define REFRACT_INDEX float3(2.407, 2.426, 2.451)
+		#define REFRACT_SPREAD float3 (0.0, 0.02, 0.05)
 		#define COS_CRITICAL_ANGLE 0.91
 		//通过法线CubeMap实现多次折射
 		float3 MultipleRefraction(half3 normalOS, half3 viewDirOS, half ior, int maxRefractionTime, half2 refractionSpread)
 		{
+			int maxBounce = min(MAX_BOUNCE, maxRefractionTime);
 			float3 viewDir = normalize(viewDirOS);
 			float3 normal = normalize(normalOS);
 			float3 reflectDir = reflect(viewDir, normal);
 			float fresnelFactor = pow(1 - abs(dot(viewDir, normal)), 2);
-			float3 reflectDirW = mul(float4(reflectDir, 0.0), unity_WorldToObject);
+			float3 reflectDirW = mul(float4(reflectDir, 0.0), unity_WorldToObject)*fresnelFactor;
 
 
-			float4 col = SAMPLE_TEXTURECUBE(_Cubemap, sampler_Cubemap, reflectDirW) * fresnelFactor;
+			float4 col = SAMPLE_TEXTURECUBE(_Cubemap, sampler_Cubemap, reflectDirW);
 
-			float3 inDir = refract(viewDir, normal, 1.0/REFRACT_INDEX.r);
+			float3 inDir = refract(viewDir, normal, 1.0/ior);
 				// Direction to sample environment cubemap for different colors
 				float3 inDirR, inDirG, inDirB;
-				for (int bounce = 0; bounce < MAX_BOUNCE; bounce++)
+				for (int bounce = 0; bounce < maxBounce; bounce++)
 				{
 					// Convert normal to -1, 1 range
 					half3 inN = SAMPLE_TEXTURECUBE(_CubeNormal, sampler_CubeNormal, inDir).xyz * 2.0 - 1.0;
 					if (abs(dot(-inDir, inN)) > COS_CRITICAL_ANGLE)
 					{
 						// The more bounces we have the heavier dispersion should be
-						inDirR = refract(inDir, inN, REFRACT_INDEX.r);
-						inDirG = refract(inDir, inN, REFRACT_INDEX.g + bounce * REFRACT_SPREAD.g);
-						inDirB = refract(inDir, inN, REFRACT_INDEX.b + bounce * REFRACT_SPREAD.b);
+						inDirR = refract(inDir, inN, ior);
+						inDirG = refract(inDir, inN, refractionSpread.x + bounce * REFRACT_SPREAD.g);
+						inDirB = refract(inDir, inN, refractionSpread.y + bounce * REFRACT_SPREAD.b);
 						break;
 					}
 
 					// We didn't manage to exit diamond in MAX_BOUNCE
 					// To be able exit from diamond to air we need fake our refraction 
 					// index other way we'll get float3(0,0,0) as return
-					if (bounce == MAX_BOUNCE-1)
+					if (bounce == maxBounce-1)
 					{
-						inDirR = refract(inDir, inN, 1/ REFRACT_INDEX.r);
-						inDirG = refract(inDir, inN, 1/ (REFRACT_INDEX.g + bounce * REFRACT_SPREAD.g));
-						inDirB = refract(inDir, inN, 1/ (REFRACT_INDEX.b + bounce * REFRACT_SPREAD.b));
+						inDirR = refract(inDir, inN, 1/ ior);
+						inDirG = refract(inDir, inN, 1/ (refractionSpread.x + bounce * REFRACT_SPREAD.g));
+						inDirB = refract(inDir, inN, 1/ (refractionSpread.y + bounce * REFRACT_SPREAD.b));
 						break;
 					}
 					inDir = reflect(inDir, inN);
@@ -248,7 +258,7 @@ Shader "MY_PBR_Glass"
 			col.g += SAMPLE_TEXTURECUBE(_Cubemap, sampler_Cubemap, inDirG).g;
 			col.b +=  SAMPLE_TEXTURECUBE(_Cubemap, sampler_Cubemap, inDirB).b;
 
-			return col.rgb;
+			return saturate(col.rgb);
 		}
 
 		real4 CalculateLight(PBR pbr)
@@ -415,14 +425,25 @@ Shader "MY_PBR_Glass"
 
 				#if _GLASS_ON
 				//玻璃效果
-				RefractionModelResult refractionResult = RefractionModelSphere(viewDirWS, i.positionWS, normalWS, _ior, _Thickness);
+				RefractionModelResult refractionResult = RefractionModelSphere(viewDirWS, i.positionWS, normalWS, _GlassIor, _Thickness);
 				float4 screenPos = TransformWorldToHClip(refractionResult.positionWS);
 				float2 screenUV = screenPos.xy / screenPos.w * 0.5 + 0.5;
 				screenUV.y = 1 - screenUV.y;
-				color.rgb = lerp(SampleOpaquePyramid(screenUV, _Smoothness),color.rgb, _BaseColor.a);
+				float fresnelFactor =1- pow(1 - abs(dot(viewDirWS, normalWS)), 2);
+				color.rgb = lerp(SampleOpaquePyramid(screenUV, _Smoothness),color.rgb, _BaseColor.a*fresnelFactor);
+				// color.rgb = _BaseColor.a*fresnelFactor;
+				#endif
+
+				#if _DIAMOND_ON
+				RefractionModelResult refractionResult = RefractionModelSphere(viewDirWS, i.positionWS, normalWS, _GlassIor, _Thickness);
+				float4 screenPos = TransformWorldToHClip(refractionResult.positionWS);
+				float2 screenUV = screenPos.xy / screenPos.w * 0.5 + 0.5;
+				screenUV.y = 1 - screenUV.y;
+				color.xyz = lerp(SampleOpaquePyramid(screenUV, _Smoothness),color.rgb, _BaseColor.a);
+				color.xyz = lerp(color.xyz,color.xyz+MultipleRefraction( i.normal, i.viewDir, _DiamondIor, _MaxRefractionTime, float2(2.407, 2.426)),_DiamondStrength);
 				#endif
 				
-				return float4(MultipleRefraction( i.normal, i.viewDir, _ior, 5, float2(2.407, 2.426)),1);
+				return color;
 			}
 			ENDHLSL
 		}

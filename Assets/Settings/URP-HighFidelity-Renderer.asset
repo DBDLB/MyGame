@@ -65,7 +65,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0805a01cd63f81a43a4921150a298caf, type: 3}
   m_Name: ColorTintPass
   m_EditorClassIdentifier: 
-  m_Active: 1
+  m_Active: 0
   settings:
     renderPassEvent: 400
     shader: {fileID: 4800000, guid: c7bc63701c1dc144caf4d68c61c72555, type: 3}
@@ -85,7 +85,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7b60ec6f56aeb6c448e5a838babb5c85, type: 3}
   m_Name: Underwater rendering pass
   m_EditorClassIdentifier: 
-  m_Active: 1
+  m_Active: 0
   material: {fileID: 2100000, guid: eaeee9b470618c248a93b4ed155bf780, type: 2}
   rt: {fileID: 8400000, guid: 32d2a027bfe83314ca9869f24786f323, type: 2}
   Event: 500
@@ -113,7 +113,8 @@ MonoBehaviour:
   - {fileID: -225775213531630532}
   - {fileID: 2801058016665469559}
   - {fileID: -7445002047363043177}
-  m_RendererFeatureMap: adc0de57c6d2eee5d5be3345e2e971fce20d065c48caa77beb3a48769b1f9f3b3cf45bb6a3e2ddfc77029bee6c5bdf2697b0de4e150aae98
+  - {fileID: 5067838766421485269}
+  m_RendererFeatureMap: adc0de57c6d2eee5d5be3345e2e971fce20d065c48caa77beb3a48769b1f9f3b3cf45bb6a3e2ddfc77029bee6c5bdf2697b0de4e150aae98d5a681eb81945446
   m_UseNativeRenderPass: 0
   postProcessData: {fileID: 11400000, guid: 41439944d30ece34e96484bdb6645b55, type: 2}
   xrSystemData: {fileID: 11400000, guid: 60e1133243b97e347b653163a8c01b64, type: 2}
@@ -193,6 +194,25 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_Active: 1
   Event: 500
+--- !u!114 &5067838766421485269
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d396cf13435e4b94aab86ea7d05c8f66, type: 3}
+  m_Name: DrawTrailingFeaturePass
+  m_EditorClassIdentifier: 
+  m_Active: 1
+  test: []
+  settings:
+    renderPassEvent: 300
+    shader: {fileID: 4800000, guid: 8e81e544780a6a047920eada7c64a5ae, type: 3}
+    DrawTexture: {fileID: 8400000, guid: 81a35b5cdba1aaf43b492dc4f3e08a27, type: 2}
+    perTexture: {fileID: 8400000, guid: 3a1be7f5964d0614c81c619624b71be3, type: 2}
 --- !u!114 &8910312799906172386
 MonoBehaviour:
   m_ObjectHideFlags: 0
