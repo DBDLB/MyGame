@@ -99,12 +99,12 @@ public class AntColony : MonoBehaviour
             if (variousAnt.antPrefab.antPrefab.GetComponent<Ant>().antType != AntType.FlyingAnt)
             {
                 StartCoroutine(ReallocateAntsCoroutine(variousAnt));
-                UIManager.Instance.ShowAntCount(variousAnt, variousAnt.antPrefab.antPrefab.GetComponent<Ant>().antType);
             }
             else
             {
                 FlyingAntTrack.flyingAnt = variousAnt;
             }
+            UIManager.Instance.ShowAntCount(variousAnt, variousAnt.antPrefab.antPrefab.GetComponent<Ant>().antType);
         }
     }
 

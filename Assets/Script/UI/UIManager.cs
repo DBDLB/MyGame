@@ -102,6 +102,9 @@ public class UIManager : MonoBehaviour
                     case AntColony.AntType.ShooterAnt:
                         showAntNumText.antNumText.text = "射手蚁：" + variousAnt.ants.Count;
                         break;
+                    case AntColony.AntType.FlyingAnt:
+                        showAntNumText.antNumText.text = "飞蚁：" + variousAnt.ants.Count;
+                        break;
                 }
             }
         }

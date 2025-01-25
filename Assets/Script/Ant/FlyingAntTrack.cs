@@ -125,4 +125,11 @@ public class FlyingAntTrack : MonoBehaviour
         //设置Color Multiplier
         image.color = this.enabled ? new Color(1,0.62f,0,1f) : new Color(1,0.62f,0,0.6f);
     }
+    
+    public void FlyingAntSetDisable(Image image)
+    {
+        this.enabled = false;
+        //设置Color Multiplier
+        image.color = new Color(1,0.62f,0,0.6f);
+    }
 }
