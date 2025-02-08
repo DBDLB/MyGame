@@ -11,9 +11,22 @@ public class UnderwaterFeature : ScriptableRendererFeature
     // public Texture screenBrokenNormal;
     public RenderPassEvent Event = RenderPassEvent.AfterRenderingTransparents;
     UnderwaterPass underwaterPass;
+    
+    UnderwaterVolume underwater_volume;
+
 
     public override void AddRenderPasses(ScriptableRenderer renderer, ref RenderingData renderingData)
     {
+        var stac = VolumeManager.instance.stack;
+        if (stac.GetComponent<UnderwaterVolume>() != null)
+        {
+            underwater_volume = stac.GetComponent<UnderwaterVolume>();
+        }
+        
+        if (underwater_volume == null || !underwater_volume.IsActive())
+        {
+            return;
+        }
         renderer.EnqueuePass(underwaterPass);
     }
     public override void SetupRenderPasses(ScriptableRenderer renderer, in RenderingData renderingData)
@@ -40,6 +53,7 @@ public class UnderwaterPass : ScriptableRenderPass
     private RenderTargetIdentifier source;
     private RenderTargetIdentifier tempBuff;
     private RenderTexture WaterDepthWorldSpace;
+    
     public UnderwaterPass(RenderPassEvent renderPassEvent, Material material, string tag,RenderTexture rt)
     {
         this.renderPassEvent = renderPassEvent;

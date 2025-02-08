@@ -61,7 +61,7 @@ public class Underwater : MonoBehaviour
         FarCorners[3] = maincamera.ViewportToWorldPoint(new Vector3(1.0f, 1.0f, Camera.main.farClipPlane));
         UnderWaterMat.SetVectorArray("_CameraFarCorners", FarCorners);
         UnderWaterMat.SetVector("_CameraPos", maincamera.transform.position);
-        Debug.Log("Half height of the camera viewport in world units:" + corners[0]+"------"+corners[1]+"--------"+maincamera.nearClipPlane);
+        // Debug.Log("Half height of the camera viewport in world units:" + corners[0]+"------"+corners[1]+"--------"+maincamera.nearClipPlane);
         
         
         // Matrix4x4 projectionMatrix = GL.GetGPUProjectionMatrix(Targetcamera.projectionMatrix, false);

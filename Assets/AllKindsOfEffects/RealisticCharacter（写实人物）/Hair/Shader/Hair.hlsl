@@ -1,5 +1,5 @@
 #define PI 3.14159274f
-#include <UnityCG.cginc>
+
 // Reference: A Practical and Controllable Hair and Fur Model for Production Path Tracing.
 float3 HairAbsorptionToColor(float3 A, float B=0.3f)
 {
@@ -61,6 +61,37 @@ float Square( float x )
 {
 	return x*x;
 }
+
+struct FGBufferData
+{
+	float3 BaseColor;
+	float Roughness;
+	float Metallic;
+	float3 CustomData;
+	float Specular;
+};
+
+struct FHairTransmittanceData
+{
+	float OpaqueVisibility;
+	float LocalScattering;
+	float GlobalScattering;
+	uint ScatteringComponent;
+	bool bUseLegacyAbsorption;
+	bool bUseSeparableR;
+	bool bUseBacklit;
+	bool bClampBSDFValue;
+};
+
+struct FShadowTerms
+{
+	half	SurfaceShadow;
+	half	TransmissionShadow;
+	half	TransmissionThickness;
+	FHairTransmittanceData HairTransmittance;
+};
+
+
 
 float3 KajiyaKayDiffuseAttenuation(FGBufferData GBuffer, float3 L, float3 V, half3 N, float Shadow)
 {
@@ -376,7 +407,8 @@ float3 HairShading( FGBufferData GBuffer, float3 L, float3 V, half3 N, float Sha
 	};
 
 	float3 S = 0;
-	if (HairTransmittance.ScatteringComponent & HAIR_COMPONENT_R)
+	// if (HairTransmittance.ScatteringComponent & HAIR_COMPONENT_R)
+	if (HairTransmittance.ScatteringComponent)
 	{
 		const float sa = sin(Alpha[0]);
 		const float ca = cos(Alpha[0]);
@@ -389,7 +421,8 @@ float3 HairShading( FGBufferData GBuffer, float3 L, float3 V, half3 N, float Sha
 	}
 
 	// TT
-	if (HairTransmittance.ScatteringComponent & HAIR_COMPONENT_TT)
+	// if (HairTransmittance.ScatteringComponent & HAIR_COMPONENT_TT)
+	if (HairTransmittance.ScatteringComponent )
 	{
 		float Mp = Hair_g( B[1], SinThetaL + SinThetaV - Alpha[1], HairTransmittance.bClampBSDFValue);
 
@@ -429,7 +462,8 @@ float3 HairShading( FGBufferData GBuffer, float3 L, float3 V, half3 N, float Sha
 	}
 
 	// TRT
-	if (HairTransmittance.ScatteringComponent & HAIR_COMPONENT_TRT)
+	// if (HairTransmittance.ScatteringComponent & HAIR_COMPONENT_TRT)
+	if (HairTransmittance.ScatteringComponent)
 	{
 		float Mp = Hair_g( B[2], SinThetaL + SinThetaV - Alpha[2], HairTransmittance.bClampBSDFValue);
 		
@@ -447,7 +481,8 @@ float3 HairShading( FGBufferData GBuffer, float3 L, float3 V, half3 N, float Sha
 	}
 #endif
 
-	if (HairTransmittance.ScatteringComponent & HAIR_COMPONENT_MULTISCATTER)
+	// if (HairTransmittance.ScatteringComponent & HAIR_COMPONENT_MULTISCATTER)
+	if (HairTransmittance.ScatteringComponent)
 	{
 		S  = EvaluateHairMultipleScattering(HairTransmittance, ClampedRoughness, S);
 		S += KajiyaKayDiffuseAttenuation(GBuffer, L, V, N, Shadow);
@@ -457,9 +492,9 @@ float3 HairShading( FGBufferData GBuffer, float3 L, float3 V, half3 N, float Sha
 	return S;
 }
 
-float3 HairBxDF(FGBufferData GBuffer, half3 N, half3 V, half3 L, float Falloff, half NoL, FAreaLight AreaLight, FShadowTerms Shadow)
+float3 HairBxDF(FGBufferData GBuffer, half3 N, half3 V, half3 L, float Falloff, half NoL, FShadowTerms Shadow)
 {
-	const float3 BsdfValue = HairShading(GBuffer, L, V, N, Shadow.TransmissionShadow, Shadow.HairTransmittance, HAIR_BSDF_BACKLIT, 0, uint2(0, 0));
+	const float3 BsdfValue = HairShading(GBuffer, L, V, N, Shadow.TransmissionShadow, Shadow.HairTransmittance, 1, 0, uint2(0, 0));
 
 	// FDirectLighting Lighting;
 	// Lighting.Diffuse = 0;

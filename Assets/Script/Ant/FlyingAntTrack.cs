@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 [ExecuteInEditMode]
@@ -79,7 +80,8 @@ public class FlyingAntTrack : MonoBehaviour
                 RaycastHit hit;
                 int tiling = 1;
                 // 如果射线击中了Ground层的物体
-                if (flyingAnt.antPool.Count>0 && Physics.Raycast(ray, out hit, Mathf.Infinity, groundLayer))
+                //如果点击的不是UI
+                if (!EventSystem.current.IsPointerOverGameObject()&&flyingAnt.antPool.Count>0 && Physics.Raycast(ray, out hit, Mathf.Infinity, groundLayer))
                 {
                     if (hit.transform.gameObject.layer == LayerMask.NameToLayer("Ground"))
                     {

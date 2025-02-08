@@ -19,6 +19,8 @@ public abstract class Ant : MonoBehaviour, IDamageable
     
     [HideInInspector]public bool backToNest = false; // 是否返回巢穴
     protected Coroutine patrolCoroutine;
+    
+    private Vector3 startPosition;
 
     protected virtual void OnEnable()
     {
@@ -30,7 +32,8 @@ public abstract class Ant : MonoBehaviour, IDamageable
             Vector3 direction = (waypoint.pathList[currentWaypointIndex] - transform.position).normalized;
             Quaternion targetRotation = Quaternion.LookRotation(direction);
             transform.rotation = targetRotation;
-
+            transform.position = waypoint.pathList[currentWaypointIndex];
+            startPosition = waypoint.pathList[currentWaypointIndex];
             patrolCoroutine = StartCoroutine(Patrol());
         }
     }
@@ -196,12 +199,12 @@ public abstract class Ant : MonoBehaviour, IDamageable
                 continue;
             }
             // 计算前进方向并朝向该方向
-            Vector3 direction = (colony.transform.position - transform.position).normalized;
+            Vector3 direction = (startPosition - transform.position).normalized;
             Quaternion targetRotation = Quaternion.LookRotation(direction);
             transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, Time.deltaTime * patrolSpeed*2);
-            transform.position = Vector3.MoveTowards(transform.position, colony.transform.position, Time.deltaTime * patrolSpeed);
+            transform.position = Vector3.MoveTowards(transform.position, startPosition, Time.deltaTime * patrolSpeed);
             // 检查是否到达巢穴位置
-            if (Vector3.Distance(transform.position, colony.transform.position) < 0.1f)
+            if (Vector3.Distance(transform.position, startPosition) < 0.1f)
             {
                 // 回收蚂蚁
                 colony.RecycleAnt(gameObject);

@@ -53,6 +53,22 @@ MonoBehaviour:
   - {fileID: 2800000, guid: 3302065f671a8450b82c9ddf07426f3a, type: 3}
   - {fileID: 2800000, guid: 56a77a3e8d64f47b6afe9e3c95cb57d5, type: 3}
   m_Shader: {fileID: 4800000, guid: 0849e84e3d62649e8882e9d6f056a017, type: 3}
+--- !u!114 &-919519588507745490
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5e5c1b520a9360c4eb097a84c7f15036, type: 3}
+  m_Name: SSOutlineDistorted
+  m_EditorClassIdentifier: 
+  m_Active: 1
+  OutlineDistortMat: {fileID: 2100000, guid: 4bafb83d8ab3d9d4c9777dbf7004d659, type: 2}
+  gfxFormat: 4
+  Event: 500
 --- !u!114 &-256166545750507819
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -70,7 +86,7 @@ MonoBehaviour:
     renderPassEvent: 400
     shader: {fileID: 4800000, guid: c7bc63701c1dc144caf4d68c61c72555, type: 3}
     outline_width: 1
-    outline_color: {r: 0, g: 0.15871708, b: 2.9960785, a: 1}
+    outline_color: {r: 0, g: 0, b: 0, a: 1}
     depth_threshold: 0.01
     normal_threshold: 2
 --- !u!114 &-225775213531630532
@@ -85,10 +101,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7b60ec6f56aeb6c448e5a838babb5c85, type: 3}
   m_Name: Underwater rendering pass
   m_EditorClassIdentifier: 
-  m_Active: 0
+  m_Active: 1
   material: {fileID: 2100000, guid: eaeee9b470618c248a93b4ed155bf780, type: 2}
   rt: {fileID: 8400000, guid: 32d2a027bfe83314ca9869f24786f323, type: 2}
-  Event: 500
+  Event: 450
 --- !u!114 &11400000
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -114,7 +130,8 @@ MonoBehaviour:
   - {fileID: 2801058016665469559}
   - {fileID: -7445002047363043177}
   - {fileID: 5067838766421485269}
-  m_RendererFeatureMap: adc0de57c6d2eee5d5be3345e2e971fce20d065c48caa77beb3a48769b1f9f3b3cf45bb6a3e2ddfc77029bee6c5bdf2697b0de4e150aae98d5a681eb81945446
+  - {fileID: -919519588507745490}
+  m_RendererFeatureMap: adc0de57c6d2eee5d5be3345e2e971fce20d065c48caa77beb3a48769b1f9f3b3cf45bb6a3e2ddfc77029bee6c5bdf2697b0de4e150aae98d5a681eb819454462e83fb5ace353df3
   m_UseNativeRenderPass: 0
   postProcessData: {fileID: 11400000, guid: 41439944d30ece34e96484bdb6645b55, type: 2}
   xrSystemData: {fileID: 11400000, guid: 60e1133243b97e347b653163a8c01b64, type: 2}

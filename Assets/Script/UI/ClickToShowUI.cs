@@ -22,19 +22,19 @@ public class ClickToShowUI : MonoBehaviour
         }
     }
 
-    private void Awake()
-    {
-        if (instance == null)
-        {
-            instance = this;
-            DontDestroyOnLoad(gameObject);
-        }
-        else if (instance != this)
-        {
-            Destroy(gameObject);
-        }
-    }
-    
+    // private void Awake()
+    // {
+    //     if (instance == null)
+    //     {
+    //         instance = this;
+    //         DontDestroyOnLoad(gameObject);
+    //     }
+    //     else if (instance != this)
+    //     {
+    //         Destroy(gameObject);
+    //     }
+    // }
+    //
     
     public List<GameObject> uiPanels = new List<GameObject>();
 
@@ -163,7 +163,7 @@ public class ClickToShowUI : MonoBehaviour
         }
         AntColony.variousAnts[variousAntIndex].antTrack.AntPathList.Remove(antPath);
         Destroy(antPath.lineRenderer.gameObject);
-        DeleteButton.SetActive(false);
+        // DeleteButton.SetActive(false);
     }
 
     public static AntTrack CreatingPath;
@@ -234,5 +234,10 @@ public class ClickToShowUI : MonoBehaviour
         {
             panel.SetActive(false);
         }
+    }
+    
+    public void SetAntColonyPosition()
+    {
+        AntColony.instance.AntColonyPosition = this.gameObject;
     }
 }

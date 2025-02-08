@@ -82,7 +82,7 @@ public class AntTrack : MonoBehaviour
                     {
                         if (mousePositions.Count == 0)
                         {
-                            mousePositions.Add(AntColony.instance.transform.position);
+                            mousePositions.Add(AntColony.instance.AntColonyPosition.transform.position);
                         }
 
                         float distance = Vector3.Distance(mousePositions[mousePositions.Count - 1], hit.point);
@@ -91,7 +91,7 @@ public class AntTrack : MonoBehaviour
                         {
                             Vector3 pos = Vector3.MoveTowards(mousePositions[mousePositions.Count - 1], hit.point,
                                 minDistance);
-                            pos.y = AntColony.instance.transform.position.y;
+                            pos.y = AntColony.instance.AntColonyPosition.transform.position.y;
                             mousePositions.Add(pos);
 
                             distance -= minDistance;
@@ -140,7 +140,7 @@ public class AntTrack : MonoBehaviour
         line = null;
         mousePositions = new List<Vector3>();
         this.enabled = false;
-        AntColony.instance.GetComponent<ClickToShowUI>().enabled = true;
+        AntColony.instance.AntColonyPosition.GetComponent<ClickToShowUI>().enabled = true;
     }
     public void CancelCreatePath()
     {
@@ -148,6 +148,6 @@ public class AntTrack : MonoBehaviour
         line = null;
         mousePositions = new List<Vector3>();
         this.enabled = false;
-        AntColony.instance.GetComponent<ClickToShowUI>().enabled = true;
+        AntColony.instance.AntColonyPosition.GetComponent<ClickToShowUI>().enabled = true;
     }
 }

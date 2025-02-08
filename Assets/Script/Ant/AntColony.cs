@@ -79,8 +79,10 @@ public class AntColony : MonoBehaviour
     public int foodCount = 20;
     
     private int AntCount = 0;
-    
-    
+
+    public GameObject AntColonyPosition;
+
+
     void Start()
     {
         foreach (var antPrefab in prefabsAnts)

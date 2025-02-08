@@ -82,6 +82,7 @@ Shader "ShallowWater"
                 float4 pos: SV_POSITION;
                 float2 uv: TEXCOORD0;
                 float3 worldPos: TEXCOORD1;
+                float3 PosOS: TEXCOORD3;
                 float4 screenPosition : TEXCOORD2;
             };
 
@@ -192,6 +193,42 @@ Shader "ShallowWater"
             //    // #endif
             //    return viewPos;
             // }
+            float2 IntersectCube(float3 origin, float3 ray, float3 sphereMin, float3 sphereMax)
+            {
+                float3 tMin = (sphereMin - origin) / ray;
+                float3 tMax = (sphereMax - origin) / ray;
+                float3 t1 = min(tMin, tMax);
+                float3 t2 = max(tMin, tMax);
+                float tNear = max(max(t1.x, t1.y), t1.z);
+                float tFar = min(min(t2.x, t2.y), t2.z);
+                return float2(tNear, tFar);
+            }
+
+            static const float IOR_AIR = 1.0, IOR_WATER = 1.333;
+            float3 GetWallColor(float3 _point, float3 normal,float info)
+            {
+                float scale = 0.5;
+            
+                scale /= length(_point); 
+            
+                float3 refractedLight = -refract(normalize(float3(0.0, -1.0, 0.0)), float3(0.0, 1.0, 0.0), IOR_AIR / IOR_WATER);
+                float diffuse = max(0.0, dot(refractedLight, normal));
+            
+                // float4 info = SAMPLE_TEXTURE2D(_WaveMap, sampler_WaveMap, _point.xz * 0.5 + 0.5);
+                if (_point.y < info.r)
+                {
+                    float4 caustic = SAMPLE_TEXTURE2D(_CausticMap, sampler_ScreenTextures_linear_repeat, 0.75 * (_point.xz - _point.y * refractedLight.xz / refractedLight.y) * 0.5 + 0.5);
+                    scale += diffuse * caustic.r * 2.0 * caustic.g;
+                }
+                else
+                {
+                    float2 t = IntersectCube(_point, refractedLight, float3(-1.0, -1.0, -1.0), float3(1.0, 2.0, 1.0));
+                    diffuse *= 1.0 / (1.0 + exp(-200.0 / (1.0 + 10.0 * (t.y - t.x)) * (_point.y + refractedLight.y * t.y - 2.0 / 12.0)));
+                    scale = max(0.5, scale + 0.5 * diffuse);
+                }
+            
+                return scale;
+            }
             
             
             v2f vert(appdata v)
@@ -201,6 +238,7 @@ Shader "ShallowWater"
                 // float4 displcae = SAMPLE_TEXTURE2D_LOD(_Displace,sampler_LinearRepeat, float4(o.uv, 0, 0),0.1 * UNITY_SPECCUBE_LOD_STEPS);
                 // v.vertex += float4(displcae.xyz, 0);
                 o.pos = TransformObjectToHClip(v.vertex);
+                o.PosOS = v.vertex.xyz;
                 o.screenPosition = ComputeScreenPos(o.pos);
                 
                 o.worldPos = mul(unity_ObjectToWorld, v.vertex).xyz;
@@ -319,7 +357,9 @@ Shader "ShallowWater"
                 
                 half3 col = ambient + lerp(diffuse, sky + IndirColor, fresnel) + specular ;
                 col = lerp(col, baseMap.rgb , depthDifference);
-                
+
+
+                float4 col_test = float4(GetWallColor(i.PosOS, float3(0,1,0),heightValue), 1);
                 return half4(col, 1);
             }
             ENDHLSL
