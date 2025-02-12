@@ -42,8 +42,11 @@ Material:
     m_Floats:
     - _AddLights: 1
     - _BaseColorStrength: 1
-    - _Cutoff: 0.3
+    - _Cutoff: 0.142
+    - _CutoffMaxDistance: 5
+    - _DitherThresold: 0
     - _DstBlend: 0
+    - _MaxDistance: 0
     - _Other: 1
     - _SrcBlend: 1
     - _TEST: 1

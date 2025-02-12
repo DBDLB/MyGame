@@ -101,7 +101,7 @@ public class SS_Outline_Distorted : ScriptableRendererFeature
             }
             else
             {
-                Debug.LogWarning("outline_volume is null");
+                // Debug.LogWarning("outline_volume is null");
 
                 return;
             }
