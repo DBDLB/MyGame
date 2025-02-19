@@ -244,8 +244,6 @@ MonoBehaviour:
   m_Name: HairAARendererFeature
   m_EditorClassIdentifier: 
   m_Active: 1
-  hairAARenderer_SourceMat: {fileID: 2100000, guid: 6bb8d38a4331a67488d495fa177a8878,
-    type: 2}
   hairAARendererMat: {fileID: 2100000, guid: edee70c3166269a4ab9337a2568987e2, type: 2}
   gfxFormat: 4
   Event: 300

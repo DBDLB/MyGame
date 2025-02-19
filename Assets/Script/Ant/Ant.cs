@@ -20,7 +20,7 @@ public abstract class Ant : MonoBehaviour, IDamageable
     [HideInInspector]public bool backToNest = false; // 是否返回巢穴
     protected Coroutine patrolCoroutine;
     
-    private Vector3 startPosition;
+    protected Vector3 startPosition;
 
     protected virtual void OnEnable()
     {
@@ -69,22 +69,22 @@ public abstract class Ant : MonoBehaviour, IDamageable
                         // 获取上一只蚂蚁
                         previousAnt = GetPreviousAnt();
                         // 如果距离上一只蚂蚁太近，减慢速度
-                        if (previousAnt != null && previousAnt.backToNest == backToNest)
-                        {
-                            float distanceToPreviousAnt =
-                                Vector3.Distance(transform.position, previousAnt.transform.position);
-                            if (distanceToPreviousAnt < minDistanceToPreviousAnt)
-                            {
-                                if (Vector3.Distance(transform.position, colony.transform.position)<minDistanceToColony)
-                                {
-                                    speed *= Mathf.Clamp01(distanceToPreviousAnt / minDistanceToPreviousAnt);
-                                }
-                                else
-                                {
-                                    speed *= Mathf.Max(Mathf.Clamp01(distanceToPreviousAnt / minDistanceToPreviousAnt), slowDownFactor);
-                                }
-                            }
-                        }
+                        // if (previousAnt != null && previousAnt.backToNest == backToNest)
+                        // {
+                        //     float distanceToPreviousAnt =
+                        //         Vector3.Distance(transform.position, previousAnt.transform.position);
+                        //     if (distanceToPreviousAnt < minDistanceToPreviousAnt)
+                        //     {
+                        //         if (Vector3.Distance(transform.position, colony.transform.position)<minDistanceToColony)
+                        //         {
+                        //             speed *= Mathf.Clamp01(distanceToPreviousAnt / minDistanceToPreviousAnt);
+                        //         }
+                        //         else
+                        //         {
+                        //             speed *= Mathf.Max(Mathf.Clamp01(distanceToPreviousAnt / minDistanceToPreviousAnt), slowDownFactor);
+                        //         }
+                        //     }
+                        // }
 
                         // 计算前进方向并朝向该方向
                         Vector3 direction = (waypoint.pathList[i] - transform.position).normalized;
@@ -160,17 +160,17 @@ public abstract class Ant : MonoBehaviour, IDamageable
                         // 获取上一只蚂蚁
                         previousAnt = GetPreviousAnt();
                         // 如果距离上一只蚂蚁太近，减慢速度
-                        if (previousAnt != null && previousAnt.backToNest == backToNest && Vector3.Distance(transform.position, colony.transform.position)>minDistanceToColony)
-                        {
-                            float distanceToPreviousAnt = Vector3.Distance(transform.position, previousAnt.transform.position);
-                            if (distanceToPreviousAnt < minDistanceToPreviousAnt)
-                            {
-                                if (Vector3.Distance(transform.position, colony.transform.position)>minDistanceToColony)
-                                {
-                                    speed *= Mathf.Max(Mathf.Clamp01(distanceToPreviousAnt / minDistanceToPreviousAnt), slowDownFactor);
-                                }
-                            }
-                        }
+                        // if (previousAnt != null && previousAnt.backToNest == backToNest && Vector3.Distance(transform.position, colony.transform.position)>minDistanceToColony)
+                        // {
+                        //     float distanceToPreviousAnt = Vector3.Distance(transform.position, previousAnt.transform.position);
+                        //     if (distanceToPreviousAnt < minDistanceToPreviousAnt)
+                        //     {
+                        //         if (Vector3.Distance(transform.position, colony.transform.position)>minDistanceToColony)
+                        //         {
+                        //             speed *= Mathf.Max(Mathf.Clamp01(distanceToPreviousAnt / minDistanceToPreviousAnt), slowDownFactor);
+                        //         }
+                        //     }
+                        // }
                         
                         // 计算前进方向并朝向该方向
                         Vector3 direction = (waypoint.pathList[i] - transform.position).normalized;

@@ -8,15 +8,36 @@ using UnityEngine.Experimental.Rendering.RenderGraphModule;
 public class HairAARendererFeature : ScriptableRendererFeature
 {
     HairAARendererPass hairAARendererPass;
-    public Material hairAARenderer_SourceMat;
+    // public Material hairAARenderer_SourceMat;
     public Material hairAARendererMat;
-
     public GraphicsFormat gfxFormat;
-
-
     public RenderPassEvent Event = RenderPassEvent.BeforeRenderingPostProcessing;
+    
+    public override void Create()
+    {
+        // 建立对应的 ScriptableRenderPass
+        hairAARendererPass = new HairAARendererPass(this);
+        // 将 ScriptableRenderPass 的渲染时机指定为所有其他渲染操作完成之后
+        hairAARendererPass.renderPassEvent = Event;
+        const FormatUsage usage = FormatUsage.Linear | FormatUsage.Render;
+        gfxFormat = SystemInfo.IsFormatSupported(GraphicsFormat.R8G8B8A8_SRGB, usage) ? GraphicsFormat.R8G8B8A8_SRGB : GraphicsFormat.R16G16B16A16_SFloat; // HDR fallback
+    }
 
+    public override void AddRenderPasses(ScriptableRenderer renderer, ref RenderingData renderingData)
+    {
+        var camera = renderingData.cameraData.camera;
 
+        if(hairAARendererMat==null) return;
+        if (camera.cameraType != CameraType.Game && camera.cameraType != CameraType.SceneView) return;
+        if (camera.cameraType == CameraType.Game && camera.CompareTag("MainCamera") == false) //game视图目前只支持主相机
+            return;
+        renderer.EnqueuePass(hairAARendererPass);
+    }
+    public override void SetupRenderPasses(ScriptableRenderer renderer, in RenderingData renderingData)
+    {
+        hairAARendererPass.SetTarget(renderer.cameraColorTargetHandle, renderer.cameraDepthTargetHandle);
+    }
+    
     // public LayerMask layerMask;
     public class HairAARendererPass : ScriptableRenderPass
     {
@@ -29,10 +50,10 @@ public class HairAARendererFeature : ScriptableRendererFeature
         // private RenderTargetHandle HairAATangentDepthRT = new RenderTargetHandle("HairAATangentDepthRT");
 
         private List<ShaderTagId> shaderTagIdList = new List<ShaderTagId> {
-        new ShaderTagId("UniversalForward"),
+        new ShaderTagId("HairAA_Source"),
     };
  
-        public Material hairAARenderer_SourceMat;
+        // public Material hairAARenderer_SourceMat;
         public Material hairAARendererMat;
         
         RTHandle cameraColorAttachment;//设置当前渲染目标
@@ -44,7 +65,7 @@ public class HairAARendererFeature : ScriptableRendererFeature
             this.feature = feature;
             // 在构造函数中创建描边时使用的材质
             this.hairAARendererMat = feature.hairAARendererMat;
-            this.hairAARenderer_SourceMat = feature.hairAARenderer_SourceMat;
+            // this.hairAARenderer_SourceMat = feature.hairAARenderer_SourceMat;
             HairAATangentRT.Init("HairAATangentRT");
 
         }
@@ -92,10 +113,12 @@ public class HairAARendererFeature : ScriptableRendererFeature
                 DrawingSettings drawingSettings = CreateDrawingSettings(shaderTagIdList, ref renderingData, renderingData.cameraData.defaultOpaqueSortFlags);
                 //覆盖layer里所有物体的材质
                 // drawingSettings.overrideShader = Shader.Find("HairAA/Source");
-                drawingSettings.overrideMaterial = hairAARenderer_SourceMat;
+                // drawingSettings.overrideMaterial = hairAARendererMat;
+                // drawingSettings.overrideMaterialPassIndex = 1;
 
                 RendererListParams rendererListParams = new RendererListParams(renderingData.cullResults, drawingSettings, filteringSettings);
                 // var depthAttachment = renderingData.cameraData.renderer.cameraDepthTarget;
+                
                 cmd.SetRenderTarget(HairAATangentRT.id, cameraDepth);
                 cmd.ClearRenderTarget(false, true, Color.clear, 0);
 
@@ -113,12 +136,11 @@ public class HairAARendererFeature : ScriptableRendererFeature
                 // 绘制描边
                 hairAARendererMat.SetTexture("_CameraColor", cameraColor);
                 cmd.Blit(HairAATangentRT.Identifier(), cameraColorAttachment, hairAARendererMat,0);
-                cmd.Blit(cameraColorAttachment, cameraColor, hairAARendererMat,1);
-                // Blitter.BlitCameraTexture(cmd, cameraColorAttachment, cameraColor);
+                // cmd.Blit(cameraColorAttachment, cameraColor, hairAARendererMat,1);
+                Blitter.BlitCameraTexture(cmd, cameraColorAttachment, cameraColor);
                 context.ExecuteCommandBuffer(cmd);
                 cmd.Clear();
                 //     // 执行
-
             }
             // 回收 CommandBuffer
             CommandBufferPool.Release(cmd);
@@ -131,32 +153,5 @@ public class HairAARendererFeature : ScriptableRendererFeature
 
 
         }
-    }
-
-
-    public override void Create()
-    {
-
-        // 建立对应的 ScriptableRenderPass
-        hairAARendererPass = new HairAARendererPass(this);
-        // 将 ScriptableRenderPass 的渲染时机指定为所有其他渲染操作完成之后
-        hairAARendererPass.renderPassEvent = Event;
-        const FormatUsage usage = FormatUsage.Linear | FormatUsage.Render;
-        gfxFormat = SystemInfo.IsFormatSupported(GraphicsFormat.R8G8B8A8_SRGB, usage) ? GraphicsFormat.R8G8B8A8_SRGB : GraphicsFormat.R16G16B16A16_SFloat; // HDR fallback
-
-    }
-
-    public override void AddRenderPasses(ScriptableRenderer renderer, ref RenderingData renderingData)
-    {
-        var camera = renderingData.cameraData.camera;
-
-        if (camera.cameraType != CameraType.Game && camera.cameraType != CameraType.SceneView) return;
-        if (camera.cameraType == CameraType.Game && camera.CompareTag("MainCamera") == false) //game视图目前只支持主相机
-            return;
-        renderer.EnqueuePass(hairAARendererPass);
-    }
-    public override void SetupRenderPasses(ScriptableRenderer renderer, in RenderingData renderingData)
-    {
-        hairAARendererPass.SetTarget(renderer.cameraColorTargetHandle, renderer.cameraDepthTargetHandle);
     }
 }

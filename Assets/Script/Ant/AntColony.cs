@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using UnityEngine;
 using System.Collections.Generic;
+using System.Linq;
 using TMPro;
 
 public class AntColony : MonoBehaviour
@@ -55,6 +56,7 @@ public class AntColony : MonoBehaviour
     }
     
     public List<antPrefabs> prefabsAnts = new List<antPrefabs>(); // 蚂蚁预制体
+    public FlyingAntTrack flyingAntTrack;
     // public List<List<Vector3>> AntTrack.AntPathList = new List<List<Vector3>>(); // 蚂蚁路径列表
 
     public class VariousAnt
@@ -74,17 +76,22 @@ public class AntColony : MonoBehaviour
         }
     }
 
+    public GameObject ChildAntColony;
+
     public static List<VariousAnt> variousAnts = new List<VariousAnt>(); // 当前生成的蚂蚁列表
-    
+
     public int foodCount = 20;
     
     private int AntCount = 0;
 
-    public GameObject AntColonyPosition;
+    [HideInInspector]public GameObject AntColonyPosition;
 
 
     void Start()
     {
+        //复制ChildAntColony到指定位置
+        // Instantiate(ChildAntColony, new(-13.6f,0.5f,4.9f), Quaternion.identity).SetActive(true);
+        
         foreach (var antPrefab in prefabsAnts)
         {
             variousAnts.Add(new VariousAnt(antPrefab.AntTrack, antPrefab));
@@ -183,20 +190,35 @@ public class AntColony : MonoBehaviour
 
             while (variousAnt.antPool.Count != 0)
             {
+                bool hasLeaveOver = true;
                 //判断哪一条路径上的蚂蚁数量最少
-                AntTrack.AntPath pathWithLeastAnts = FindPathWithLeastAnts(variousAnt);
-                if (pathWithLeastAnts != null)
+                int pathAntsCount = variousAnt.ants.Count/Math.Max(variousAnt.antTrack.AntPathList.Count,1);
+                foreach (var Path in variousAnt.antTrack.AntPathList)
                 {
+                    if (variousAnt.antPool.Count == 0 || Path.ants.Count >= pathAntsCount)
+                    {
+                        hasLeaveOver = true;
+                        continue;
+                    }
                     GameObject ant = variousAnt.antPool.Dequeue();
-                    ant.GetComponent<Ant>().waypoint = pathWithLeastAnts;
-                    pathWithLeastAnts.ants.Add(ant.GetComponent<Ant>());
+                    ant.GetComponent<Ant>().waypoint = Path;
+                    Path.ants.Add(ant.GetComponent<Ant>());
                     ant.SetActive(true);
-                    yield return new WaitForSeconds(0.4f);
+                    hasLeaveOver = false;
                 }
-                else
+
+                if (hasLeaveOver)
                 {
-                    break;
+                    AntTrack.AntPath pathWithLeastAnts = FindPathWithLeastAnts(variousAnt);
+                    if (pathWithLeastAnts != null &&variousAnt.antPool.Count != 0)
+                    {
+                        GameObject ant = variousAnt.antPool.Dequeue();
+                        ant.GetComponent<Ant>().waypoint = pathWithLeastAnts;
+                        pathWithLeastAnts.ants.Add(ant.GetComponent<Ant>());
+                        ant.SetActive(true);
+                    }
                 }
+                yield return new WaitForSeconds(0.4f);
             }
 
 
@@ -396,6 +418,4 @@ public class AntColony : MonoBehaviour
     //     }
     // }
     #endregion
-    
-
 }

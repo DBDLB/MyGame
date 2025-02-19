@@ -55,10 +55,10 @@ MonoBehaviour:
   active: 1
   OutlineWidth:
     m_OverrideState: 1
-    m_Value: 4.1
+    m_Value: 3.5
   OutlineColor:
     m_OverrideState: 1
-    m_Value: {r: 0, g: 0, b: 0, a: 1}
+    m_Value: {r: 1.2913697, g: 3.6654227, b: 4.8029895, a: 1}
 --- !u!114 &11400000
 MonoBehaviour:
   m_ObjectHideFlags: 0

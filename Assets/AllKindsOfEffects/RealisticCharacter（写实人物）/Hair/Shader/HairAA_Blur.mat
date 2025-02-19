@@ -32,19 +32,23 @@ Material:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
+    - _FlowMapTexture:
+        m_Texture: {fileID: 2800000, guid: 81be5b403dfa8ce449f3f4df4248bf48, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
     - _MainTex:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _RIDO:
-        m_Texture: {fileID: 0}
+        m_Texture: {fileID: 2800000, guid: ebb87ba0b1f047144baaac35e82cbe6e, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
-    - _Blur: 8
+    - _Blur: 8.61
     - _Contrast: 0
-    - _CutoffMaxDistance: 10
+    - _CutoffMaxDistance: 5
     - _HighPassRange: 1
     - _Loop: 1
     - _Other: 1

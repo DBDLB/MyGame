@@ -38,19 +38,29 @@ public class UIManager : MonoBehaviour
     private void Start()
     {
         // 初始化时隐藏所有面板
-        HideAllPanels();
+        // HideAllPanels();
     }
 
     // 显示指定面板
     public void ShowPanel(string panelName)
     {
-        HideAllPanels(); // 隐藏其他面板
-
         foreach (GameObject panel in panels)
         {
             if (panel.name == panelName)
             {
                 panel.SetActive(true);
+                break;
+            }
+        }
+    }
+    
+    public void HidePanel(string panelName)
+    {
+        foreach (GameObject panel in panels)
+        {
+            if (panel.name == panelName)
+            {
+                panel.SetActive(false);
                 break;
             }
         }
@@ -81,7 +91,7 @@ public class UIManager : MonoBehaviour
     // 显示食物数量
     public void ShowFoodCount()
     {
-        FoodShowText.text = "食物数量：" + AntColony.instance.foodCount;
+        FoodShowText.text = AntColony.instance.foodCount.ToString();
     }
     
     // 显示蚂蚁数量
@@ -94,16 +104,20 @@ public class UIManager : MonoBehaviour
                 switch (antType)
                 {
                     case AntColony.AntType.WorkerAnt:
-                        showAntNumText.antNumText.text = "工蚁：" + variousAnt.ants.Count;
+                        // showAntNumText.antNumText.text = "工蚁：" + variousAnt.ants.Count;
+                        showAntNumText.antNumText.text = variousAnt.ants.Count.ToString();
                         break;
                     case AntColony.AntType.SoldierAnt:
-                        showAntNumText.antNumText.text = "兵蚁：" + variousAnt.ants.Count;
+                        // showAntNumText.antNumText.text = "兵蚁：" + variousAnt.ants.Count;
+                        showAntNumText.antNumText.text = variousAnt.ants.Count.ToString();
                         break;
                     case AntColony.AntType.ShooterAnt:
-                        showAntNumText.antNumText.text = "射手蚁：" + variousAnt.ants.Count;
+                        // showAntNumText.antNumText.text = "射手蚁：" + variousAnt.ants.Count;
+                        showAntNumText.antNumText.text = variousAnt.ants.Count.ToString();
                         break;
                     case AntColony.AntType.FlyingAnt:
-                        showAntNumText.antNumText.text = "飞蚁：" + variousAnt.ants.Count;
+                        // showAntNumText.antNumText.text = "飞蚁：" + variousAnt.ants.Count;
+                        showAntNumText.antNumText.text = variousAnt.ants.Count.ToString();
                         break;
                 }
             }

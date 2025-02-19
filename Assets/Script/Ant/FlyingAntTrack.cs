@@ -85,23 +85,33 @@ public class FlyingAntTrack : MonoBehaviour
                 {
                     if (hit.transform.gameObject.layer == LayerMask.NameToLayer("Ground"))
                     {
-                        path.Add(AntColony.instance.transform.position);
                         Vector3 pos = hit.point;
                         pos.y = 7;
+                        Vector3 NearestPos = transform.position;
+                        foreach (var childClickToShowUI in ClickToShowUI.Instance.childClickToShowUIs)
+                        {
+                            if (Vector3.Distance(childClickToShowUI.transform.position, pos) <
+                                Vector3.Distance(NearestPos, pos))
+                            {
+                                NearestPos = childClickToShowUI.transform.position;
+                            }
+                        }
+                        
+                        path.Add(NearestPos);
                         // path = CreateBezierCurve.GetBezierPath(transform.position, targetEnemy.position, Random.Range(30, 65), 10);
                         float randomAngle = UnityEngine.Random.Range(-65, 65);
                         if (Mathf.Abs(randomAngle) < 30)
                         {
                             randomAngle = randomAngle > 0 ? 30 : -30;
                         }
-
-                        path.AddRange( CreateBezierCurve.GetBezierPath(transform.position, pos, randomAngle, 2,false));
-                        path.AddRange(CreateBezierCurve.GetBezierPath(pos, transform.position, randomAngle, 2,false));
+                        //获取离pos最近的ChildClickToShowUI
+                        path.AddRange( CreateBezierCurve.GetBezierPath(NearestPos, pos, randomAngle, 2,false));
+                        path.AddRange(CreateBezierCurve.GetBezierPath(pos, NearestPos, randomAngle, 2,false));
                         tiling = path.Count;
                         PathHelper.GetWayPoints(path.ToArray(), 10, ref path);
                         lineRenderer.positionCount = path.Count;
                         lineRenderer.SetPositions(path.ToArray());
-                        lineMaterial.SetVector("_BaseMap_ST", new Vector4(path.Count, 1, 0, 0));
+                        lineMaterial.SetVector("_BaseMap_ST", new Vector4(Vector3.Distance(NearestPos, pos)+5, 1, 0, 0));
                         lineMaterial.SetTexture("_BaseMap", lineTexture);
 
                         GameObject ant = flyingAnt.antPool.Dequeue();

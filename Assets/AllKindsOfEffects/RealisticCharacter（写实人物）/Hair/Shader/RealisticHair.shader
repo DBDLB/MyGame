@@ -4,8 +4,7 @@
     {
         [Tex(_MainColor)]_MainTex ("Main Tex", 2D) = "white" { }
         [HideInInspector]_MainColor ("Main Color", Color) = (1, 1, 1, 1)
-//        _Cutoff ("Alpha Cutoff", Range(0, 1)) = 0.5
-    	_CutoffMaxDistance("Max Distance", float) = 10
+        _CutoffMaxDistance("Max Distance", float) = 10
     	_DitherThresold("Dither Thresold", Range(0, 0.99)) = 0
         _RIDO("RIDO", 2D) = "white" { }
         _FlowMapTexture("FlowMapTexture", 2D) = "white" { }
@@ -38,7 +37,6 @@
         half4 _MainColor;
         half4 _RootColor;
         half4 _TipColor;
-        half _Cutoff;
         half _TEST;
         half _BaseColorStrength;
         half _CutoffMaxDistance;
@@ -156,7 +154,10 @@
                 Light light = GetMainLight();
                 half4 col = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, i.uv) * _MainColor;
                 float4 RIDO = SAMPLE_TEXTURE2D(_RIDO, sampler_RIDO, i.uv);
+            	// clip(RIDO.a-0.1);
                 float4 FlowMap = SAMPLE_TEXTURE2D(_FlowMapTexture, sampler_FlowMapTexture, i.uv);
+            	            	                // return float4(RIDO.bbb, 1);
+
                 float3 Normal_test = normalize(lerp(float4(0,0,0.3,1),float4(0,0,-0.3,1), RIDO.g).rgb+(FlowMap.rgb*2-1)*(float3(1,1,0)));
 
                 float3 N=NormalizeNormalPerPixel(mul(T2W,Normal_test));
@@ -224,11 +225,87 @@
 				#endif
 
                 float PixelDepthOffset = ((1-RIDO.r)-0.5)*_TEST;
-                // return float4(i.tangentWS.xyz, 1);
+                // return float4(RIDO.rrr, 1);
                 // return float4(i.worldPos.xyz, 1);
                 return float4(color*(1-RIDO.r*_TEST), 1);
             }
             ENDHLSL
+        }
+    	
+    	Pass
+        {
+            Name "HairAASource"
+            Tags { "LightMode" = "HairAA_Source" }
+
+            // -------------------------------------
+            // Render State Commands
+            ZWrite on
+            ZTest lequal
+            Cull off
+
+            HLSLPROGRAM
+            #pragma target 2.0
+            
+            #pragma vertex vert
+            #pragma fragment frag
+            
+            struct appdata
+            {
+                float4 vertex: POSITION;
+                float2 uv: TEXCOORD0;
+                float4 tangentOS:TANGENT;
+                float3 normalOS: NORMAL;
+            };
+            
+            struct v2f
+            {
+                float4 vertex: SV_POSITION;
+                float2 uv: TEXCOORD0;
+                float3 worldPos: TEXCOORD1;
+                float4 tangentWS:TANGENT;
+                float4 normalWS:NORMAL;
+                float4 BtangentWS:TEXCOORD2;
+                float3 TangentSS:TEXCOORD3;
+                float3 BtangentSS:TEXCOORD4;
+            };
+            
+            TEXTURE2D(_RIDO);
+            SAMPLER(sampler_RIDO);
+            TEXTURE2D(_FlowMapTexture);
+            SAMPLER(sampler_FlowMapTexture);
+            
+            v2f vert(appdata v)
+            {
+                v2f o;
+                VertexPositionInputs vertexPos = GetVertexPositionInputs(v.vertex.xyz);
+                o.vertex = vertexPos.positionCS;
+                o.worldPos = mul(unity_ObjectToWorld, v.vertex).xyz;
+                o.normalWS.xyz=normalize(TransformObjectToWorldNormal(v.normalOS.xyz));
+                o.tangentWS.xyz=normalize(TransformObjectToWorldDir(v.tangentOS.xyz));
+                o.TangentSS = normalize(TransformWorldToViewDir(o.tangentWS.xyz));
+                o.BtangentWS.xyz=cross(o.normalWS.xyz,o.tangentWS.xyz)*v.tangentOS.w*unity_WorldTransformParams.w;
+                o.BtangentSS = normalize(TransformWorldToViewDir(o.BtangentWS.xyz));
+                
+                o.uv = v.uv;
+                return o;
+            }
+            
+            float4 frag(v2f i): SV_Target
+            {
+                float3x3 T2W={i.tangentWS.xyz,i.BtangentWS.xyz,i.normalWS.xyz};
+                T2W=transpose(T2W);
+                float4 RIDO = SAMPLE_TEXTURE2D(_RIDO, sampler_RIDO, i.uv);
+                float4 FlowMap = SAMPLE_TEXTURE2D(_FlowMapTexture, sampler_FlowMapTexture, i.uv);
+                float3 Btangent = (FlowMap.rgb*2-1);
+                float3 BtangentWS=NormalizeNormalPerPixel(mul(T2W,Btangent));
+                float3 BtangentSS = normalize(TransformWorldToViewDir(BtangentWS.xyz));
+
+                float distance = max(1-length(i.worldPos - _WorldSpaceCameraPos),0.1);
+                float dynamicCutoff = lerp(0.5, 0.05, saturate(distance / _CutoffMaxDistance));
+                clip(RIDO.a - dynamicCutoff);
+                return float4(normalize(BtangentSS.xy*0.5+0.5),distance, 1);
+            }
+            ENDHLSL            
         }
     }
     CustomEditor "Scarecrow.SimpleShaderGUI"

@@ -1,10 +1,12 @@
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class ClickToShowUI : MonoBehaviour
 {
     
-    public static ClickToShowUI instance;
+    private static ClickToShowUI instance;
     public static ClickToShowUI Instance
     {
         get
@@ -22,25 +24,26 @@ public class ClickToShowUI : MonoBehaviour
         }
     }
 
-    // private void Awake()
-    // {
-    //     if (instance == null)
-    //     {
-    //         instance = this;
-    //         DontDestroyOnLoad(gameObject);
-    //     }
-    //     else if (instance != this)
-    //     {
-    //         Destroy(gameObject);
-    //     }
-    // }
-    //
+    protected virtual void Awake()
+    {
+        if (instance == null)
+        {
+            instance = this;
+            DontDestroyOnLoad(gameObject);
+        }
+        else if (instance != this)
+        {
+            Destroy(gameObject);
+        }
+    }
+    
+    public List<ChildClickToShowUI> childClickToShowUIs = new List<ChildClickToShowUI>(); // 子蚂蚁巢穴列表
     
     public List<GameObject> uiPanels = new List<GameObject>();
 
     public float selectionThreshold = 0.1f; // 点击曲线的距离阈值
-    private Vector3 PreviousPoint;
-    private LineRenderer PreviousLineRenderer;
+    protected Vector3 PreviousPoint;
+    protected LineRenderer PreviousLineRenderer;
     public GameObject DeleteButton;
     public GameObject CreateButton;
     public GameObject CancelCreateButton;
@@ -91,7 +94,7 @@ public class ClickToShowUI : MonoBehaviour
 
     void SelectionCurve()
     {
-        if (Input.GetMouseButtonDown(0))
+        if (Input.GetMouseButtonDown(0)&&!AntColony.Instance.flyingAntTrack.enabled)
         {
             Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
             RaycastHit hit;
@@ -239,5 +242,16 @@ public class ClickToShowUI : MonoBehaviour
     public void SetAntColonyPosition()
     {
         AntColony.instance.AntColonyPosition = this.gameObject;
+    }
+    
+    // 获取所有LineRenderer
+    public void SetAllLineRenderersEnabled(bool isOn)
+    {
+        List<LineRenderer> lineRenderers = this.GetComponentsInChildren<LineRenderer>(true).ToList();
+        foreach (var lineRenderer in lineRenderers)
+        {
+            lineRenderer.enabled = isOn;
+        }
+        
     }
 }
